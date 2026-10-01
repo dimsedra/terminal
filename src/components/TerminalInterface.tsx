@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { useChat } from "@ai-sdk/react";
 import { SpinningAsciiEds } from "./SpinningAsciiEds";
 import { PORTFOLIO_DATA } from "@/data/portfolioData";
 import { StreamingTerminalOutput, OutputPayload } from "./StreamingTerminalOutput";
@@ -10,8 +11,11 @@ export function TerminalInterface() {
   const [inputVal, setInputVal] = useState("");
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeAiOutputId, setActiveAiOutputId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const contentWrapperRef = useRef<HTMLDivElement>(null);
+
+  const { messages, sendMessage, status, setMessages, error } = useChat();
 
   const {
     history,
@@ -20,6 +24,7 @@ export function TerminalInterface() {
     scrollContainerRef,
     bottomRef,
     appendInteraction,
+    updateMessagePayload,
     clearSession,
     handleStreamComplete,
     scrollToBottom,
@@ -46,6 +51,45 @@ export function TerminalInterface() {
     return () => observer.disconnect();
   }, [isFase2, scrollContainerRef]);
 
+  // Synchronize AI SDK streaming tokens and completion with the active terminal message
+  useEffect(() => {
+    if (!activeAiOutputId) return;
+
+    if (error) {
+      updateMessagePayload(activeAiOutputId, {
+        type: "markdown",
+        content: `### AI Assistant Connection Note\n\n${error.message || "Failed to connect to Google Gemini API."}\n\n> Please make sure you have set \`GOOGLE_GENERATIVE_AI_API_KEY\` in your \`.env.local\` file. You can obtain a free key at [Google AI Studio](https://aistudio.google.com/).`,
+        isLiveStream: true,
+        isDone: true,
+      });
+      handleStreamComplete(activeAiOutputId);
+      setActiveAiOutputId(null);
+      return;
+    }
+
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg && lastMsg.role === "assistant") {
+      const fullText = lastMsg.parts
+        .filter((p: any) => p.type === "text")
+        .map((p: any) => p.text)
+        .join("");
+
+      const isCompleted = status === "ready";
+
+      updateMessagePayload(activeAiOutputId, {
+        type: "markdown",
+        content: fullText,
+        isLiveStream: true,
+        isDone: isCompleted,
+      });
+
+      if (isCompleted) {
+        handleStreamComplete(activeAiOutputId);
+        setActiveAiOutputId(null);
+      }
+    }
+  }, [messages, status, error, activeAiOutputId]);
+
   const handleCommandExecution = (rawInput: string) => {
     const trimmed = rawInput.trim();
     if (!trimmed) return;
@@ -53,20 +97,45 @@ export function TerminalInterface() {
     setHistoryIndex(-1);
     const cmdLower = trimmed.toLowerCase();
 
-    // Deterministic command routing
+    // 1. Reset Total: clear both terminal history and AI conversation state
     if (cmdLower === "/clear") {
       clearSession();
+      setMessages([]);
+      setActiveAiOutputId(null);
       setInputVal("");
       return;
     }
 
+    // 2. AI Chat routing: /chat, /chat <prompt>, or any query without a leading slash
+    const isChatCommand = cmdLower === "/chat" || cmdLower.startsWith("/chat ");
+    const isSlashCommand = trimmed.startsWith("/");
+
+    if (isChatCommand || !isSlashCommand) {
+      const query = isChatCommand
+        ? trimmed.replace(/^\/chat\s*/i, "").trim()
+        : trimmed;
+
+      const promptToSend =
+        query || "Halo! Ceritakan tentang Eds, latar belakang, dan keahliannya.";
+
+      const outId = appendInteraction(trimmed, {
+        type: "markdown",
+        content: "",
+        isLiveStream: true,
+        isDone: false,
+      });
+
+      setActiveAiOutputId(outId);
+      sendMessage({ text: promptToSend });
+      setInputVal("");
+      return;
+    }
+
+    // 3. Deterministic slash commands
     let payload: OutputPayload;
 
     if (cmdLower === "/help") {
       payload = { type: "help" };
-    } else if (cmdLower === "/chat" || cmdLower.startsWith("/chat ")) {
-      const query = trimmed.replace(/^\/chat\s*/i, "").trim();
-      payload = { type: "chat", query: query || undefined };
     } else if (cmdLower === "/about") {
       payload = { type: "about" };
     } else if (cmdLower === "/projects" || cmdLower === "/project") {
@@ -86,6 +155,7 @@ export function TerminalInterface() {
     appendInteraction(trimmed, payload);
     setInputVal("");
   };
+
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {

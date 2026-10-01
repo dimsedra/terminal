@@ -107,7 +107,7 @@ export function useTerminalSession() {
   };
 
   // Helper to append a user command and an output message
-  const appendInteraction = (command: string, payload: OutputPayload) => {
+  const appendInteraction = (command: string, payload: OutputPayload): string => {
     const userMsgId = `user-${Date.now()}`;
     const outputMsgId = `out-${Date.now()}`;
 
@@ -126,6 +126,14 @@ export function useTerminalSession() {
     setCommandHistory((prev) => [...prev, command]);
     setActiveStreamingId(outputMsgId);
     setHistory((prev) => [...prev, userMsg, outputMsg]);
+    return outputMsgId;
+  };
+
+  // Helper to update an existing message's payload in history (used by AI live streaming)
+  const updateMessagePayload = (id: string, payload: OutputPayload) => {
+    setHistory((prev) =>
+      prev.map((msg) => (msg.id === id ? { ...msg, payload } : msg))
+    );
   };
 
   // Helper to clear terminal session
@@ -153,8 +161,10 @@ export function useTerminalSession() {
     scrollContainerRef,
     bottomRef,
     appendInteraction,
+    updateMessagePayload,
     clearSession,
     handleStreamComplete,
     scrollToBottom,
   };
 }
+

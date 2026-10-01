@@ -19,7 +19,7 @@ export type OutputPayload =
   | { type: "skills" }
   | { type: "contact" }
   | { type: "chat"; query?: string }
-  | { type: "markdown"; content: string }
+  | { type: "markdown"; content: string; isLiveStream?: boolean; isDone?: boolean }
   | { type: "text"; text: string; actionCmd?: string };
 
 interface StreamingTerminalOutputProps {
@@ -44,6 +44,8 @@ export function StreamingTerminalOutput({
   const onRunCommandRef = useRef(onRunCommand);
   onRunCommandRef.current = onRunCommand;
 
+  const isLiveStream = payload.type === "markdown" && Boolean(payload.isLiveStream);
+
   // Resolve payload into full Markdown string
   const fullMarkdown = useMemo(() => {
     switch (payload.type) {
@@ -61,7 +63,6 @@ export function StreamingTerminalOutput({
         return getChatPlaceholderMarkdown(payload.query);
       case "markdown":
         return payload.content;
-
       case "text":
         if (payload.actionCmd) {
           return `${payload.text}\n\nType \`${payload.actionCmd}\` to see available commands.`;
@@ -70,17 +71,18 @@ export function StreamingTerminalOutput({
     }
   }, [payload]);
 
-  // Tokenize full markdown into streaming pieces (words + spaces/newlines)
+  // Tokenize full markdown into streaming pieces for local deterministic commands
   const tokens = useMemo(() => {
+    if (isLiveStream) return [];
     return fullMarkdown.split(/(\s+)/);
-  }, [fullMarkdown]);
+  }, [fullMarkdown, isLiveStream]);
 
   const [tokenIndex, setTokenIndex] = useState<number>(alreadyFinished ? 999999 : 0);
-  const [isDone, setIsDone] = useState<boolean>(alreadyFinished);
+  const [isLocalDone, setIsLocalDone] = useState<boolean>(alreadyFinished);
 
   useEffect(() => {
-    if (alreadyFinished) {
-      setIsDone(true);
+    if (isLiveStream || alreadyFinished) {
+      setIsLocalDone(true);
       return;
     }
 
@@ -94,15 +96,15 @@ export function StreamingTerminalOutput({
 
       if (current >= tokens.length) {
         clearInterval(timer);
-        setIsDone(true);
+        setIsLocalDone(true);
         onCompleteRef.current?.();
       }
     }, intervalTime);
 
     return () => clearInterval(timer);
-  }, [alreadyFinished, tokens.length]);
+  }, [alreadyFinished, tokens.length, isLiveStream]);
 
-  // Keep scroll container pinned to bottom as new tokens arrive
+  // Keep scroll container pinned to bottom as new tokens arrive (local or live stream)
   useEffect(() => {
     if (!alreadyFinished) {
       requestAnimationFrame(() => {
@@ -113,14 +115,22 @@ export function StreamingTerminalOutput({
       }, 25);
       return () => clearTimeout(t);
     }
-  }, [tokenIndex, alreadyFinished]);
+  }, [tokenIndex, alreadyFinished, payload]);
+
+  const isDone = isLiveStream
+    ? alreadyFinished || Boolean((payload as any).isDone)
+    : alreadyFinished || isLocalDone || tokenIndex >= tokens.length;
 
   const currentStreamedText = useMemo(() => {
+    if (isLiveStream) {
+      return (payload as any).content || "";
+    }
     if (alreadyFinished || isDone || tokenIndex >= tokens.length) {
       return fullMarkdown;
     }
     return tokens.slice(0, tokenIndex).join("");
-  }, [alreadyFinished, isDone, tokenIndex, tokens, fullMarkdown]);
+  }, [alreadyFinished, isDone, tokenIndex, tokens, fullMarkdown, isLiveStream, payload]);
+
 
   // Custom Streamdown component mapping tailored for our dark terminal aesthetics
   const components = useMemo(() => {
