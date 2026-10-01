@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { SpinningAsciiEds } from "./SpinningAsciiEds";
 import { PORTFOLIO_DATA } from "@/data/portfolioData";
 import { StreamingTerminalOutput, OutputPayload } from "./StreamingTerminalOutput";
@@ -11,6 +11,7 @@ export function TerminalInterface() {
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
+  const contentWrapperRef = useRef<HTMLDivElement>(null);
 
   const {
     history,
@@ -30,6 +31,20 @@ export function TerminalInterface() {
   const handleContainerClick = () => {
     inputRef.current?.focus();
   };
+
+  // Strictly bind viewport to bottom whenever content height grows
+  useEffect(() => {
+    const el = contentWrapperRef.current;
+    const container = scrollContainerRef.current;
+    if (!el || !container) return;
+
+    const observer = new ResizeObserver(() => {
+      container.scrollTop = container.scrollHeight;
+    });
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isFase2, scrollContainerRef]);
 
   const handleCommandExecution = (rawInput: string) => {
     const trimmed = rawInput.trim();
@@ -97,10 +112,10 @@ export function TerminalInterface() {
   return (
     <div
       onClick={handleContainerClick}
-      className="w-full h-screen flex flex-col bg-[#0E0F0E] cursor-text select-text"
+      className="w-full h-screen flex flex-col bg-[#0E0F0E] cursor-text select-text overflow-hidden"
     >
       {/* Top Title Bar */}
-      <div className="w-full px-4 sm:px-6 py-2.5 bg-[#090A09] border-b border-[#1A1D19] select-none flex items-center justify-between z-10">
+      <header className="shrink-0 w-full px-4 sm:px-6 py-2.5 bg-[#090A09] border-b border-[#1A1D19] select-none flex items-center justify-between z-10">
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-[#272B25]" />
@@ -129,12 +144,12 @@ export function TerminalInterface() {
         <div className="text-xs text-[#555A51] tracking-wider uppercase font-mono">
           agentic-cli
         </div>
-      </div>
+      </header>
 
       {/* Main Workspace */}
       {!isFase2 ? (
         /* FASE 1: Welcoming Landing View */
-        <div className="flex-1 flex flex-col justify-between overflow-hidden">
+        <div className="flex-1 min-h-0 flex flex-col justify-between overflow-hidden">
           <div className="flex-1 overflow-y-auto flex flex-col justify-center items-center px-4 py-8">
             <div className="max-w-2xl w-full text-center space-y-4">
               {/* Large Centered 3D Spinning ASCII EDS */}
@@ -172,7 +187,7 @@ export function TerminalInterface() {
           </div>
 
           {/* Bottom Input Prompt for Fase 1 */}
-          <div className="w-full bg-[#090A09] border-t border-[#1A1D19] px-4 sm:px-8 py-3.5">
+          <footer className="shrink-0 w-full bg-[#090A09] border-t border-[#1A1D19] px-4 sm:px-8 py-3.5 z-10">
             <div className="max-w-5xl mx-auto flex items-center space-x-3">
               <span className="text-[#9AE6B4] font-bold text-base sm:text-lg select-none">❯</span>
               <input
@@ -191,14 +206,14 @@ export function TerminalInterface() {
                 [Enter: run | ↑↓: history]
               </div>
             </div>
-          </div>
+          </footer>
         </div>
       ) : (
-        /* FASE 2: Active Split Workspace (Left Sidebar + Main CLI) */
-        <div className="flex-1 flex overflow-hidden">
+        /* FASE 2: Active Split Workspace (Left Sidebar + Bounded Chat Viewport) */
+        <div className="flex-1 min-h-0 flex overflow-hidden">
           {/* Left Sidebar */}
           {sidebarOpen && (
-            <aside className="w-64 sm:w-72 bg-[#0B0D0B] border-r border-[#1A1D19] flex flex-col justify-between select-none shrink-0 transition-all duration-200">
+            <aside className="w-64 sm:w-72 bg-[#0B0D0B] border-r border-[#1A1D19] flex flex-col justify-between select-none shrink-0 h-full transition-all duration-200">
               <div className="overflow-y-auto p-4 space-y-4">
                 {/* Sidebar Header: Compact 3D Spinning ASCII EDS */}
                 <div className="border-b border-[#181B17] pb-3 text-center">
@@ -268,11 +283,17 @@ export function TerminalInterface() {
             </aside>
           )}
 
-          {/* Right Main CLI Pane */}
-          <main className="flex-1 flex flex-col min-w-0 bg-[#0E0F0E]">
-            {/* Scrollable Message List (First message starts right at the top) */}
-            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
-              <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-4">
+          {/* Right Main CLI Pane (The Strictly Bounded Rectangular Box) */}
+          <main className="flex-1 min-h-0 min-w-0 flex flex-col bg-[#0E0F0E]">
+            {/* The Bounded Chat Viewport */}
+            <div
+              ref={scrollContainerRef}
+              className="flex-1 min-h-0 overflow-y-auto w-full"
+            >
+              <div
+                ref={contentWrapperRef}
+                className="max-w-4xl mx-auto p-4 sm:p-6 space-y-4 pb-20"
+              >
                 {history.map((msg) => {
                   const isStreaming = msg.id === activeStreamingId;
                   return (
@@ -301,12 +322,12 @@ export function TerminalInterface() {
                     </div>
                   );
                 })}
-                <div ref={bottomRef} />
+                <div ref={bottomRef} className="h-1" />
               </div>
             </div>
 
-            {/* Input Prompt Bar for Fase 2 */}
-            <div className="w-full bg-[#090A09] border-t border-[#1A1D19] px-4 sm:px-6 py-3.5">
+            {/* Input Prompt Bar for Fase 2 - Pinned firmly below the bounded viewport */}
+            <footer className="shrink-0 w-full bg-[#090A09] border-t border-[#1A1D19] px-4 sm:px-6 py-3.5 z-10">
               <div className="max-w-4xl mx-auto flex items-center space-x-3">
                 <span className="text-[#9AE6B4] font-bold text-base sm:text-lg select-none">❯</span>
                 <input
@@ -325,7 +346,7 @@ export function TerminalInterface() {
                   [Enter: run | ↑↓: history]
                 </div>
               </div>
-            </div>
+            </footer>
           </main>
         </div>
       )}
