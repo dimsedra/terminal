@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@ai-sdk/devtools": "^1.0.29",
+    "@ai-sdk/google": "^4.0.87",
+    "@ai-sdk/react": "^4.0.129",
     "ai": "^7.0.126",
     "clsx": "^2.1.1",
     "lucide-react": "^1.49.0",
