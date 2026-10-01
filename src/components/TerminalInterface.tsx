@@ -24,6 +24,9 @@ export function TerminalInterface() {
 
   useEffect(() => {
     try {
+      if (typeof window !== "undefined" && window.innerWidth < 640) {
+        setSidebarOpen(false);
+      }
       hasShownNoticeRef.current = Boolean(
         sessionStorage.getItem("eds_ai_notice_shown")
       );
@@ -73,6 +76,23 @@ export function TerminalInterface() {
     observer.observe(el);
     return () => observer.disconnect();
   }, [isFase2, scrollContainerRef]);
+
+  // Keep input in view when mobile virtual keyboard opens or resizes visual viewport
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const handleViewportResize = () => {
+      scrollToBottom();
+      if (inputRef.current) {
+        inputRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    };
+
+    vv.addEventListener("resize", handleViewportResize);
+    return () => vv.removeEventListener("resize", handleViewportResize);
+  }, [scrollToBottom]);
 
   // Synchronize AI SDK streaming tokens and completion with the active terminal message
   useEffect(() => {
@@ -289,12 +309,12 @@ export function TerminalInterface() {
   return (
     <div
       onClick={handleContainerClick}
-      className="w-full h-screen flex flex-col bg-[#0A0A0A] cursor-text select-text overflow-hidden"
+      className="w-full h-[100dvh] flex flex-col bg-[#0A0A0A] cursor-text select-text overflow-hidden"
     >
       {/* Top Title Bar */}
-      <header className="shrink-0 w-full px-4 sm:px-6 py-2.5 bg-[#050505] border-b border-[#171717] select-none flex items-center justify-between z-10">
-        <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-1.5">
+      <header className="shrink-0 w-full px-3 sm:px-6 py-2.5 bg-[#050505] border-b border-[#171717] select-none flex items-center justify-between z-20">
+        <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+          <div className="flex items-center space-x-1.5 shrink-0">
             <div className="w-2.5 h-2.5 rounded-full bg-[#262626]" />
             <div className="w-2.5 h-2.5 rounded-full bg-[#262626]" />
             <div className="w-2.5 h-2.5 rounded-full bg-[#262626]" />
@@ -307,22 +327,24 @@ export function TerminalInterface() {
                 e.stopPropagation();
                 setSidebarOpen(!sidebarOpen);
               }}
-              className="text-xs px-2 py-0.5 rounded bg-[#141414] hover:bg-[#1F1F1F] text-[#9E9EA5] hover:text-[#9AE6B4] border border-[#262626] transition-colors cursor-pointer font-mono"
+              className="text-xs px-2 py-0.5 rounded bg-[#141414] hover:bg-[#1F1F1F] text-[#9E9EA5] hover:text-[#9AE6B4] border border-[#262626] transition-colors cursor-pointer font-mono shrink-0"
               title="Toggle sidebar"
             >
-              {sidebarOpen ? "[sidebar: on]" : "[sidebar: off]"}
+              <span className="sm:hidden">{sidebarOpen ? "[sidebar: ×]" : "[sidebar]"}</span>
+              <span className="hidden sm:inline">{sidebarOpen ? "[sidebar: on]" : "[sidebar: off]"}</span>
             </button>
           )}
 
-          <span className="text-xs text-[#66666E] tracking-wide font-medium flex items-center space-x-1.5">
-            <span>eds@terminal-portfolio:~</span>
+          <span className="text-xs text-[#66666E] tracking-wide font-medium flex items-center space-x-1.5 truncate">
+            <span className="sm:hidden">eds:~</span>
+            <span className="hidden sm:inline">eds@terminal-portfolio:~</span>
             {isAiSession && (
-              <span className="text-[#9AE6B4] font-semibold text-[11px]">[ai-session]</span>
+              <span className="text-[#9AE6B4] font-semibold text-[11px] shrink-0">[ai-session]</span>
             )}
           </span>
         </div>
 
-        <div className="text-xs text-[#52525B] tracking-wider uppercase font-mono">
+        <div className="text-xs text-[#52525B] tracking-wider uppercase font-mono hidden sm:block shrink-0">
           agentic-cli
         </div>
       </header>
@@ -331,7 +353,7 @@ export function TerminalInterface() {
       {!isFase2 ? (
         /* FASE 1: Welcoming Landing View */
         <div className="flex-1 min-h-0 flex flex-col justify-between overflow-hidden">
-          <div className="flex-1 overflow-y-auto flex flex-col justify-center items-center px-4 py-8">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col justify-center items-center px-4 py-8">
             <div className="max-w-2xl w-full text-center space-y-4">
               {/* Large Centered 3D Spinning ASCII EDS */}
               <div className="py-2">
@@ -377,12 +399,17 @@ export function TerminalInterface() {
                 value={inputVal}
                 onChange={(e) => setInputVal(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Type /chat to enter AI session, or /projects, /help..."
+                onFocus={() => {
+                  requestAnimationFrame(() => {
+                    inputRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                  });
+                }}
+                placeholder="Type /chat, /projects, or /help..."
                 autoFocus
                 spellCheck={false}
 
                 autoComplete="off"
-                className="flex-1 bg-transparent border-none outline-none text-[#F4F4F5] text-sm font-mono placeholder:text-[#52525B]"
+                className="flex-1 min-w-0 bg-transparent border-none outline-none text-[#F4F4F5] text-sm font-mono placeholder:text-[#52525B]"
               />
               <div className="text-xs text-[#44444A] select-none hidden sm:block">
                 [Enter: run | ↑↓: history]
@@ -391,12 +418,31 @@ export function TerminalInterface() {
           </footer>
         </div>
       ) : (
-        /* FASE 2: Active Split Workspace (Left Sidebar + Bounded Chat Viewport) */
-        <div className="flex-1 min-h-0 flex overflow-hidden">
-          {/* Left Sidebar */}
+        /* FASE 2: Active Workspace */
+        <div className="relative flex-1 min-h-0 flex overflow-hidden w-full">
+          {/* Backdrop on Mobile when Sidebar is Open */}
           {sidebarOpen && (
-            <aside className="w-64 sm:w-72 bg-[#080808] border-r border-[#171717] flex flex-col justify-between select-none shrink-0 h-full transition-all duration-200">
+            <div
+              onClick={() => setSidebarOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs z-30 sm:hidden"
+            />
+          )}
+
+          {/* Left Sidebar: Offcanvas drawer on mobile, static side column on desktop */}
+          {sidebarOpen && (
+            <aside className="fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] sm:static sm:z-auto sm:w-64 md:w-72 bg-[#080808] border-r border-[#171717] flex flex-col justify-between select-none shrink-0 h-full transition-all duration-200 shadow-2xl sm:shadow-none">
               <div className="overflow-y-auto p-4 space-y-4">
+                {/* Mobile Drawer Header with Close Button */}
+                <div className="flex items-center justify-between sm:hidden pb-2 border-b border-[#171717]">
+                  <span className="text-xs font-mono text-[#52525B] uppercase tracking-wider">Navigation</span>
+                  <button
+                    onClick={() => setSidebarOpen(false)}
+                    className="text-xs text-[#9E9EA5] hover:text-[#9AE6B4] px-1.5 py-0.5 rounded border border-[#262626] font-mono cursor-pointer"
+                  >
+                    [close ×]
+                  </button>
+                </div>
+
                 {/* Sidebar Header: Compact 3D Spinning ASCII EDS */}
                 <div className="border-b border-[#171717] pb-3 text-center">
                   <SpinningAsciiEds compact={true} />
@@ -418,6 +464,9 @@ export function TerminalInterface() {
                         onClick={(e) => {
                           e.stopPropagation();
                           handleCommandExecution(cmd.name);
+                          if (typeof window !== "undefined" && window.innerWidth < 640) {
+                            setSidebarOpen(false);
+                          }
                         }}
                         className="w-full flex items-center justify-between px-2.5 py-1.5 rounded hover:bg-[#141414] text-left transition-colors cursor-pointer group"
                       >
@@ -465,16 +514,16 @@ export function TerminalInterface() {
             </aside>
           )}
 
-          {/* Right Main CLI Pane (The Strictly Bounded Rectangular Box) */}
-          <main className="flex-1 min-h-0 min-w-0 flex flex-col bg-[#0A0A0A]">
+          {/* Right Main CLI Pane (Always full width on mobile) */}
+          <main className="flex-1 min-h-0 min-w-0 flex flex-col bg-[#0A0A0A] w-full">
             {/* The Bounded Chat Viewport */}
             <div
               ref={scrollContainerRef}
-              className="flex-1 min-h-0 overflow-y-auto w-full"
+              className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden w-full"
             >
               <div
                 ref={contentWrapperRef}
-                className="w-full px-6 sm:px-8 py-5 space-y-4"
+                className="w-full px-3.5 sm:px-8 py-4 sm:py-5 space-y-4"
               >
                 {history.map((msg) => {
                   const isStreaming = msg.id === activeStreamingId;
@@ -486,7 +535,7 @@ export function TerminalInterface() {
                           <span className="text-[#F4F4F5] font-medium">{msg.command}</span>
                         </div>
                       ) : (
-                        <div className="pl-4 sm:pl-5 border-l-2 border-[#1F1F1F]">
+                        <div className="pl-3 sm:pl-5 border-l-2 border-[#1F1F1F]">
                           {msg.payload && (
                             <StreamingTerminalOutput
                               payload={msg.payload}
@@ -508,28 +557,34 @@ export function TerminalInterface() {
               </div>
             </div>
 
-            {/* Input Prompt Bar for Fase 2 - Full width edge-to-edge alignment */}
-            <footer className="shrink-0 w-full bg-[#050505] border-t border-[#171717] px-6 sm:px-8 py-3.5 z-10">
-              <div className="w-full flex items-center space-x-3">
-                <span className="text-[#9AE6B4] font-bold text-sm sm:text-base select-none">❯</span>
+            {/* Input Prompt Bar for Fase 2 */}
+            <footer className="shrink-0 w-full bg-[#050505] border-t border-[#171717] px-3.5 sm:px-8 py-3.5 z-10">
+              <div className="w-full flex items-center space-x-2.5 sm:space-x-3">
+                <span className="text-[#9AE6B4] font-bold text-sm sm:text-base select-none shrink-0">❯</span>
                 <input
                   ref={inputRef}
                   type="text"
                   value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}
                   onKeyDown={handleKeyDown}
+                  onFocus={() => {
+                    requestAnimationFrame(() => {
+                      scrollToBottom();
+                      inputRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                    });
+                  }}
                   placeholder={
                     isAiSession
-                      ? "Ask Eds's AI assistant anything (or /exit to return)..."
-                      : "Type /chat to enter AI session, or /projects, /help..."
+                      ? "Ask anything (or /exit to return)..."
+                      : "Type /chat, /projects, or /help..."
                   }
                   autoFocus
                   spellCheck={false}
 
                   autoComplete="off"
-                  className="flex-1 bg-transparent border-none outline-none text-[#F4F4F5] text-sm font-mono placeholder:text-[#52525B]"
+                  className="flex-1 min-w-0 bg-transparent border-none outline-none text-[#F4F4F5] text-sm font-mono placeholder:text-[#52525B]"
                 />
-                <div className="text-xs text-[#44444A] select-none hidden sm:block">
+                <div className="text-xs text-[#44444A] select-none hidden sm:block shrink-0">
                   [Enter: run | ↑↓: history]
                 </div>
               </div>

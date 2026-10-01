@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -13,6 +13,13 @@ export const metadata: Metadata = {
   description: "Interactive modern terminal portfolio of Dimas Edra Ar Rafi (Eds)",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#050505",
+  interactiveWidget: "resizes-content",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -22,7 +29,7 @@ export default function RootLayout({
     <html lang="en" className={jetbrainsMono.variable} suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className="antialiased min-h-screen bg-[#040502] text-[#D3D7CE] font-mono selection:bg-[#273024] selection:text-[#E2E8F0]"
+        className="antialiased min-h-[100dvh] bg-[#050505] text-[#D4D4D8] font-mono selection:bg-[#222222] selection:text-[#E2E8F0]"
       >
         {children}
       </body>

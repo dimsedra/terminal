@@ -190,10 +190,10 @@ export function SpinningAsciiEds({ compact = false }: SpinningAsciiEdsProps) {
 
   return (
     <div
-      className={`select-none flex justify-center items-center py-2 text-[#9AE6B4] font-mono tracking-wider transition-all ${
+      className={`select-none flex justify-center items-center py-2 text-[#9AE6B4] font-mono tracking-wider transition-all max-w-full overflow-hidden ${
         compact
           ? "text-[8px] sm:text-[9px] leading-[1.08]"
-          : "text-xs sm:text-sm leading-[1.15]"
+          : "text-[9.5px] sm:text-xs md:text-sm leading-[1.15]"
       }`}
     >
       <pre className="font-mono whitespace-pre opacity-90 transition-opacity">

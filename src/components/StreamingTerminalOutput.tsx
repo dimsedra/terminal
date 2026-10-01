@@ -136,37 +136,37 @@ export function StreamingTerminalOutput({
   const components = useMemo(() => {
     return {
       h1: ({ children, ...props }: React.ComponentProps<"h1">) => (
-        <h1 className="text-base font-semibold text-[#F4F4F5] mt-3 mb-2" {...props}>
+        <h1 className="text-base font-semibold text-[#F4F4F5] mt-5 mb-2.5" {...props}>
           {children}
         </h1>
       ),
       h2: ({ children, ...props }: React.ComponentProps<"h2">) => (
-        <h2 className="text-sm sm:text-base font-semibold text-[#F4F4F5] mt-3 mb-1.5" {...props}>
+        <h2 className="text-sm sm:text-base font-semibold text-[#F4F4F5] mt-4 mb-2" {...props}>
           {children}
         </h2>
       ),
       h3: ({ children, ...props }: React.ComponentProps<"h3">) => (
-        <h3 className="text-sm font-semibold text-[#9AE6B4] tracking-wide mt-2.5 mb-1.5" {...props}>
+        <h3 className="text-sm font-semibold text-[#9AE6B4] tracking-wide mt-4 mb-2" {...props}>
           {children}
         </h3>
       ),
       p: ({ children, ...props }: React.ComponentProps<"p">) => (
-        <p className="text-sm text-[#D4D4D8] leading-relaxed my-1.5" {...props}>
+        <p className="text-sm text-[#D4D4D8] leading-[1.7] my-3.5 sm:my-4" {...props}>
           {children}
         </p>
       ),
       ul: ({ children, ...props }: React.ComponentProps<"ul">) => (
-        <ul className="space-y-2 my-2 list-none pl-0" {...props}>
+        <ul className="space-y-2.5 my-3.5 list-none pl-0" {...props}>
           {children}
         </ul>
       ),
       ol: ({ children, ...props }: React.ComponentProps<"ol">) => (
-        <ol className="space-y-1.5 my-2 pl-4 list-decimal text-sm text-[#D4D4D8]" {...props}>
+        <ol className="space-y-2 my-3.5 pl-4 list-decimal text-sm text-[#D4D4D8]" {...props}>
           {children}
         </ol>
       ),
       li: ({ children, ...props }: React.ComponentProps<"li">) => (
-        <li className="text-sm text-[#D4D4D8] leading-relaxed" {...props}>
+        <li className="text-sm text-[#D4D4D8] leading-[1.65]" {...props}>
           {children}
         </li>
       ),
@@ -181,7 +181,7 @@ export function StreamingTerminalOutput({
         </em>
       ),
       blockquote: ({ children, ...props }: React.ComponentProps<"blockquote">) => (
-        <blockquote className="border-l-2 border-[#9AE6B4]/60 pl-3 my-2 text-xs text-[#9E9EA5]" {...props}>
+        <blockquote className="border-l-2 border-[#9AE6B4]/60 pl-3 my-3.5 text-xs text-[#9E9EA5] leading-[1.65]" {...props}>
           {children}
         </blockquote>
       ),
@@ -224,11 +224,11 @@ export function StreamingTerminalOutput({
   }, []);
 
   return (
-    <div className="text-sm text-[#D4D4D8] py-1 leading-relaxed streamdown-output">
+    <div className="text-sm text-[#D4D4D8] py-1 streamdown-output">
       <Streamdown
         mode="streaming"
         components={components}
-        className="space-y-1"
+        className="space-y-0.5"
       >
         {currentStreamedText}
       </Streamdown>
