@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+:root {
+  --background: #040502;
+  --surface: #0E0F0E;
+  --foreground: #D3D7CE;
+  --muted: #7E8578;
+  --border: #1F221E;
+  --accent: #9AE6B4;
+
+  --stream-gap: 20ms;
+  --stream-fade: 200ms;
+  --stream-blur: 1px;
+  --stream-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-jetbrains-mono), monospace;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* Custom minimal scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #040502;
+}
+::-webkit-scrollbar-thumb {
+  background: #1F221E;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2C302B;
+}
+
+/* Terminal text selection */
+::selection {
+  background-color: #273024;
+  color: #E2E8F0;
+}
+
+/* Word stream resolution animation */
+.t-stream-w {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(var(--stream-blur));
+  transition:
+    opacity var(--stream-fade) var(--stream-ease),
+    filter var(--stream-fade) var(--stream-ease);
+}
+.t-stream-w.is-in {
+  opacity: 1;
+  filter: blur(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-stream-w {
+    transition: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Streaming terminal block cursor */
+@keyframes cursor-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.terminal-cursor {
+  display: inline-block;
+  color: #9AE6B4;
+  animation: cursor-pulse 0.8s steps(2, start) infinite;
+  margin-left: 2px;
+  vertical-align: middle;
+}
