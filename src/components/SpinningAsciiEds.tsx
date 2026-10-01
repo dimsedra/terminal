@@ -12,7 +12,11 @@ interface Point3D {
   nz: number;
 }
 
-export function SpinningAsciiEds() {
+interface SpinningAsciiEdsProps {
+  compact?: boolean;
+}
+
+export function SpinningAsciiEds({ compact = false }: SpinningAsciiEdsProps) {
   const [frame, setFrame] = useState<string>("");
   const angleYRef = useRef(0);
   const angleXRef = useRef(0.2); // slight downward tilt for 3D depth
@@ -102,8 +106,8 @@ export function SpinningAsciiEds() {
       }
     });
 
-    const width = 56;
-    const height = 18;
+    const width = compact ? 38 : 56;
+    const height = compact ? 13 : 18;
     const chars = " .·:;+*#%@";
 
     let animationFrameId: number;
@@ -127,9 +131,9 @@ export function SpinningAsciiEds() {
       const output: string[] = new Array(width * height).fill(" ");
       const zBuffer: number[] = new Array(width * height).fill(-Infinity);
 
-      const distance = 30;
-      const k1 = 36; // horizontal scale factor
-      const k2 = 18; // vertical scale factor (terminal chars are taller than wide)
+      const distance = compact ? 32 : 30;
+      const k1 = compact ? 23 : 36; // horizontal scale factor
+      const k2 = compact ? 12 : 18; // vertical scale factor (terminal chars are taller than wide)
 
       for (let i = 0; i < points.length; i++) {
         const p = points[i];
@@ -182,10 +186,16 @@ export function SpinningAsciiEds() {
 
     animationFrameId = requestAnimationFrame(render);
     return () => cancelAnimationFrame(animationFrameId);
-  }, []);
+  }, [compact]);
 
   return (
-    <div className="select-none flex justify-center items-center py-2 text-[#9AE6B4] font-mono leading-[1.15] tracking-wider text-xs sm:text-sm">
+    <div
+      className={`select-none flex justify-center items-center py-2 text-[#9AE6B4] font-mono tracking-wider transition-all ${
+        compact
+          ? "text-[8px] sm:text-[9px] leading-[1.08]"
+          : "text-xs sm:text-sm leading-[1.15]"
+      }`}
+    >
       <pre className="font-mono whitespace-pre opacity-90 transition-opacity">
         {frame}
       </pre>
