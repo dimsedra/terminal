@@ -16,8 +16,11 @@ export function TerminalInterface() {
   const [showAiNotice, setShowAiNotice] = useState(false);
   const [isAiSession, setIsAiSession] = useState(false);
   const hasShownNoticeRef = useRef(false);
+  const lastAssistantIdRef = useRef<string | null>(null);
+  const isAwaitingNewAssistantRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const contentWrapperRef = useRef<HTMLDivElement>(null);
+
 
   useEffect(() => {
     try {
@@ -82,13 +85,32 @@ export function TerminalInterface() {
         isLiveStream: true,
         isDone: true,
       });
+      isAwaitingNewAssistantRef.current = false;
       handleStreamComplete(activeAiOutputId);
       setActiveAiOutputId(null);
       return;
     }
 
     const lastMsg = messages[messages.length - 1];
-    if (lastMsg && lastMsg.role === "assistant") {
+
+    // If waiting for the new assistant turn, ignore past messages from earlier turns
+    if (isAwaitingNewAssistantRef.current) {
+      if (
+        !lastMsg ||
+        lastMsg.role !== "assistant" ||
+        lastMsg.id === lastAssistantIdRef.current
+      ) {
+        return;
+      }
+      isAwaitingNewAssistantRef.current = false;
+      lastAssistantIdRef.current = lastMsg.id;
+    }
+
+    if (
+      lastMsg &&
+      lastMsg.role === "assistant" &&
+      lastMsg.id === lastAssistantIdRef.current
+    ) {
       const fullText = lastMsg.parts
         .filter((p: any) => p.type === "text")
         .map((p: any) => p.text)
@@ -123,6 +145,8 @@ export function TerminalInterface() {
       setMessages([]);
       setActiveAiOutputId(null);
       setIsAiSession(false);
+      lastAssistantIdRef.current = null;
+      isAwaitingNewAssistantRef.current = false;
       try {
         sessionStorage.removeItem("eds_is_ai_session");
       } catch (e) {
@@ -138,6 +162,8 @@ export function TerminalInterface() {
       clearSession();
       setMessages([]);
       setIsAiSession(true);
+      lastAssistantIdRef.current = null;
+      isAwaitingNewAssistantRef.current = true;
       try {
         sessionStorage.setItem("eds_is_ai_session", "true");
       } catch (e) {
@@ -200,11 +226,13 @@ export function TerminalInterface() {
         isDone: false,
       });
 
+      isAwaitingNewAssistantRef.current = true;
       setActiveAiOutputId(outId);
       sendMessage({ text: promptToSend });
       setInputVal("");
       return;
     }
+
 
     // 4. Non-AI CLI Shell: Deterministic slash commands
     let payload: OutputPayload;
