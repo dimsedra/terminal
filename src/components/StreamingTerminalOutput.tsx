@@ -141,12 +141,12 @@ export function StreamingTerminalOutput({
         </h1>
       ),
       h2: ({ children, ...props }: React.ComponentProps<"h2">) => (
-        <h2 className="text-sm font-semibold text-[#F0F3EC] mt-3 mb-2" {...props}>
+        <h2 className="text-sm sm:text-base font-semibold text-[#F0F3EC] mt-3 mb-1.5" {...props}>
           {children}
         </h2>
       ),
       h3: ({ children, ...props }: React.ComponentProps<"h3">) => (
-        <h3 className="text-xs font-semibold text-[#9AE6B4] uppercase tracking-wider mt-2 mb-2" {...props}>
+        <h3 className="text-sm font-semibold text-[#9AE6B4] tracking-wide mt-2.5 mb-1.5" {...props}>
           {children}
         </h3>
       ),

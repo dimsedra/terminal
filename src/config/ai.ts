@@ -5,7 +5,7 @@ import { google } from "@ai-sdk/google";
  * To change or upgrade the model across the codebase, edit this single line.
  * It also supports overriding via the AI_MODEL environment variable without code changes.
  */
-export const DEFAULT_AI_MODEL = process.env.AI_MODEL || "gemini-3.5-flash";
+export const DEFAULT_AI_MODEL = process.env.AI_MODEL || "gemini-3.5-flash-lite";
 
 /**
  * Returns the initialized provider model instance.

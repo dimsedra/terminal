@@ -81,7 +81,7 @@ export function TerminalInterface() {
     if (error) {
       updateMessagePayload(activeAiOutputId, {
         type: "markdown",
-        content: `### AI Assistant Connection Note\n\n${error.message || "Failed to connect to Google Gemini API."}\n\n> Please make sure you have set \`GOOGLE_GENERATIVE_AI_API_KEY\` in your \`.env.local\` file. You can obtain a free key at [Google AI Studio](https://aistudio.google.com/).`,
+        content: `### AI Assistant Temporarily Unavailable\n\nThe AI assistant is currently experiencing high demand or a temporary rate limit.\n\nPlease wait a few moments and try again. Alternatively, type \`/exit\` to return to the standard terminal and explore via \`/projects\`, \`/skills\`, \`/about\`, or \`/contact\`.`,
         isLiveStream: true,
         isDone: true,
       });
@@ -382,7 +382,7 @@ export function TerminalInterface() {
                 spellCheck={false}
 
                 autoComplete="off"
-                className="flex-1 bg-transparent border-none outline-none text-[#F0F3EC] text-sm sm:text-base font-mono placeholder:text-[#555A51]"
+                className="flex-1 bg-transparent border-none outline-none text-[#F0F3EC] text-sm font-mono placeholder:text-[#555A51]"
               />
               <div className="text-xs text-[#4A5046] select-none hidden sm:block">
                 [Enter: run | ↑↓: history]
@@ -481,7 +481,7 @@ export function TerminalInterface() {
                   return (
                     <div key={msg.id} className="space-y-1.5 font-mono">
                       {msg.type === "user" ? (
-                        <div className="flex items-center space-x-2.5 text-sm sm:text-base">
+                        <div className="flex items-center space-x-2.5 text-sm">
                           <span className="text-[#9AE6B4] font-bold">❯</span>
                           <span className="text-[#F0F3EC] font-medium">{msg.command}</span>
                         </div>
@@ -511,7 +511,7 @@ export function TerminalInterface() {
             {/* Input Prompt Bar for Fase 2 - Full width edge-to-edge alignment */}
             <footer className="shrink-0 w-full bg-[#090A09] border-t border-[#1A1D19] px-6 sm:px-8 py-3.5 z-10">
               <div className="w-full flex items-center space-x-3">
-                <span className="text-[#9AE6B4] font-bold text-base sm:text-lg select-none">❯</span>
+                <span className="text-[#9AE6B4] font-bold text-sm sm:text-base select-none">❯</span>
                 <input
                   ref={inputRef}
                   type="text"
@@ -527,7 +527,7 @@ export function TerminalInterface() {
                   spellCheck={false}
 
                   autoComplete="off"
-                  className="flex-1 bg-transparent border-none outline-none text-[#F0F3EC] text-sm sm:text-base font-mono placeholder:text-[#555A51]"
+                  className="flex-1 bg-transparent border-none outline-none text-[#F0F3EC] text-sm font-mono placeholder:text-[#555A51]"
                 />
                 <div className="text-xs text-[#4A5046] select-none hidden sm:block">
                   [Enter: run | ↑↓: history]
