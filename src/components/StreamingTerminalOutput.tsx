@@ -181,7 +181,7 @@ export function StreamingTerminalOutput({
 
   if (payload.type === "about") {
     return (
-      <div className="space-y-3.5 py-1 text-sm text-[#D3D7CE] leading-relaxed max-w-3xl">
+      <div className="space-y-3.5 py-1 text-sm text-[#D3D7CE] leading-relaxed w-full">
         {revealedIndex >= 1 && (
           <div className="border-l-2 border-[#9AE6B4]/60 pl-3.5 space-y-1">
             <h2 className="text-base font-semibold text-[#F0F3EC] flex items-center">

@@ -292,7 +292,7 @@ export function TerminalInterface() {
             >
               <div
                 ref={contentWrapperRef}
-                className="max-w-4xl mx-auto p-4 sm:p-6 space-y-4 pb-20"
+                className="w-full px-6 sm:px-8 py-5 space-y-4 pb-24"
               >
                 {history.map((msg) => {
                   const isStreaming = msg.id === activeStreamingId;
@@ -326,9 +326,9 @@ export function TerminalInterface() {
               </div>
             </div>
 
-            {/* Input Prompt Bar for Fase 2 - Pinned firmly below the bounded viewport */}
-            <footer className="shrink-0 w-full bg-[#090A09] border-t border-[#1A1D19] px-4 sm:px-6 py-3.5 z-10">
-              <div className="max-w-4xl mx-auto flex items-center space-x-3">
+            {/* Input Prompt Bar for Fase 2 - Full width edge-to-edge alignment */}
+            <footer className="shrink-0 w-full bg-[#090A09] border-t border-[#1A1D19] px-6 sm:px-8 py-3.5 z-10">
+              <div className="w-full flex items-center space-x-3">
                 <span className="text-[#9AE6B4] font-bold text-base sm:text-lg select-none">❯</span>
                 <input
                   ref={inputRef}
