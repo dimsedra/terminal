@@ -38,9 +38,9 @@ export function AiNoticeToast({ isOpen, onClose }: AiNoticeToastProps) {
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-16 right-4 sm:right-8 z-30 w-80 sm:w-88 bg-[#0B0D0B]/95 backdrop-blur-sm border border-[#1F221E] rounded-md p-3.5 shadow-xl shadow-black/50 font-mono transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 select-none"
+      className="fixed bottom-16 right-4 sm:right-8 z-30 w-80 sm:w-88 bg-[#080808]/95 backdrop-blur-sm border border-[#1F1F1F] rounded-md p-3.5 shadow-xl shadow-black/50 font-mono transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 select-none"
     >
-      <div className="flex items-center justify-between pb-1.5 border-b border-[#181B17]">
+      <div className="flex items-center justify-between pb-1.5 border-b border-[#171717]">
         <div className="flex items-center space-x-2">
           <span className="w-1.5 h-1.5 rounded-full bg-[#9AE6B4] inline-block animate-pulse" />
           <span className="text-[10px] text-[#9AE6B4] tracking-wider uppercase font-medium">
@@ -49,7 +49,7 @@ export function AiNoticeToast({ isOpen, onClose }: AiNoticeToastProps) {
         </div>
         <button
           onClick={onClose}
-          className="text-[#656C60] hover:text-[#9AE6B4] text-xs transition-colors cursor-pointer"
+          className="text-[#66666E] hover:text-[#9AE6B4] text-xs transition-colors cursor-pointer"
           title="Dismiss notification"
           aria-label="Dismiss"
         >
@@ -57,7 +57,7 @@ export function AiNoticeToast({ isOpen, onClose }: AiNoticeToastProps) {
         </button>
       </div>
 
-      <div className="pt-2 text-xs leading-relaxed text-[#D3D7CE]">
+      <div className="pt-2 text-xs leading-relaxed text-[#D4D4D8]">
         {step === 1 ? (
           <p className="animate-in fade-in duration-200">
             You are now chatting with an AI assistant representing Eds.

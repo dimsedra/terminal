@@ -289,15 +289,15 @@ export function TerminalInterface() {
   return (
     <div
       onClick={handleContainerClick}
-      className="w-full h-screen flex flex-col bg-[#0E0F0E] cursor-text select-text overflow-hidden"
+      className="w-full h-screen flex flex-col bg-[#0A0A0A] cursor-text select-text overflow-hidden"
     >
       {/* Top Title Bar */}
-      <header className="shrink-0 w-full px-4 sm:px-6 py-2.5 bg-[#090A09] border-b border-[#1A1D19] select-none flex items-center justify-between z-10">
+      <header className="shrink-0 w-full px-4 sm:px-6 py-2.5 bg-[#050505] border-b border-[#171717] select-none flex items-center justify-between z-10">
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#272B25]" />
-            <div className="w-2.5 h-2.5 rounded-full bg-[#272B25]" />
-            <div className="w-2.5 h-2.5 rounded-full bg-[#272B25]" />
+            <div className="w-2.5 h-2.5 rounded-full bg-[#262626]" />
+            <div className="w-2.5 h-2.5 rounded-full bg-[#262626]" />
+            <div className="w-2.5 h-2.5 rounded-full bg-[#262626]" />
           </div>
 
           {/* Sidebar Toggle Button (active in Fase 2) */}
@@ -307,14 +307,14 @@ export function TerminalInterface() {
                 e.stopPropagation();
                 setSidebarOpen(!sidebarOpen);
               }}
-              className="text-xs px-2 py-0.5 rounded bg-[#131613] hover:bg-[#1A1E1A] text-[#8B9285] hover:text-[#9AE6B4] border border-[#212620] transition-colors cursor-pointer font-mono"
+              className="text-xs px-2 py-0.5 rounded bg-[#141414] hover:bg-[#1F1F1F] text-[#9E9EA5] hover:text-[#9AE6B4] border border-[#262626] transition-colors cursor-pointer font-mono"
               title="Toggle sidebar"
             >
               {sidebarOpen ? "[sidebar: on]" : "[sidebar: off]"}
             </button>
           )}
 
-          <span className="text-xs text-[#656C60] tracking-wide font-medium flex items-center space-x-1.5">
+          <span className="text-xs text-[#66666E] tracking-wide font-medium flex items-center space-x-1.5">
             <span>eds@terminal-portfolio:~</span>
             {isAiSession && (
               <span className="text-[#9AE6B4] font-semibold text-[11px]">[ai-session]</span>
@@ -322,7 +322,7 @@ export function TerminalInterface() {
           </span>
         </div>
 
-        <div className="text-xs text-[#555A51] tracking-wider uppercase font-mono">
+        <div className="text-xs text-[#52525B] tracking-wider uppercase font-mono">
           agentic-cli
         </div>
       </header>
@@ -339,13 +339,13 @@ export function TerminalInterface() {
               </div>
 
               <div className="space-y-2">
-                <h1 className="text-base sm:text-lg text-[#F0F3EC] font-semibold tracking-wide">
+                <h1 className="text-base sm:text-lg text-[#F4F4F5] font-semibold tracking-wide">
                   DIMAS EDRA AR RAFI (EDS)
                 </h1>
-                <p className="text-xs sm:text-sm text-[#7E8578]">
+                <p className="text-xs sm:text-sm text-[#8E8E93]">
                   AI-Assisted Software Engineer & Systems Thinker
                 </p>
-                <p className="text-xs sm:text-sm text-[#555A51] pt-2">
+                <p className="text-xs sm:text-sm text-[#52525B] pt-2">
                   Type a command or click a shortcut to explore:
                 </p>
 
@@ -357,7 +357,7 @@ export function TerminalInterface() {
                         e.stopPropagation();
                         handleCommandExecution(cmd);
                       }}
-                      className="px-3 py-1 bg-[#141714] text-[#9AE6B4] hover:bg-[#1C201B] border border-[#212620] rounded-md transition-colors cursor-pointer"
+                      className="px-3 py-1 bg-[#141414] text-[#9AE6B4] hover:bg-[#1F1F1F] border border-[#262626] rounded-md transition-colors cursor-pointer"
                     >
                       {cmd}
                     </button>
@@ -368,7 +368,7 @@ export function TerminalInterface() {
           </div>
 
           {/* Bottom Input Prompt for Fase 1 */}
-          <footer className="shrink-0 w-full bg-[#090A09] border-t border-[#1A1D19] px-4 sm:px-8 py-3.5 z-10">
+          <footer className="shrink-0 w-full bg-[#050505] border-t border-[#171717] px-4 sm:px-8 py-3.5 z-10">
             <div className="max-w-5xl mx-auto flex items-center space-x-3">
               <span className="text-[#9AE6B4] font-bold text-base sm:text-lg select-none">❯</span>
               <input
@@ -382,9 +382,9 @@ export function TerminalInterface() {
                 spellCheck={false}
 
                 autoComplete="off"
-                className="flex-1 bg-transparent border-none outline-none text-[#F0F3EC] text-sm font-mono placeholder:text-[#555A51]"
+                className="flex-1 bg-transparent border-none outline-none text-[#F4F4F5] text-sm font-mono placeholder:text-[#52525B]"
               />
-              <div className="text-xs text-[#4A5046] select-none hidden sm:block">
+              <div className="text-xs text-[#44444A] select-none hidden sm:block">
                 [Enter: run | ↑↓: history]
               </div>
             </div>
@@ -395,20 +395,20 @@ export function TerminalInterface() {
         <div className="flex-1 min-h-0 flex overflow-hidden">
           {/* Left Sidebar */}
           {sidebarOpen && (
-            <aside className="w-64 sm:w-72 bg-[#0B0D0B] border-r border-[#1A1D19] flex flex-col justify-between select-none shrink-0 h-full transition-all duration-200">
+            <aside className="w-64 sm:w-72 bg-[#080808] border-r border-[#171717] flex flex-col justify-between select-none shrink-0 h-full transition-all duration-200">
               <div className="overflow-y-auto p-4 space-y-4">
                 {/* Sidebar Header: Compact 3D Spinning ASCII EDS */}
-                <div className="border-b border-[#181B17] pb-3 text-center">
+                <div className="border-b border-[#171717] pb-3 text-center">
                   <SpinningAsciiEds compact={true} />
-                  <p className="text-xs font-semibold text-[#F0F3EC] pt-1">
+                  <p className="text-xs font-semibold text-[#F4F4F5] pt-1">
                     DIMAS EDRA AR RAFI
                   </p>
-                  <p className="text-[11px] text-[#7E8578]">AI-Assisted Engineer</p>
+                  <p className="text-[11px] text-[#8E8E93]">AI-Assisted Engineer</p>
                 </div>
 
                 {/* Quick Navigation Commands */}
                 <div className="space-y-1.5 pt-1">
-                  <p className="text-[10px] text-[#555A51] uppercase tracking-wider px-2 font-medium">
+                  <p className="text-[10px] text-[#52525B] uppercase tracking-wider px-2 font-medium">
                     Commands
                   </p>
                   <div className="space-y-1 text-xs">
@@ -419,12 +419,12 @@ export function TerminalInterface() {
                           e.stopPropagation();
                           handleCommandExecution(cmd.name);
                         }}
-                        className="w-full flex items-center justify-between px-2.5 py-1.5 rounded hover:bg-[#151915] text-left transition-colors cursor-pointer group"
+                        className="w-full flex items-center justify-between px-2.5 py-1.5 rounded hover:bg-[#141414] text-left transition-colors cursor-pointer group"
                       >
                         <span className="text-[#9AE6B4] font-medium group-hover:underline">
                           {cmd.name}
                         </span>
-                        <span className="text-[10px] text-[#555A51] truncate max-w-[120px]">
+                        <span className="text-[10px] text-[#52525B] truncate max-w-[120px]">
                           {cmd.desc.split(" ")[0]}
                         </span>
                       </button>
@@ -433,8 +433,8 @@ export function TerminalInterface() {
                 </div>
 
                 {/* Touchpoints / Links */}
-                <div className="space-y-1.5 pt-2 border-t border-[#181B17]">
-                  <p className="text-[10px] text-[#555A51] uppercase tracking-wider px-2 font-medium">
+                <div className="space-y-1.5 pt-2 border-t border-[#171717]">
+                  <p className="text-[10px] text-[#52525B] uppercase tracking-wider px-2 font-medium">
                     Links
                   </p>
                   <div className="space-y-1 text-xs">
@@ -442,7 +442,7 @@ export function TerminalInterface() {
                       href={PORTFOLIO_DATA.author.links.github}
                       target="_blank"
                       rel="noreferrer"
-                      className="block px-2.5 py-1 text-[#8B9285] hover:text-[#9AE6B4] transition-colors"
+                      className="block px-2.5 py-1 text-[#9E9EA5] hover:text-[#9AE6B4] transition-colors"
                     >
                       github.com ↗
                     </a>
@@ -450,7 +450,7 @@ export function TerminalInterface() {
                       href={PORTFOLIO_DATA.author.links.linkedin}
                       target="_blank"
                       rel="noreferrer"
-                      className="block px-2.5 py-1 text-[#8B9285] hover:text-[#9AE6B4] transition-colors"
+                      className="block px-2.5 py-1 text-[#9E9EA5] hover:text-[#9AE6B4] transition-colors"
                     >
                       linkedin.com ↗
                     </a>
@@ -459,14 +459,14 @@ export function TerminalInterface() {
               </div>
 
               {/* Sidebar Footer Hint */}
-              <div className="p-3 border-t border-[#181B17] text-[10px] text-[#4A5046]">
+              <div className="p-3 border-t border-[#171717] text-[10px] text-[#44444A]">
                 terminal portfolio v1.0
               </div>
             </aside>
           )}
 
           {/* Right Main CLI Pane (The Strictly Bounded Rectangular Box) */}
-          <main className="flex-1 min-h-0 min-w-0 flex flex-col bg-[#0E0F0E]">
+          <main className="flex-1 min-h-0 min-w-0 flex flex-col bg-[#0A0A0A]">
             {/* The Bounded Chat Viewport */}
             <div
               ref={scrollContainerRef}
@@ -483,10 +483,10 @@ export function TerminalInterface() {
                       {msg.type === "user" ? (
                         <div className="flex items-center space-x-2.5 text-sm">
                           <span className="text-[#9AE6B4] font-bold">❯</span>
-                          <span className="text-[#F0F3EC] font-medium">{msg.command}</span>
+                          <span className="text-[#F4F4F5] font-medium">{msg.command}</span>
                         </div>
                       ) : (
-                        <div className="pl-4 sm:pl-5 border-l-2 border-[#1F221E]">
+                        <div className="pl-4 sm:pl-5 border-l-2 border-[#1F1F1F]">
                           {msg.payload && (
                             <StreamingTerminalOutput
                               payload={msg.payload}
@@ -509,7 +509,7 @@ export function TerminalInterface() {
             </div>
 
             {/* Input Prompt Bar for Fase 2 - Full width edge-to-edge alignment */}
-            <footer className="shrink-0 w-full bg-[#090A09] border-t border-[#1A1D19] px-6 sm:px-8 py-3.5 z-10">
+            <footer className="shrink-0 w-full bg-[#050505] border-t border-[#171717] px-6 sm:px-8 py-3.5 z-10">
               <div className="w-full flex items-center space-x-3">
                 <span className="text-[#9AE6B4] font-bold text-sm sm:text-base select-none">❯</span>
                 <input
@@ -527,9 +527,9 @@ export function TerminalInterface() {
                   spellCheck={false}
 
                   autoComplete="off"
-                  className="flex-1 bg-transparent border-none outline-none text-[#F0F3EC] text-sm font-mono placeholder:text-[#555A51]"
+                  className="flex-1 bg-transparent border-none outline-none text-[#F4F4F5] text-sm font-mono placeholder:text-[#52525B]"
                 />
-                <div className="text-xs text-[#4A5046] select-none hidden sm:block">
+                <div className="text-xs text-[#44444A] select-none hidden sm:block">
                   [Enter: run | ↑↓: history]
                 </div>
               </div>

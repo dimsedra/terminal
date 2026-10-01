@@ -136,12 +136,12 @@ export function StreamingTerminalOutput({
   const components = useMemo(() => {
     return {
       h1: ({ children, ...props }: React.ComponentProps<"h1">) => (
-        <h1 className="text-base font-semibold text-[#F0F3EC] mt-3 mb-2" {...props}>
+        <h1 className="text-base font-semibold text-[#F4F4F5] mt-3 mb-2" {...props}>
           {children}
         </h1>
       ),
       h2: ({ children, ...props }: React.ComponentProps<"h2">) => (
-        <h2 className="text-sm sm:text-base font-semibold text-[#F0F3EC] mt-3 mb-1.5" {...props}>
+        <h2 className="text-sm sm:text-base font-semibold text-[#F4F4F5] mt-3 mb-1.5" {...props}>
           {children}
         </h2>
       ),
@@ -151,7 +151,7 @@ export function StreamingTerminalOutput({
         </h3>
       ),
       p: ({ children, ...props }: React.ComponentProps<"p">) => (
-        <p className="text-sm text-[#D3D7CE] leading-relaxed my-1.5" {...props}>
+        <p className="text-sm text-[#D4D4D8] leading-relaxed my-1.5" {...props}>
           {children}
         </p>
       ),
@@ -161,27 +161,27 @@ export function StreamingTerminalOutput({
         </ul>
       ),
       ol: ({ children, ...props }: React.ComponentProps<"ol">) => (
-        <ol className="space-y-1.5 my-2 pl-4 list-decimal text-sm text-[#D3D7CE]" {...props}>
+        <ol className="space-y-1.5 my-2 pl-4 list-decimal text-sm text-[#D4D4D8]" {...props}>
           {children}
         </ol>
       ),
       li: ({ children, ...props }: React.ComponentProps<"li">) => (
-        <li className="text-sm text-[#D3D7CE] leading-relaxed" {...props}>
+        <li className="text-sm text-[#D4D4D8] leading-relaxed" {...props}>
           {children}
         </li>
       ),
       strong: ({ children, ...props }: React.ComponentProps<"strong">) => (
-        <strong className="font-semibold text-[#F0F3EC]" {...props}>
+        <strong className="font-semibold text-[#F4F4F5]" {...props}>
           {children}
         </strong>
       ),
       em: ({ children, ...props }: React.ComponentProps<"em">) => (
-        <em className="text-[#A2A99B] italic text-sm" {...props}>
+        <em className="text-[#A1A1AA] italic text-sm" {...props}>
           {children}
         </em>
       ),
       blockquote: ({ children, ...props }: React.ComponentProps<"blockquote">) => (
-        <blockquote className="border-l-2 border-[#9AE6B4]/60 pl-3 my-2 text-xs text-[#8B9285]" {...props}>
+        <blockquote className="border-l-2 border-[#9AE6B4]/60 pl-3 my-2 text-xs text-[#9E9EA5]" {...props}>
           {children}
         </blockquote>
       ),
@@ -203,7 +203,7 @@ export function StreamingTerminalOutput({
           return (
             <code
               onClick={() => onRunCommandRef.current?.(text)}
-              className="px-1.5 py-0.5 rounded bg-[#131513] text-[#9AE6B4] text-xs border border-[#1F221E] cursor-pointer hover:border-[#9AE6B4]/50 transition-colors inline-block"
+              className="px-1.5 py-0.5 rounded bg-[#141414] text-[#9AE6B4] text-xs border border-[#1F1F1F] cursor-pointer hover:border-[#9AE6B4]/50 transition-colors inline-block"
               title={`Run ${text}`}
               {...props}
             >
@@ -213,7 +213,7 @@ export function StreamingTerminalOutput({
         }
         return (
           <code
-            className="px-1.5 py-0.5 rounded bg-[#131513] text-[#A2A99B] text-xs border border-[#1F221E]"
+            className="px-1.5 py-0.5 rounded bg-[#141414] text-[#D4D4D8] text-xs border border-[#1F1F1F]"
             {...props}
           >
             {children}
@@ -224,7 +224,7 @@ export function StreamingTerminalOutput({
   }, []);
 
   return (
-    <div className="text-sm text-[#D3D7CE] py-1 leading-relaxed streamdown-output">
+    <div className="text-sm text-[#D4D4D8] py-1 leading-relaxed streamdown-output">
       <Streamdown
         mode="streaming"
         components={components}
