@@ -1,7 +1,15 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { PORTFOLIO_DATA, ProjectItem } from "@/data/portfolioData";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { Streamdown } from "streamdown";
+import {
+  PORTFOLIO_DATA,
+  getHelpMarkdown,
+  getAboutMarkdown,
+  getProjectsMarkdown,
+  getSkillsMarkdown,
+  getContactMarkdown,
+} from "@/data/portfolioData";
 
 export type OutputPayload =
   | { type: "help" }
@@ -9,6 +17,7 @@ export type OutputPayload =
   | { type: "projects" }
   | { type: "skills" }
   | { type: "contact" }
+  | { type: "markdown"; content: string }
   | { type: "text"; text: string; actionCmd?: string };
 
 interface StreamingTerminalOutputProps {
@@ -26,61 +35,43 @@ export function StreamingTerminalOutput({
   onComplete,
   alreadyFinished = false,
 }: StreamingTerminalOutputProps) {
-  // If already finished, display 100% immediately
-  const [revealedIndex, setRevealedIndex] = useState<number>(alreadyFinished ? 9999 : 0);
-  const [isDone, setIsDone] = useState<boolean>(alreadyFinished);
   const scrollCbRef = useRef(onScroll);
   scrollCbRef.current = onScroll;
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
+  const onRunCommandRef = useRef(onRunCommand);
+  onRunCommandRef.current = onRunCommand;
 
-  // Flatten the payload into progressive streaming steps/tokens
-  const steps = React.useMemo(() => {
+  // Resolve payload into full Markdown string
+  const fullMarkdown = useMemo(() => {
     switch (payload.type) {
-      case "help": {
-        // Step 0: header, Steps 1..N: commands
-        const items = ["Available Slash Commands:"];
-        PORTFOLIO_DATA.commands.forEach((c) => {
-          items.push(`${c.name} - ${c.desc}`);
-        });
-        return items;
-      }
-      case "about": {
-        return [
-          `${PORTFOLIO_DATA.author.name} (${PORTFOLIO_DATA.author.callsign})`,
-          PORTFOLIO_DATA.author.role,
-          PORTFOLIO_DATA.author.bio,
-          `Location: ${PORTFOLIO_DATA.author.location}`,
-        ];
-      }
-      case "projects": {
-        const items = ["Featured Projects & Systems:"];
-        PORTFOLIO_DATA.projects.forEach((p) => {
-          items.push(p.id);
-        });
-        return items;
-      }
-      case "skills": {
-        const items = ["Technical Capabilities & Tools:"];
-        PORTFOLIO_DATA.skills.forEach((s) => {
-          items.push(s.category);
-        });
-        return items;
-      }
-      case "contact": {
-        return [
-          "Get in touch with Eds:",
-          `GitHub: ${PORTFOLIO_DATA.author.links.github}`,
-          `LinkedIn: ${PORTFOLIO_DATA.author.links.linkedin}`,
-          `Email: ${PORTFOLIO_DATA.author.links.email.replace("mailto:", "")}`,
-        ];
-      }
-      case "text": {
-        // Word-level tokens for text
-        return payload.text.split(" ");
-      }
+      case "help":
+        return getHelpMarkdown();
+      case "about":
+        return getAboutMarkdown();
+      case "projects":
+        return getProjectsMarkdown();
+      case "skills":
+        return getSkillsMarkdown();
+      case "contact":
+        return getContactMarkdown();
+      case "markdown":
+        return payload.content;
+      case "text":
+        if (payload.actionCmd) {
+          return `${payload.text}\n\nType \`${payload.actionCmd}\` to see available commands.`;
+        }
+        return payload.text;
     }
   }, [payload]);
+
+  // Tokenize full markdown into streaming pieces (words + spaces/newlines)
+  const tokens = useMemo(() => {
+    return fullMarkdown.split(/(\s+)/);
+  }, [fullMarkdown]);
+
+  const [tokenIndex, setTokenIndex] = useState<number>(alreadyFinished ? 999999 : 0);
+  const [isDone, setIsDone] = useState<boolean>(alreadyFinished);
 
   useEffect(() => {
     if (alreadyFinished) {
@@ -88,14 +79,15 @@ export function StreamingTerminalOutput({
       return;
     }
 
-    let currentIndex = 0;
-    const intervalTime = payload.type === "text" ? 22 : 90; // rapid for words, slightly paced for cards
+    let current = 0;
+    // Fast word-by-word streaming interval for authentic CLI feel
+    const intervalTime = 16;
 
     const timer = setInterval(() => {
-      currentIndex++;
-      setRevealedIndex(currentIndex);
+      current++;
+      setTokenIndex(current);
 
-      if (currentIndex >= steps.length) {
+      if (current >= tokens.length) {
         clearInterval(timer);
         setIsDone(true);
         onCompleteRef.current?.();
@@ -103,9 +95,9 @@ export function StreamingTerminalOutput({
     }, intervalTime);
 
     return () => clearInterval(timer);
-  }, [alreadyFinished, steps.length, payload.type]);
+  }, [alreadyFinished, tokens.length]);
 
-  // Always scroll AFTER React has rendered the new token/card into the DOM
+  // Keep scroll container pinned to bottom as new tokens arrive
   useEffect(() => {
     if (!alreadyFinished) {
       requestAnimationFrame(() => {
@@ -113,260 +105,119 @@ export function StreamingTerminalOutput({
       });
       const t = setTimeout(() => {
         scrollCbRef.current?.();
-      }, 35);
+      }, 25);
       return () => clearTimeout(t);
     }
-  }, [revealedIndex, alreadyFinished]);
+  }, [tokenIndex, alreadyFinished]);
 
-  // Render outputs based on revealed steps
-  if (payload.type === "text") {
-    const revealedWords = steps.slice(0, revealedIndex).join(" ");
-    return (
-      <div className="text-sm text-[#8B9285] py-1 space-y-1.5 leading-relaxed">
-        <p>
-          <span className="text-[#D3D7CE]">{revealedWords}</span>
-          {!isDone && <span className="terminal-cursor">▋</span>}
+  const currentStreamedText = useMemo(() => {
+    if (alreadyFinished || isDone || tokenIndex >= tokens.length) {
+      return fullMarkdown;
+    }
+    return tokens.slice(0, tokenIndex).join("");
+  }, [alreadyFinished, isDone, tokenIndex, tokens, fullMarkdown]);
+
+  // Custom Streamdown component mapping tailored for our dark terminal aesthetics
+  const components = useMemo(() => {
+    return {
+      h1: ({ children, ...props }: React.ComponentProps<"h1">) => (
+        <h1 className="text-base font-semibold text-[#F0F3EC] mt-3 mb-2" {...props}>
+          {children}
+        </h1>
+      ),
+      h2: ({ children, ...props }: React.ComponentProps<"h2">) => (
+        <h2 className="text-sm font-semibold text-[#F0F3EC] mt-3 mb-2" {...props}>
+          {children}
+        </h2>
+      ),
+      h3: ({ children, ...props }: React.ComponentProps<"h3">) => (
+        <h3 className="text-xs font-semibold text-[#9AE6B4] uppercase tracking-wider mt-2 mb-2" {...props}>
+          {children}
+        </h3>
+      ),
+      p: ({ children, ...props }: React.ComponentProps<"p">) => (
+        <p className="text-sm text-[#D3D7CE] leading-relaxed my-1.5" {...props}>
+          {children}
         </p>
-        {isDone && payload.actionCmd && (
-          <p className="pt-1">
-            Type{" "}
-            <button
-              onClick={() => {
-                if (onRunCommand && payload.actionCmd) onRunCommand(payload.actionCmd);
-              }}
-              className="text-[#9AE6B4] hover:underline cursor-pointer"
+      ),
+      ul: ({ children, ...props }: React.ComponentProps<"ul">) => (
+        <ul className="space-y-2 my-2 list-none pl-0" {...props}>
+          {children}
+        </ul>
+      ),
+      ol: ({ children, ...props }: React.ComponentProps<"ol">) => (
+        <ol className="space-y-1.5 my-2 pl-4 list-decimal text-sm text-[#D3D7CE]" {...props}>
+          {children}
+        </ol>
+      ),
+      li: ({ children, ...props }: React.ComponentProps<"li">) => (
+        <li className="text-sm text-[#D3D7CE] leading-relaxed" {...props}>
+          {children}
+        </li>
+      ),
+      strong: ({ children, ...props }: React.ComponentProps<"strong">) => (
+        <strong className="font-semibold text-[#F0F3EC]" {...props}>
+          {children}
+        </strong>
+      ),
+      em: ({ children, ...props }: React.ComponentProps<"em">) => (
+        <em className="text-[#8B9285] not-italic text-xs block pt-1" {...props}>
+          {children}
+        </em>
+      ),
+      blockquote: ({ children, ...props }: React.ComponentProps<"blockquote">) => (
+        <blockquote className="border-l-2 border-[#9AE6B4]/60 pl-3 my-2 text-xs text-[#8B9285]" {...props}>
+          {children}
+        </blockquote>
+      ),
+      a: ({ href, children, ...props }: React.ComponentProps<"a">) => (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#9AE6B4] hover:underline cursor-pointer transition-colors"
+          {...props}
+        >
+          {children}
+        </a>
+      ),
+      code: ({ children, className, ...props }: React.ComponentProps<"code">) => {
+        const text = String(children).trim();
+        // If it represents a slash command like `/projects` or `/help`
+        if (text.startsWith("/")) {
+          return (
+            <code
+              onClick={() => onRunCommandRef.current?.(text)}
+              className="px-1.5 py-0.5 rounded bg-[#131513] text-[#9AE6B4] text-xs border border-[#1F221E] cursor-pointer hover:border-[#9AE6B4]/50 transition-colors inline-block"
+              title={`Run ${text}`}
+              {...props}
             >
-              {payload.actionCmd}
-            </button>{" "}
-            to see available commands.
-          </p>
-        )}
-      </div>
-    );
-  }
+              {children}
+            </code>
+          );
+        }
+        return (
+          <code
+            className="px-1.5 py-0.5 rounded bg-[#131513] text-[#A2A99B] text-xs border border-[#1F221E]"
+            {...props}
+          >
+            {children}
+          </code>
+        );
+      },
+    };
+  }, []);
 
-  if (payload.type === "help") {
-    return (
-      <div className="space-y-2.5 py-1 text-[#D3D7CE]">
-        {revealedIndex >= 1 && (
-          <p className="text-[#8B9285] text-sm flex items-center">
-            <span>Available Slash Commands:</span>
-            {!isDone && revealedIndex === 1 && <span className="terminal-cursor">▋</span>}
-          </p>
-        )}
-        <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-y-2 text-sm pt-1">
-          {PORTFOLIO_DATA.commands.map((cmd, idx) => {
-            const isRevealed = revealedIndex >= idx + 2;
-            if (!isRevealed) return null;
-            const isCurrentTail = !isDone && revealedIndex === idx + 2;
-            return (
-              <React.Fragment key={cmd.name}>
-                <span
-                  onClick={() => onRunCommand?.(cmd.name)}
-                  className="text-[#9AE6B4] font-medium cursor-pointer hover:underline flex items-center"
-                >
-                  {cmd.name}
-                </span>
-                <span className="text-[#8B9285] flex items-center">
-                  {cmd.desc}
-                  {isCurrentTail && <span className="terminal-cursor">▋</span>}
-                </span>
-              </React.Fragment>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  if (payload.type === "about") {
-    return (
-      <div className="space-y-3.5 py-1 text-sm text-[#D3D7CE] leading-relaxed w-full">
-        {revealedIndex >= 1 && (
-          <div className="border-l-2 border-[#9AE6B4]/60 pl-3.5 space-y-1">
-            <h2 className="text-base font-semibold text-[#F0F3EC] flex items-center">
-              {PORTFOLIO_DATA.author.name}{" "}
-              <span className="text-[#8B9285] font-normal text-sm ml-1.5">
-                ({PORTFOLIO_DATA.author.callsign})
-              </span>
-              {!isDone && revealedIndex === 1 && <span className="terminal-cursor">▋</span>}
-            </h2>
-            {revealedIndex >= 2 && (
-              <p className="text-sm text-[#9AE6B4] flex items-center">
-                {PORTFOLIO_DATA.author.role}
-                {!isDone && revealedIndex === 2 && <span className="terminal-cursor">▋</span>}
-              </p>
-            )}
-          </div>
-        )}
-
-        {revealedIndex >= 3 && (
-          <p className="text-[#A2A99B] text-sm leading-relaxed flex items-center flex-wrap">
-            <span>{PORTFOLIO_DATA.author.bio}</span>
-            {!isDone && revealedIndex === 3 && <span className="terminal-cursor">▋</span>}
-          </p>
-        )}
-
-        {revealedIndex >= 4 && (
-          <div className="flex items-center gap-4 pt-1 text-sm">
-            <span className="text-[#656C60]">Location:</span>
-            <span className="text-[#D3D7CE]">{PORTFOLIO_DATA.author.location}</span>
-            {!isDone && revealedIndex >= 4 && <span className="terminal-cursor">▋</span>}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  if (payload.type === "projects") {
-    return (
-      <div className="space-y-3.5 py-1">
-        {revealedIndex >= 1 && (
-          <p className="text-[#8B9285] text-sm flex items-center">
-            <span>Featured Projects & Systems:</span>
-            {!isDone && revealedIndex === 1 && <span className="terminal-cursor">▋</span>}
-          </p>
-        )}
-        <div className="space-y-3">
-          {PORTFOLIO_DATA.projects.map((proj, idx) => {
-            const isRevealed = revealedIndex >= idx + 2;
-            if (!isRevealed) return null;
-            const isTail = !isDone && revealedIndex === idx + 2;
-            return (
-              <div
-                key={proj.id}
-                className="p-3.5 bg-[#131513] border border-[#1F221E] rounded-md text-sm space-y-2 transition-all hover:border-[#2C312A] animate-in fade-in duration-300"
-              >
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <span className="font-semibold text-[#F0F3EC] text-base flex items-center">
-                    {proj.name}
-                    {isTail && <span className="terminal-cursor">▋</span>}
-                  </span>
-                  {proj.github && (
-                    <a
-                      href={proj.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[#9AE6B4] text-sm hover:underline"
-                    >
-                      [view repository ↗]
-                    </a>
-                  )}
-                </div>
-                <p className="text-[#A2A99B] text-sm leading-relaxed">{proj.description}</p>
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {proj.stack.map((t) => (
-                    <span
-                      key={t}
-                      className="px-2 py-0.5 bg-[#090A09] text-[#8B9285] rounded text-xs border border-[#1A1D19]"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  if (payload.type === "skills") {
-    return (
-      <div className="space-y-3.5 py-1 text-sm">
-        {revealedIndex >= 1 && (
-          <p className="text-[#8B9285] flex items-center">
-            <span>Technical Capabilities & Tools:</span>
-            {!isDone && revealedIndex === 1 && <span className="terminal-cursor">▋</span>}
-          </p>
-        )}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-          {PORTFOLIO_DATA.skills.map((cat, idx) => {
-            const isRevealed = revealedIndex >= idx + 2;
-            if (!isRevealed) return null;
-            const isTail = !isDone && revealedIndex === idx + 2;
-            return (
-              <div
-                key={cat.category}
-                className="p-3 bg-[#131513] border border-[#1F221E] rounded-md space-y-2 animate-in fade-in duration-300"
-              >
-                <p className="font-semibold text-[#9AE6B4] text-xs uppercase tracking-wider flex items-center">
-                  <span>{cat.category}</span>
-                  {isTail && <span className="terminal-cursor">▋</span>}
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {cat.items.map((skill) => (
-                    <span
-                      key={skill}
-                      className="px-2 py-0.5 bg-[#090A09] text-[#A2A99B] rounded text-xs"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  if (payload.type === "contact") {
-    return (
-      <div className="space-y-2.5 py-1 text-sm">
-        {revealedIndex >= 1 && (
-          <p className="text-[#8B9285] flex items-center">
-            <span>Get in touch with Eds:</span>
-            {!isDone && revealedIndex === 1 && <span className="terminal-cursor">▋</span>}
-          </p>
-        )}
-        <div className="space-y-1.5 text-sm">
-          {revealedIndex >= 2 && (
-            <div>
-              <span className="text-[#656C60] w-28 inline-block">GitHub:</span>
-              <a
-                href={PORTFOLIO_DATA.author.links.github}
-                target="_blank"
-                rel="noreferrer"
-                className="text-[#9AE6B4] hover:underline"
-              >
-                {PORTFOLIO_DATA.author.links.github}
-              </a>
-              {!isDone && revealedIndex === 2 && <span className="terminal-cursor">▋</span>}
-            </div>
-          )}
-          {revealedIndex >= 3 && (
-            <div>
-              <span className="text-[#656C60] w-28 inline-block">LinkedIn:</span>
-              <a
-                href={PORTFOLIO_DATA.author.links.linkedin}
-                target="_blank"
-                rel="noreferrer"
-                className="text-[#9AE6B4] hover:underline"
-              >
-                {PORTFOLIO_DATA.author.links.linkedin}
-              </a>
-              {!isDone && revealedIndex === 3 && <span className="terminal-cursor">▋</span>}
-            </div>
-          )}
-          {revealedIndex >= 4 && (
-            <div>
-              <span className="text-[#656C60] w-28 inline-block">Email:</span>
-              <a
-                href={PORTFOLIO_DATA.author.links.email}
-                className="text-[#9AE6B4] hover:underline"
-              >
-                {PORTFOLIO_DATA.author.links.email.replace("mailto:", "")}
-              </a>
-              {!isDone && revealedIndex >= 4 && <span className="terminal-cursor">▋</span>}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  return null;
+  return (
+    <div className="text-sm text-[#D3D7CE] py-1 leading-relaxed streamdown-output">
+      <Streamdown
+        mode="streaming"
+        components={components}
+        className="space-y-1"
+      >
+        {currentStreamedText}
+      </Streamdown>
+      {!isDone && <span className="terminal-cursor">▋</span>}
+    </div>
+  );
 }

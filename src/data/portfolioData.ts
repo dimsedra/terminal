@@ -68,3 +68,46 @@ export const PORTFOLIO_DATA = {
     { name: "/clear", desc: "Clear terminal history" },
   ],
 };
+
+export function getHelpMarkdown(): string {
+  const cmdList = PORTFOLIO_DATA.commands
+    .map((c) => `- \`${c.name}\` — ${c.desc}`)
+    .join("\n");
+
+  return `### Available Commands\n\n${cmdList}\n\n_Tip: You can also ask any question directly to chat with the AI assistant._`;
+}
+
+export function getAboutMarkdown(): string {
+  const { author } = PORTFOLIO_DATA;
+  return `### ${author.name} (${author.callsign})\n**${author.role}**\n\n> Location: ${author.location} · [GitHub](${author.links.github}) · [LinkedIn](${author.links.linkedin})\n\n${author.bio}`;
+}
+
+export function getProjectsMarkdown(): string {
+  const projList = PORTFOLIO_DATA.projects
+    .map((p) => {
+      const stackBadges = p.stack.map((s) => `\`${s}\``).join(" ");
+      const repoLink = p.github ? `\n  [view repository ↗](${p.github})` : "";
+      return `- **${p.name}**\n  ${p.description}\n  ${stackBadges}${repoLink}`;
+    })
+    .join("\n\n");
+
+  return `### Featured Projects & Systems\n\n${projList}`;
+}
+
+export function getSkillsMarkdown(): string {
+  const skillsList = PORTFOLIO_DATA.skills
+    .map((cat) => {
+      const items = cat.items.map((i) => `\`${i}\``).join(" ");
+      return `- **${cat.category}**\n  ${items}`;
+    })
+    .join("\n\n");
+
+  return `### Technical Capabilities & Tools\n\n${skillsList}`;
+}
+
+export function getContactMarkdown(): string {
+  const { links } = PORTFOLIO_DATA.author;
+  const cleanEmail = links.email.replace("mailto:", "");
+  return `### Contact & Touchpoints\n\n- **GitHub:** [${links.github.replace("https://", "")}](${links.github})\n- **LinkedIn:** [${links.linkedin.replace("https://", "")}](${links.linkedin})\n- **Email:** [${cleanEmail}](${links.email})\n\n_Feel free to reach out for collaborations, system architecture discussions, or agentic tooling experiments._`;
+}
+
