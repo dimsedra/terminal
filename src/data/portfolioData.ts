@@ -60,11 +60,12 @@ export const PORTFOLIO_DATA = {
     },
   ] as ProjectItem[],
   commands: [
-    { name: "/help", desc: "List all available terminal commands" },
-    { name: "/about", desc: "Learn about Eds, role, and engineering philosophy" },
+    { name: "/chat", desc: "Chat with Eds's AI assistant (LLM)" },
     { name: "/projects", desc: "View projects with live links and repository details" },
     { name: "/skills", desc: "Inspect technical skills, stack, and AI tooling" },
+    { name: "/about", desc: "Learn about Eds, role, and engineering philosophy" },
     { name: "/contact", desc: "Get touchpoints (GitHub, LinkedIn, Email)" },
+    { name: "/help", desc: "List all available terminal commands" },
     { name: "/clear", desc: "Clear terminal history" },
   ],
 };
@@ -74,8 +75,16 @@ export function getHelpMarkdown(): string {
     .map((c) => `- \`${c.name}\` — ${c.desc}`)
     .join("\n");
 
-  return `### Available Commands\n\n${cmdList}\n\n_Tip: You can also ask any question directly to chat with the AI assistant._`;
+  return `### Available Commands\n\n${cmdList}\n\n_Tip: Use \`/chat <prompt>\` to interact directly with the AI assistant._`;
 }
+
+export function getChatPlaceholderMarkdown(query?: string): string {
+  if (query && query.trim()) {
+    return `### AI Assistant (LLM Mode)\n\nConnecting prompt to Gemini LLM...\n\n> Prompt: \`${query.trim()}\`\n\n_AI assistant connection is being initialized. You will soon be able to chat freely with Eds's virtual avatar powered by Google Gemini!_`;
+  }
+  return `### AI Assistant (LLM Mode)\n\nConnected to Eds's AI Assistant interface.\n\nYou can ask about Eds's background, system architecture patterns, agentic workflows, or specific projects.\n\n_Usage: \`/chat <your question here>\`_`;
+}
+
 
 export function getAboutMarkdown(): string {
   const { author } = PORTFOLIO_DATA;

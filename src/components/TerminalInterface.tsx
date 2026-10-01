@@ -64,6 +64,9 @@ export function TerminalInterface() {
 
     if (cmdLower === "/help") {
       payload = { type: "help" };
+    } else if (cmdLower === "/chat" || cmdLower.startsWith("/chat ")) {
+      const query = trimmed.replace(/^\/chat\s*/i, "").trim();
+      payload = { type: "chat", query: query || undefined };
     } else if (cmdLower === "/about") {
       payload = { type: "about" };
     } else if (cmdLower === "/projects" || cmdLower === "/project") {
@@ -169,7 +172,7 @@ export function TerminalInterface() {
                 </p>
 
                 <div className="flex flex-wrap justify-center gap-2 pt-2 text-xs sm:text-sm">
-                  {["/about", "/projects", "/skills", "/contact"].map((cmd) => (
+                  {["/chat", "/projects", "/about", "/skills", "/contact"].map((cmd) => (
                     <button
                       key={cmd}
                       onClick={(e) => {
@@ -196,7 +199,7 @@ export function TerminalInterface() {
                 value={inputVal}
                 onChange={(e) => setInputVal(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Type a slash command (e.g. /about, /projects) or ask something..."
+                placeholder="Type /chat to talk with AI, or /projects, /help..."
                 autoFocus
                 spellCheck={false}
                 autoComplete="off"
@@ -336,7 +339,7 @@ export function TerminalInterface() {
                   value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Type a slash command (e.g. /help, /projects)..."
+                  placeholder="Type /chat to talk with AI, or /projects, /help..."
                   autoFocus
                   spellCheck={false}
                   autoComplete="off"

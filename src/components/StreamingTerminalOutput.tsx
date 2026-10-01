@@ -9,6 +9,7 @@ import {
   getProjectsMarkdown,
   getSkillsMarkdown,
   getContactMarkdown,
+  getChatPlaceholderMarkdown,
 } from "@/data/portfolioData";
 
 export type OutputPayload =
@@ -17,6 +18,7 @@ export type OutputPayload =
   | { type: "projects" }
   | { type: "skills" }
   | { type: "contact" }
+  | { type: "chat"; query?: string }
   | { type: "markdown"; content: string }
   | { type: "text"; text: string; actionCmd?: string };
 
@@ -55,8 +57,11 @@ export function StreamingTerminalOutput({
         return getSkillsMarkdown();
       case "contact":
         return getContactMarkdown();
+      case "chat":
+        return getChatPlaceholderMarkdown(payload.query);
       case "markdown":
         return payload.content;
+
       case "text":
         if (payload.actionCmd) {
           return `${payload.text}\n\nType \`${payload.actionCmd}\` to see available commands.`;
