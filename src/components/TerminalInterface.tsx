@@ -1,106 +1,26 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { SpinningAsciiEds } from "./SpinningAsciiEds";
 import { PORTFOLIO_DATA } from "@/data/portfolioData";
 import { StreamingTerminalOutput, OutputPayload } from "./StreamingTerminalOutput";
-
-interface TerminalMessage {
-  id: string;
-  type: "user" | "output";
-  command?: string;
-  payload?: OutputPayload;
-}
-
-const STORAGE_HISTORY_KEY = "eds_terminal_history_v1";
-const STORAGE_CMD_HISTORY_KEY = "eds_command_history_v1";
+import { useTerminalSession } from "@/hooks/useTerminalSession";
 
 export function TerminalInterface() {
   const [inputVal, setInputVal] = useState("");
-  const [history, setHistory] = useState<TerminalMessage[]>([]);
-  const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [activeStreamingId, setActiveStreamingId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const isRestoring = useRef(true);
 
-  // Restore history from sessionStorage on client mount
-  useEffect(() => {
-    try {
-      const savedHistory = sessionStorage.getItem(STORAGE_HISTORY_KEY);
-      if (savedHistory) {
-        const parsed = JSON.parse(savedHistory);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setHistory(parsed);
-          // Go straight to the most recent position immediately
-          requestAnimationFrame(() => {
-            if (scrollContainerRef.current) {
-              scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
-            }
-          });
-          setTimeout(() => {
-            if (scrollContainerRef.current) {
-              scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
-            }
-          }, 30);
-          setTimeout(() => {
-            if (scrollContainerRef.current) {
-              scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
-            }
-          }, 120);
-        }
-      }
-      const savedCmdHistory = sessionStorage.getItem(STORAGE_CMD_HISTORY_KEY);
-      if (savedCmdHistory) {
-        setCommandHistory(JSON.parse(savedCmdHistory));
-      }
-    } catch (e) {
-      console.error("Failed to restore terminal session", e);
-    } finally {
-      setIsInitialized(true);
-    }
-  }, []);
-
-  // Save history to sessionStorage whenever it changes (after initialization)
-  useEffect(() => {
-    if (!isInitialized) return;
-    try {
-      if (history.length > 0) {
-        sessionStorage.setItem(STORAGE_HISTORY_KEY, JSON.stringify(history));
-      } else {
-        sessionStorage.removeItem(STORAGE_HISTORY_KEY);
-      }
-    } catch (e) {
-      console.error("Failed to save terminal history to session", e);
-    }
-  }, [history, isInitialized]);
-
-  // Save command history to sessionStorage
-  useEffect(() => {
-    if (!isInitialized) return;
-    try {
-      if (commandHistory.length > 0) {
-        sessionStorage.setItem(STORAGE_CMD_HISTORY_KEY, JSON.stringify(commandHistory));
-      }
-    } catch (e) {
-      console.error("Failed to save command history to session", e);
-    }
-  }, [commandHistory, isInitialized]);
-
-  // Auto-scroll on new message
-  useEffect(() => {
-    if (isRestoring.current) {
-      if (history.length > 0 && scrollContainerRef.current) {
-        scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
-      }
-      isRestoring.current = false;
-      return;
-    }
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [history]);
+  const {
+    history,
+    commandHistory,
+    activeStreamingId,
+    scrollContainerRef,
+    bottomRef,
+    appendInteraction,
+    clearSession,
+    handleStreamComplete,
+  } = useTerminalSession();
 
   // Keep focus on input
   const handleContainerClick = () => {
@@ -111,28 +31,13 @@ export function TerminalInterface() {
     const trimmed = rawInput.trim();
     if (!trimmed) return;
 
-    // Add to command history for arrow navigation
-    setCommandHistory((prev) => [...prev, trimmed]);
     setHistoryIndex(-1);
-
-    const userMsgId = `user-${Date.now()}`;
-    const userMsg: TerminalMessage = {
-      id: userMsgId,
-      type: "user",
-      command: trimmed,
-    };
-
     const cmdLower = trimmed.toLowerCase();
 
     // Deterministic command routing
     if (cmdLower === "/clear") {
-      setHistory([]);
+      clearSession();
       setInputVal("");
-      try {
-        sessionStorage.removeItem(STORAGE_HISTORY_KEY);
-      } catch (e) {
-        // ignore
-      }
       return;
     }
 
@@ -156,15 +61,7 @@ export function TerminalInterface() {
       };
     }
 
-    const outputMsgId = `out-${Date.now()}`;
-    const outputMsg: TerminalMessage = {
-      id: outputMsgId,
-      type: "output",
-      payload,
-    };
-
-    setActiveStreamingId(outputMsgId);
-    setHistory((prev) => [...prev, userMsg, outputMsg]);
+    appendInteraction(trimmed, payload);
     setInputVal("");
   };
 
@@ -264,11 +161,7 @@ export function TerminalInterface() {
                       <StreamingTerminalOutput
                         payload={msg.payload}
                         alreadyFinished={!isStreaming}
-                        onComplete={() => {
-                          if (msg.id === activeStreamingId) {
-                            setActiveStreamingId(null);
-                          }
-                        }}
+                        onComplete={() => handleStreamComplete(msg.id)}
                         onRunCommand={(c) => handleCommandExecution(c)}
                         onScroll={() =>
                           bottomRef.current?.scrollIntoView({ behavior: "smooth" })
