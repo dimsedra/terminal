@@ -390,8 +390,8 @@ export function TerminalInterface() {
           </div>
 
           {/* Bottom Input Prompt for Fase 1 */}
-          <footer className="shrink-0 w-full bg-[#050505] border-t border-[#171717] px-4 sm:px-8 py-3.5 z-10">
-            <div className="max-w-5xl mx-auto flex items-center space-x-3">
+          <footer className="h-[52px] shrink-0 w-full bg-[#050505] border-t border-[#171717] px-4 sm:px-8 flex items-center z-10">
+            <div className="max-w-5xl mx-auto flex items-center space-x-3 w-full">
               <span className="text-[#9AE6B4] font-bold text-base sm:text-lg select-none">❯</span>
               <input
                 ref={inputRef}
@@ -431,7 +431,7 @@ export function TerminalInterface() {
           {/* Left Sidebar: Offcanvas drawer on mobile, static side column on desktop */}
           {sidebarOpen && (
             <aside className="fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] sm:static sm:z-auto sm:w-64 md:w-72 bg-[#080808] border-r border-[#171717] flex flex-col justify-between select-none shrink-0 h-full transition-all duration-200 shadow-2xl sm:shadow-none">
-              <div className="overflow-y-auto p-4 space-y-4">
+              <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
                 {/* Mobile Drawer Header with Close Button */}
                 <div className="flex items-center justify-between sm:hidden pb-2 border-b border-[#171717]">
                   <span className="text-xs font-mono text-[#52525B] uppercase tracking-wider">Navigation</span>
@@ -508,7 +508,7 @@ export function TerminalInterface() {
               </div>
 
               {/* Sidebar Footer Hint */}
-              <div className="p-3 border-t border-[#171717] text-[10px] text-[#44444A]">
+              <div className="h-[52px] shrink-0 w-full px-4 flex items-center border-t border-[#171717] text-[10px] text-[#44444A]">
                 terminal portfolio v1.0
               </div>
             </aside>
@@ -558,7 +558,7 @@ export function TerminalInterface() {
             </div>
 
             {/* Input Prompt Bar for Fase 2 */}
-            <footer className="shrink-0 w-full bg-[#050505] border-t border-[#171717] px-3.5 sm:px-8 py-3.5 z-10">
+            <footer className="h-[52px] shrink-0 w-full bg-[#050505] border-t border-[#171717] px-3.5 sm:px-8 flex items-center z-10">
               <div className="w-full flex items-center space-x-2.5 sm:space-x-3">
                 <span className="text-[#9AE6B4] font-bold text-sm sm:text-base select-none shrink-0">❯</span>
                 <input
