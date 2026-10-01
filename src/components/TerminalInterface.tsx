@@ -21,6 +21,7 @@ export function TerminalInterface() {
     appendInteraction,
     clearSession,
     handleStreamComplete,
+    scrollToBottom,
   } = useTerminalSession();
 
   const isFase2 = history.length > 0;
@@ -287,11 +288,12 @@ export function TerminalInterface() {
                             <StreamingTerminalOutput
                               payload={msg.payload}
                               alreadyFinished={!isStreaming}
-                              onComplete={() => handleStreamComplete(msg.id)}
+                              onComplete={() => {
+                                handleStreamComplete(msg.id);
+                                scrollToBottom();
+                              }}
                               onRunCommand={(c) => handleCommandExecution(c)}
-                              onScroll={() =>
-                                bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-                              }
+                              onScroll={scrollToBottom}
                             />
                           )}
                         </div>

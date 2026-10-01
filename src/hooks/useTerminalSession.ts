@@ -95,8 +95,16 @@ export function useTerminalSession() {
       isRestoring.current = false;
       return;
     }
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
   }, [history]);
+
+  const scrollToBottom = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
+  };
 
   // Helper to append a user command and an output message
   const appendInteraction = (command: string, payload: OutputPayload) => {
@@ -147,5 +155,6 @@ export function useTerminalSession() {
     appendInteraction,
     clearSession,
     handleStreamComplete,
+    scrollToBottom,
   };
 }

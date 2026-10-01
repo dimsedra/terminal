@@ -94,18 +94,29 @@ export function StreamingTerminalOutput({
     const timer = setInterval(() => {
       currentIndex++;
       setRevealedIndex(currentIndex);
-      scrollCbRef.current?.();
 
       if (currentIndex >= steps.length) {
         clearInterval(timer);
         setIsDone(true);
-        scrollCbRef.current?.();
         onCompleteRef.current?.();
       }
     }, intervalTime);
 
     return () => clearInterval(timer);
   }, [alreadyFinished, steps.length, payload.type]);
+
+  // Always scroll AFTER React has rendered the new token/card into the DOM
+  useEffect(() => {
+    if (!alreadyFinished) {
+      requestAnimationFrame(() => {
+        scrollCbRef.current?.();
+      });
+      const t = setTimeout(() => {
+        scrollCbRef.current?.();
+      }, 35);
+      return () => clearTimeout(t);
+    }
+  }, [revealedIndex, alreadyFinished]);
 
   // Render outputs based on revealed steps
   if (payload.type === "text") {
