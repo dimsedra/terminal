@@ -5,6 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { SpinningAsciiEds } from "./SpinningAsciiEds";
 import { PORTFOLIO_DATA } from "@/data/portfolioData";
 import { StreamingTerminalOutput, OutputPayload } from "./StreamingTerminalOutput";
+import { AiNoticeToast } from "./AiNoticeToast";
 import { useTerminalSession } from "@/hooks/useTerminalSession";
 
 export function TerminalInterface() {
@@ -12,10 +13,23 @@ export function TerminalInterface() {
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeAiOutputId, setActiveAiOutputId] = useState<string | null>(null);
+  const [showAiNotice, setShowAiNotice] = useState(false);
+  const hasShownNoticeRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const contentWrapperRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    try {
+      hasShownNoticeRef.current = Boolean(
+        sessionStorage.getItem("eds_ai_notice_shown")
+      );
+    } catch (e) {
+      // ignore
+    }
+  }, []);
+
   const { messages, sendMessage, status, setMessages, error } = useChat();
+
 
   const {
     history,
@@ -118,6 +132,17 @@ export function TerminalInterface() {
       const promptToSend =
         query || "Halo! Ceritakan tentang Eds, latar belakang, dan keahliannya.";
 
+      // Fire sequential pop-up notice once per session
+      if (!hasShownNoticeRef.current) {
+        hasShownNoticeRef.current = true;
+        setShowAiNotice(true);
+        try {
+          sessionStorage.setItem("eds_ai_notice_shown", "true");
+        } catch (e) {
+          // ignore
+        }
+      }
+
       const outId = appendInteraction(trimmed, {
         type: "markdown",
         content: "",
@@ -130,6 +155,7 @@ export function TerminalInterface() {
       setInputVal("");
       return;
     }
+
 
     // 3. Deterministic slash commands
     let payload: OutputPayload;
@@ -423,6 +449,12 @@ export function TerminalInterface() {
           </main>
         </div>
       )}
+      {/* Sequential Toast Notice: 3s step 1, 3s step 2 (fires once per session) */}
+      <AiNoticeToast
+        isOpen={showAiNotice}
+        onClose={() => setShowAiNotice(false)}
+      />
     </div>
   );
 }
+
