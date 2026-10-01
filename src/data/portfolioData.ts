@@ -60,13 +60,13 @@ export const PORTFOLIO_DATA = {
     },
   ] as ProjectItem[],
   commands: [
-    { name: "/chat", desc: "Chat with Eds's AI assistant (LLM)" },
+    { name: "/chat", desc: "Enter interactive AI session" },
     { name: "/projects", desc: "View projects with live links and repository details" },
     { name: "/skills", desc: "Inspect technical skills, stack, and AI tooling" },
     { name: "/about", desc: "Learn about Eds, role, and engineering philosophy" },
     { name: "/contact", desc: "Get touchpoints (GitHub, LinkedIn, Email)" },
     { name: "/help", desc: "List all available terminal commands" },
-    { name: "/clear", desc: "Clear terminal history" },
+    { name: "/exit", desc: "Exit session and return to home" },
   ],
 };
 
@@ -75,8 +75,9 @@ export function getHelpMarkdown(): string {
     .map((c) => `- \`${c.name}\` — ${c.desc}`)
     .join("\n");
 
-  return `### Available Commands\n\n${cmdList}\n\n_Tip: Use \`/chat <prompt>\` to interact directly with the AI assistant._`;
+  return `### Available Commands\n\n${cmdList}\n\n_Tip: Type \`/chat\` to launch an interactive AI session, or \`/exit\` to return home._`;
 }
+
 
 export function getChatPlaceholderMarkdown(query?: string): string {
   if (query && query.trim()) {

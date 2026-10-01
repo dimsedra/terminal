@@ -14,6 +14,7 @@ export function TerminalInterface() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeAiOutputId, setActiveAiOutputId] = useState<string | null>(null);
   const [showAiNotice, setShowAiNotice] = useState(false);
+  const [isAiSession, setIsAiSession] = useState(false);
   const hasShownNoticeRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const contentWrapperRef = useRef<HTMLDivElement>(null);
@@ -23,10 +24,15 @@ export function TerminalInterface() {
       hasShownNoticeRef.current = Boolean(
         sessionStorage.getItem("eds_ai_notice_shown")
       );
+      const savedSession = sessionStorage.getItem("eds_is_ai_session");
+      if (savedSession === "true") {
+        setIsAiSession(true);
+      }
     } catch (e) {
       // ignore
     }
   }, []);
+
 
   const { messages, sendMessage, status, setMessages, error } = useChat();
 
@@ -111,26 +117,32 @@ export function TerminalInterface() {
     setHistoryIndex(-1);
     const cmdLower = trimmed.toLowerCase();
 
-    // 1. Reset Total: clear both terminal history and AI conversation state
-    if (cmdLower === "/clear") {
+    // 1. Universal Exit / Reset: exits current session and returns to clean home
+    if (cmdLower === "/exit" || cmdLower === "/clear") {
       clearSession();
       setMessages([]);
       setActiveAiOutputId(null);
+      setIsAiSession(false);
+      try {
+        sessionStorage.removeItem("eds_is_ai_session");
+      } catch (e) {
+        // ignore
+      }
       setInputVal("");
       return;
     }
 
-    // 2. AI Chat routing: /chat, /chat <prompt>, or any query without a leading slash
-    const isChatCommand = cmdLower === "/chat" || cmdLower.startsWith("/chat ");
-    const isSlashCommand = trimmed.startsWith("/");
-
-    if (isChatCommand || !isSlashCommand) {
-      const query = isChatCommand
-        ? trimmed.replace(/^\/chat\s*/i, "").trim()
-        : trimmed;
-
-      const promptToSend =
-        query || "Halo! Ceritakan tentang Eds, latar belakang, dan keahliannya.";
+    // 2. Entering AI Session via bare /chat
+    if (cmdLower === "/chat") {
+      // Clear previous CLI shell output so the AI session starts with a clean slate
+      clearSession();
+      setMessages([]);
+      setIsAiSession(true);
+      try {
+        sessionStorage.setItem("eds_is_ai_session", "true");
+      } catch (e) {
+        // ignore
+      }
 
       // Fire sequential pop-up notice once per session
       if (!hasShownNoticeRef.current) {
@@ -141,6 +153,44 @@ export function TerminalInterface() {
         } catch (e) {
           // ignore
         }
+      }
+
+      // Append initial /chat entry and immediately stream AI's greeting
+      const outId = appendInteraction("/chat", {
+        type: "markdown",
+        content: "",
+        isLiveStream: true,
+        isDone: false,
+      });
+
+      setActiveAiOutputId(outId);
+      sendMessage({
+        text: "Hi! I just activated this interactive session. Please introduce yourself warmly and let me know how we can explore Eds's work and background.",
+      });
+      setInputVal("");
+      return;
+    }
+
+    // 3. Inside Active AI Session: all messages and preset commands route to AI for dynamic synthesis
+    if (isAiSession) {
+      let promptToSend = trimmed;
+
+      if (cmdLower === "/projects" || cmdLower === "/project") {
+        promptToSend = "Could you give me a conversational overview and synthesis of Eds's featured projects based on the portfolio data?";
+      } else if (cmdLower === "/skills") {
+        promptToSend = "Could you give me a synthesized breakdown of Eds's technical capabilities, stack, and AI tooling?";
+      } else if (cmdLower === "/about") {
+        promptToSend = "Tell me about Eds's background, role, and what drives his engineering work.";
+      } else if (cmdLower === "/contact") {
+        promptToSend = "How can I get in touch with Eds or connect with him?";
+      } else if (cmdLower === "/help") {
+        const payload: OutputPayload = {
+          type: "markdown",
+          content: `### Interactive AI Session Commands\n\n- \`/exit\` — Exit AI session and return to terminal home\n- \`/projects\` — Ask AI to synthesize Eds's projects\n- \`/skills\` — Ask AI to synthesize technical capabilities\n- \`/about\` — Ask AI about Eds's background\n- \`/contact\` — Ask AI for touchpoints\n\n_Or simply ask any question directly in everyday language._`,
+        };
+        appendInteraction(trimmed, payload);
+        setInputVal("");
+        return;
       }
 
       const outId = appendInteraction(trimmed, {
@@ -156,8 +206,7 @@ export function TerminalInterface() {
       return;
     }
 
-
-    // 3. Deterministic slash commands
+    // 4. Non-AI CLI Shell: Deterministic slash commands
     let payload: OutputPayload;
 
     if (cmdLower === "/help") {
@@ -181,6 +230,7 @@ export function TerminalInterface() {
     appendInteraction(trimmed, payload);
     setInputVal("");
   };
+
 
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -236,10 +286,14 @@ export function TerminalInterface() {
             </button>
           )}
 
-          <span className="text-xs text-[#656C60] tracking-wide font-medium">
-            eds@terminal-portfolio:~
+          <span className="text-xs text-[#656C60] tracking-wide font-medium flex items-center space-x-1.5">
+            <span>eds@terminal-portfolio:~</span>
+            {isAiSession && (
+              <span className="text-[#9AE6B4] font-semibold text-[11px]">[ai-session]</span>
+            )}
           </span>
         </div>
+
         <div className="text-xs text-[#555A51] tracking-wider uppercase font-mono">
           agentic-cli
         </div>
@@ -295,9 +349,10 @@ export function TerminalInterface() {
                 value={inputVal}
                 onChange={(e) => setInputVal(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Type /chat to talk with AI, or /projects, /help..."
+                placeholder="Type /chat to enter AI session, or /projects, /help..."
                 autoFocus
                 spellCheck={false}
+
                 autoComplete="off"
                 className="flex-1 bg-transparent border-none outline-none text-[#F0F3EC] text-sm sm:text-base font-mono placeholder:text-[#555A51]"
               />
@@ -435,9 +490,14 @@ export function TerminalInterface() {
                   value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Type /chat to talk with AI, or /projects, /help..."
+                  placeholder={
+                    isAiSession
+                      ? "Ask Eds's AI assistant anything (or /exit to return)..."
+                      : "Type /chat to enter AI session, or /projects, /help..."
+                  }
                   autoFocus
                   spellCheck={false}
+
                   autoComplete="off"
                   className="flex-1 bg-transparent border-none outline-none text-[#F0F3EC] text-sm sm:text-base font-mono placeholder:text-[#555A51]"
                 />
