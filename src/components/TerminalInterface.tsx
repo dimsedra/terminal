@@ -202,13 +202,13 @@ export function TerminalInterface() {
       let promptToSend = trimmed;
 
       if (cmdLower === "/projects" || cmdLower === "/project") {
-        promptToSend = "Could you give me a conversational overview and synthesis of Eds's featured projects based on the portfolio data?";
+        promptToSend = "Can you casually introduce Eds's featured projects and share what he's been building recently?";
       } else if (cmdLower === "/skills") {
-        promptToSend = "Could you give me a synthesized breakdown of Eds's technical capabilities, stack, and AI tooling?";
+        promptToSend = "What are Eds's core engineering strengths and the tech stack he enjoys working with the most?";
       } else if (cmdLower === "/about") {
-        promptToSend = "Tell me about Eds's background, role, and what drives his engineering work.";
+        promptToSend = "Can you tell me a bit about Eds, his mindset as a systems thinker, and what drives his engineering work?";
       } else if (cmdLower === "/contact") {
-        promptToSend = "How can I get in touch with Eds or connect with him?";
+        promptToSend = "What's the best way to get in touch, reach out, or collaborate with Eds?";
       } else if (cmdLower === "/help") {
         const payload: OutputPayload = {
           type: "markdown",

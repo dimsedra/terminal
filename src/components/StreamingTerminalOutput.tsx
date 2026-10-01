@@ -176,7 +176,7 @@ export function StreamingTerminalOutput({
         </strong>
       ),
       em: ({ children, ...props }: React.ComponentProps<"em">) => (
-        <em className="text-[#8B9285] not-italic text-xs block pt-1" {...props}>
+        <em className="text-[#A2A99B] italic text-sm" {...props}>
           {children}
         </em>
       ),
