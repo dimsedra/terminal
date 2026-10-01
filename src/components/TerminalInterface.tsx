@@ -295,7 +295,7 @@ export function TerminalInterface() {
             >
               <div
                 ref={contentWrapperRef}
-                className="w-full px-6 sm:px-8 py-5 space-y-4 pb-24"
+                className="w-full px-6 sm:px-8 py-5 space-y-4"
               >
                 {history.map((msg) => {
                   const isStreaming = msg.id === activeStreamingId;
@@ -325,7 +325,7 @@ export function TerminalInterface() {
                     </div>
                   );
                 })}
-                <div ref={bottomRef} className="h-1" />
+                <div ref={bottomRef} />
               </div>
             </div>
 
