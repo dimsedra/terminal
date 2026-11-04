@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useChat } from "@ai-sdk/react";
 import { SpinningAsciiEds } from "./SpinningAsciiEds";
 import { AsciiBackground } from "./AsciiBackground";
-import { ThemeId, parseThemeArgument, getThemesMarkdown } from "@/content/themes";
+import { ThemeId, THEME_LIST, parseThemeArgument, getThemesMarkdown } from "@/content/themes";
 import { PORTFOLIO_DATA } from "@/data/portfolioData";
 import { StreamingTerminalOutput, OutputPayload } from "./StreamingTerminalOutput";
 import { AiNoticeToast } from "./AiNoticeToast";
@@ -37,9 +37,9 @@ export function TerminalInterface() {
       if (savedSession === "true") {
         setIsAiSession(true);
       }
-      const savedTheme = sessionStorage.getItem("eds_terminal_theme") as ThemeId;
-      if (savedTheme) {
-        setCurrentTheme(savedTheme);
+      const savedTheme = sessionStorage.getItem("eds_terminal_theme");
+      if (savedTheme && THEME_LIST.some((t) => t.id === savedTheme)) {
+        setCurrentTheme(savedTheme as ThemeId);
       }
     } catch (e) {
       // ignore
