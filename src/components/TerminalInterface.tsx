@@ -3,6 +3,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useChat } from "@ai-sdk/react";
 import { SpinningAsciiEds } from "./SpinningAsciiEds";
+import { AsciiBackground } from "./AsciiBackground";
+import { ThemeId, parseThemeArgument, getThemesMarkdown } from "@/content/themes";
 import { PORTFOLIO_DATA } from "@/data/portfolioData";
 import { StreamingTerminalOutput, OutputPayload } from "./StreamingTerminalOutput";
 import { AiNoticeToast } from "./AiNoticeToast";
@@ -15,6 +17,7 @@ export function TerminalInterface() {
   const [activeAiOutputId, setActiveAiOutputId] = useState<string | null>(null);
   const [showAiNotice, setShowAiNotice] = useState(false);
   const [isAiSession, setIsAiSession] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState<ThemeId>("default");
   const hasShownNoticeRef = useRef(false);
   const lastAssistantIdRef = useRef<string | null>(null);
   const isAwaitingNewAssistantRef = useRef(false);
@@ -33,6 +36,10 @@ export function TerminalInterface() {
       const savedSession = sessionStorage.getItem("eds_is_ai_session");
       if (savedSession === "true") {
         setIsAiSession(true);
+      }
+      const savedTheme = sessionStorage.getItem("eds_terminal_theme") as ThemeId;
+      if (savedTheme) {
+        setCurrentTheme(savedTheme);
       }
     } catch (e) {
       // ignore
@@ -229,10 +236,46 @@ export function TerminalInterface() {
         promptToSend = "Can you tell me a bit about Eds, his mindset as a systems thinker, and what drives his engineering work?";
       } else if (cmdLower === "/contact") {
         promptToSend = "What's the best way to get in touch, reach out, or collaborate with Eds?";
+      } else if (cmdLower === "/themes" || cmdLower.startsWith("/themes ")) {
+        const themeArg = trimmed.slice(7).trim();
+        if (!themeArg) {
+          const payload: OutputPayload = {
+            type: "markdown",
+            content: getThemesMarkdown(currentTheme),
+          };
+          appendInteraction(trimmed, payload);
+          setInputVal("");
+          return;
+        }
+
+        const parseResult = parseThemeArgument(themeArg);
+        if (parseResult.success) {
+          setCurrentTheme(parseResult.theme.id);
+          try {
+            sessionStorage.setItem("eds_terminal_theme", parseResult.theme.id);
+          } catch (e) {
+            // ignore
+          }
+          const payload: OutputPayload = {
+            type: "markdown",
+            content: `Switched background theme to **${parseResult.theme.name}**.\n\nType \`/themes default\` or click \`/themes\` to change anytime.`,
+          };
+          appendInteraction(trimmed, payload);
+          setInputVal("");
+          return;
+        }
+
+        const payload: OutputPayload = {
+          type: "markdown",
+          content: `### Theme Error\n\n${parseResult.error}`,
+        };
+        appendInteraction(trimmed, payload);
+        setInputVal("");
+        return;
       } else if (cmdLower === "/help") {
         const payload: OutputPayload = {
           type: "markdown",
-          content: `### Interactive AI Session Commands\n\n- \`/exit\` — Exit AI session and return to terminal home\n- \`/projects\` — Ask AI to synthesize Eds's projects\n- \`/skills\` — Ask AI to synthesize technical capabilities\n- \`/about\` — Ask AI about Eds's background\n- \`/contact\` — Ask AI for touchpoints\n\n_Or simply ask any question directly in everyday language._`,
+          content: `### Interactive AI Session Commands\n\n- \`/exit\` — Exit AI session and return to terminal home\n- \`/projects\` — Ask AI to synthesize Eds's projects\n- \`/skills\` — Ask AI to synthesize technical capabilities\n- \`/about\` — Ask AI about Eds's background\n- \`/contact\` — Ask AI for touchpoints\n- \`/themes\` — Switch ambient ASCII background theme\n\n_Or simply ask any question directly in everyday language._`,
         };
         appendInteraction(trimmed, payload);
         setInputVal("");
@@ -267,6 +310,33 @@ export function TerminalInterface() {
       payload = { type: "skills" };
     } else if (cmdLower === "/contact") {
       payload = { type: "contact" };
+    } else if (cmdLower === "/themes" || cmdLower.startsWith("/themes ")) {
+      const themeArg = trimmed.slice(7).trim();
+      if (!themeArg) {
+        payload = {
+          type: "markdown",
+          content: getThemesMarkdown(currentTheme),
+        };
+      } else {
+        const parseResult = parseThemeArgument(themeArg);
+        if (parseResult.success) {
+          setCurrentTheme(parseResult.theme.id);
+          try {
+            sessionStorage.setItem("eds_terminal_theme", parseResult.theme.id);
+          } catch (e) {
+            // ignore
+          }
+          payload = {
+            type: "markdown",
+            content: `Switched background theme to **${parseResult.theme.name}**.\n\nType \`/themes default\` or click \`/themes\` to change anytime.`,
+          };
+        } else {
+          payload = {
+            type: "markdown",
+            content: `### Theme Error\n\n${parseResult.error}`,
+          };
+        }
+      }
     } else {
       payload = {
         type: "text",
@@ -309,10 +379,13 @@ export function TerminalInterface() {
   return (
     <div
       onClick={handleContainerClick}
-      className="w-full h-[100dvh] flex flex-col bg-[#0A0A0A] cursor-text select-text overflow-hidden"
+      className="relative w-full h-[100dvh] flex flex-col bg-[#0A0A0A] cursor-text select-text overflow-hidden"
     >
+      {/* Ambient Animated ASCII Background */}
+      <AsciiBackground themeId={currentTheme} />
+
       {/* Top Title Bar */}
-      <header className="shrink-0 w-full px-3 sm:px-6 py-2.5 bg-[#050505] border-b border-[#171717] select-none flex items-center justify-between z-20">
+      <header className="shrink-0 w-full px-3 sm:px-6 py-2.5 bg-[#050505]/90 backdrop-blur-xs border-b border-[#171717] select-none flex items-center justify-between z-20">
         <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
           <div className="flex items-center space-x-1.5 shrink-0">
             <div className="w-2.5 h-2.5 rounded-full bg-[#262626]" />
@@ -352,7 +425,7 @@ export function TerminalInterface() {
       {/* Main Workspace */}
       {!isFase2 ? (
         /* FASE 1: Welcoming Landing View */
-        <div className="flex-1 min-h-0 flex flex-col justify-between overflow-hidden">
+        <div className="relative flex-1 min-h-0 flex flex-col justify-between overflow-hidden z-10">
           <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col justify-center items-center px-4 py-8">
             <div className="max-w-2xl w-full text-center space-y-4">
               {/* Large Centered 3D Spinning ASCII EDS */}
@@ -372,14 +445,14 @@ export function TerminalInterface() {
                 </p>
 
                 <div className="flex flex-wrap justify-center gap-2 pt-2 text-xs sm:text-sm">
-                  {["/chat", "/projects", "/about", "/skills", "/contact"].map((cmd) => (
+                  {["/chat", "/projects", "/about", "/skills", "/contact", "/themes"].map((cmd) => (
                     <button
                       key={cmd}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleCommandExecution(cmd);
                       }}
-                      className="px-3 py-1 bg-[#141414] text-[#9AE6B4] hover:bg-[#1F1F1F] border border-[#262626] rounded-md transition-colors cursor-pointer"
+                      className="px-3 py-1 bg-[#141414]/90 text-[#9AE6B4] hover:bg-[#1F1F1F] border border-[#262626] rounded-md transition-colors cursor-pointer"
                     >
                       {cmd}
                     </button>
@@ -390,7 +463,7 @@ export function TerminalInterface() {
           </div>
 
           {/* Bottom Input Prompt for Fase 1 */}
-          <footer className="h-[52px] shrink-0 w-full bg-[#050505] border-t border-[#171717] px-4 sm:px-8 flex items-center z-10">
+          <footer className="h-[52px] shrink-0 w-full bg-[#050505]/90 backdrop-blur-xs border-t border-[#171717] px-4 sm:px-8 flex items-center z-10">
             <div className="max-w-5xl mx-auto flex items-center space-x-3 w-full">
               <span className="text-[#9AE6B4] font-bold text-base sm:text-lg select-none">❯</span>
               <input
@@ -404,7 +477,7 @@ export function TerminalInterface() {
                     inputRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
                   });
                 }}
-                placeholder="Type /chat, /projects, or /help..."
+                placeholder="Type /chat, /projects, /themes, or /help..."
                 autoFocus
                 spellCheck={false}
 
@@ -419,7 +492,7 @@ export function TerminalInterface() {
         </div>
       ) : (
         /* FASE 2: Active Workspace */
-        <div className="relative flex-1 min-h-0 flex overflow-hidden w-full">
+        <div className="relative flex-1 min-h-0 flex overflow-hidden w-full z-10">
           {/* Backdrop on Mobile when Sidebar is Open */}
           {sidebarOpen && (
             <div
@@ -430,7 +503,7 @@ export function TerminalInterface() {
 
           {/* Left Sidebar: Offcanvas drawer on mobile, static side column on desktop */}
           {sidebarOpen && (
-            <aside className="fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] sm:static sm:z-auto sm:w-64 md:w-72 bg-[#080808] border-r border-[#171717] flex flex-col justify-between select-none shrink-0 h-full transition-all duration-200 shadow-2xl sm:shadow-none">
+            <aside className="fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] sm:static sm:z-auto sm:w-64 md:w-72 bg-[#080808]/90 backdrop-blur-xs border-r border-[#171717] flex flex-col justify-between select-none shrink-0 h-full transition-all duration-200 shadow-2xl sm:shadow-none">
               <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
                 {/* Mobile Drawer Header with Close Button */}
                 <div className="flex items-center justify-between sm:hidden pb-2 border-b border-[#171717]">
@@ -515,7 +588,7 @@ export function TerminalInterface() {
           )}
 
           {/* Right Main CLI Pane (Always full width on mobile) */}
-          <main className="flex-1 min-h-0 min-w-0 flex flex-col bg-[#0A0A0A] w-full">
+          <main className="flex-1 min-h-0 min-w-0 flex flex-col bg-[#0A0A0A]/85 backdrop-blur-xs w-full">
             {/* The Bounded Chat Viewport */}
             <div
               ref={scrollContainerRef}
@@ -558,7 +631,7 @@ export function TerminalInterface() {
             </div>
 
             {/* Input Prompt Bar for Fase 2 */}
-            <footer className="h-[52px] shrink-0 w-full bg-[#050505] border-t border-[#171717] px-3.5 sm:px-8 flex items-center z-10">
+            <footer className="h-[52px] shrink-0 w-full bg-[#050505]/90 backdrop-blur-xs border-t border-[#171717] px-3.5 sm:px-8 flex items-center z-10">
               <div className="w-full flex items-center space-x-2.5 sm:space-x-3">
                 <span className="text-[#9AE6B4] font-bold text-sm sm:text-base select-none shrink-0">❯</span>
                 <input
@@ -576,7 +649,7 @@ export function TerminalInterface() {
                   placeholder={
                     isAiSession
                       ? "Ask anything (or /exit to return)..."
-                      : "Type /chat, /projects, or /help..."
+                      : "Type /chat, /projects, /themes, or /help..."
                   }
                   autoFocus
                   spellCheck={false}
