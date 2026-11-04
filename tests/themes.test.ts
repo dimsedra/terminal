@@ -7,7 +7,7 @@ import {
   type ThemeId,
 } from "../src/content/themes.ts";
 
-test("Theme Registry - Core Invariants", () => {
+test("Theme Registry - maintains baseline default theme and non-empty metadata across all registered themes", () => {
   assert.ok(THEME_LIST.length >= 4, "Should have at least 4 registered themes");
   
   const defaultTheme = THEME_LIST.find((t) => t.id === "default");
@@ -22,7 +22,7 @@ test("Theme Registry - Core Invariants", () => {
   }
 });
 
-test("Theme Parser - Normal Path", () => {
+test("Theme Parser - resolves canonical theme ID and shorthand aliases to matching theme", () => {
   // Exact ID
   const r1 = parseThemeArgument("autumn-pagoda-maples");
   assert.equal(r1.success, true);
@@ -56,7 +56,7 @@ test("Theme Parser - Normal Path", () => {
   }
 });
 
-test("Theme Parser - Boundaries and Edge Cases", () => {
+test("Theme Parser - trims whitespace, ignores casing, and resolves numbered shortcuts", () => {
   // Case-insensitivity & whitespace trimming
   const r1 = parseThemeArgument("   PAGODA   ");
   assert.equal(r1.success, true);
@@ -84,7 +84,7 @@ test("Theme Parser - Boundaries and Edge Cases", () => {
   }
 });
 
-test("Theme Parser - Error Path", () => {
+test("Theme Parser - rejects unrecognized theme input with error referencing /themes", () => {
   const r = parseThemeArgument("matrix-super-rain-404");
   assert.equal(r.success, false);
   if (!r.success) {
@@ -93,7 +93,7 @@ test("Theme Parser - Error Path", () => {
   }
 });
 
-test("Themes Markdown Output - Formatting & Interactive Chips", () => {
+test("Themes Markdown - generates clickable command chips and active state marker", () => {
   const md = getThemesMarkdown("default");
   assert.ok(md.includes("### Ambient Background Themes"), "Should have title");
   assert.ok(md.includes("`/themes autumn`"), "Should contain clickable command chip for autumn");

@@ -313,30 +313,36 @@ export function TerminalInterface() {
     } else if (cmdLower === "/themes" || cmdLower.startsWith("/themes ")) {
       const themeArg = trimmed.slice(7).trim();
       if (!themeArg) {
-        payload = {
+        appendInteraction(trimmed, {
           type: "markdown",
           content: getThemesMarkdown(currentTheme),
-        };
-      } else {
-        const parseResult = parseThemeArgument(themeArg);
-        if (parseResult.success) {
-          setCurrentTheme(parseResult.theme.id);
-          try {
-            sessionStorage.setItem("eds_terminal_theme", parseResult.theme.id);
-          } catch (e) {
-            // ignore
-          }
-          payload = {
-            type: "markdown",
-            content: `Switched background theme to **${parseResult.theme.name}**.\n\nType \`/themes default\` or click \`/themes\` to change anytime.`,
-          };
-        } else {
-          payload = {
-            type: "markdown",
-            content: `### Theme Error\n\n${parseResult.error}`,
-          };
-        }
+        });
+        setInputVal("");
+        return;
       }
+
+      const parseResult = parseThemeArgument(themeArg);
+      if (parseResult.success) {
+        setCurrentTheme(parseResult.theme.id);
+        try {
+          sessionStorage.setItem("eds_terminal_theme", parseResult.theme.id);
+        } catch (e) {
+          // ignore
+        }
+        appendInteraction(trimmed, {
+          type: "markdown",
+          content: `Switched background theme to **${parseResult.theme.name}**.\n\nType \`/themes default\` or click \`/themes\` to change anytime.`,
+        });
+        setInputVal("");
+        return;
+      }
+
+      appendInteraction(trimmed, {
+        type: "markdown",
+        content: `### Theme Error\n\n${parseResult.error}`,
+      });
+      setInputVal("");
+      return;
     } else {
       payload = {
         type: "text",
