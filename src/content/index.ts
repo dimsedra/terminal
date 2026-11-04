@@ -3,3 +3,4 @@ export * from "./author";
 export * from "./skills";
 export * from "./projects";
 export * from "./commands";
+export * from "./themes";
