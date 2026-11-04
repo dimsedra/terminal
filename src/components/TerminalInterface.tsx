@@ -594,7 +594,7 @@ export function TerminalInterface() {
           )}
 
           {/* Right Main CLI Pane (Always full width on mobile) */}
-          <main className="flex-1 min-h-0 min-w-0 flex flex-col bg-[#0A0A0A]/85 backdrop-blur-xs w-full">
+          <main className="flex-1 min-h-0 min-w-0 flex flex-col bg-transparent w-full">
             {/* The Bounded Chat Viewport */}
             <div
               ref={scrollContainerRef}
