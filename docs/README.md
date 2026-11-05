@@ -4,10 +4,12 @@ Shared memory and architectural index for `eds-terminal-portfolio`.
 
 ## Intents
 
+- [GitHub Contributions Visualization in /about](file:///home/eds/Code/terminal/docs/intent/20261105_github_contributions.md) (2026-11-05): Green ASCII contribution grid in `/about` with responsive mobile windowing and cached Vercel endpoint.
 - [Animated ASCII Background Themes](file:///home/eds/Code/terminal/docs/intent/20261105_ascii_background_themes.md) (2026-11-05): Ambient animated ASCII backgrounds with live `/themes` switching.
 
 ## Blueprints
 
+- [GitHub Contributions Visualization in /about](file:///home/eds/Code/terminal/docs/blueprint/20261105_github_contributions.md) (2026-11-05): Contracts for GitHub GraphQL serverless route, ASCII grid formatter, and `/about` integration.
 - [Animated ASCII Background Themes](file:///home/eds/Code/terminal/docs/blueprint/20261105_ascii_background_themes.md) (2026-11-05): Technical contracts for ambient background layer, theme registry, and `/themes` command integration.
 
 ## Design

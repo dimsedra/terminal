@@ -42,6 +42,15 @@ The portfolio is built as an authentic developer terminal and agentic CLI interf
   - Centered monospace `<pre>` container cycling through character frames.
 - **Interactive Command Chips**:
   - Formatted code blocks starting with `/` automatically render as clickable chips with border highlights on hover.
+- **GitHub Contributions ASCII Grid (`/about`)**:
+  - Rendered as a monospace 7-row (Sunday–Saturday) character grid directly below the author bio in `/about`.
+  - Uses character density paired with GitHub's dark-mode green hierarchy:
+    - `NONE`: `·` in `#3F3F46` (dim terminal zinc)
+    - `FIRST_QUARTILE`: `░` in `#0e4429` (deep forest green)
+    - `SECOND_QUARTILE`: `▒` in `#006d32` (medium GitHub green)
+    - `THIRD_QUARTILE`: `▓` in `#26a641` (bright GitHub green)
+    - `FOURTH_QUARTILE`: `█` in `#39d353` (vibrant neon green)
+  - Responsive windowing: slices weeks from the right so mobile viewports display the most recent weeks that fit cleanly (e.g. 14 weeks on `<640px`, 26 weeks on tablet, 52 weeks on desktop) without horizontal scrolling.
 
 ## Non-Goals
 
