@@ -54,7 +54,7 @@ test("GitHub Contributions API - returns parsed totalContributions and weeks wit
     assert.equal(capturedUrl, "https://api.github.com/graphql");
     assert.equal(capturedOptions.next?.revalidate, 3600);
     const requestBody = JSON.parse(String(capturedOptions.body));
-    assert.equal(requestBody.variables.login, "edra-dev");
+    assert.equal(requestBody.variables.login, "dimsedra");
   } finally {
     if (originalToken === undefined) {
       delete process.env.GITHUB_TOKEN;

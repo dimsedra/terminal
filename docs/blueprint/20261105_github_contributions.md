@@ -54,8 +54,8 @@ To incorporate the contribution visualization:
 - Input: HTTP GET to `/api/github-contributions`.
 - Behavior:
   - Validates presence of `GITHUB_TOKEN`. If missing, returns `{ totalContributions: 0, weeks: [], error: "TOKEN_NOT_CONFIGURED" }` with HTTP 200 to allow graceful fallback rendering on client.
-  - Executes GitHub GraphQL query for user `edra-dev` (from `author.links.github`):
-    `user(login: "edra-dev") { contributionsCollection { contributionCalendar { totalContributions weeks { contributionDays { contributionCount date weekday contributionLevel } } } } }`.
+  - Executes GitHub GraphQL query for user `dimsedra` (from `author.links.github`):
+    `user(login: "dimsedra") { contributionsCollection { contributionCalendar { totalContributions weeks { contributionDays { contributionCount date weekday contributionLevel } } } } }`.
   - Configures `next: { revalidate: 3600 }` to cache the upstream response in Vercel Edge for 1 hour.
 - Output: JSON `{ totalContributions: number, weeks: Array<{ contributionDays: Array<{ contributionCount: number, date: string, weekday: number, contributionLevel: string }> }>, error?: string }`.
 - Failure: Network errors or GitHub API errors return `{ totalContributions: 0, weeks: [], error: "UPSTREAM_ERROR" }` without throwing unhandled exceptions.

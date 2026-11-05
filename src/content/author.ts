@@ -7,7 +7,7 @@ export const author: AuthorInfo = {
   bio: "Passionate about building refined developer experiences, agentic workflows, and modern web architectures. Focused on disciplined simplicity, pattern recognition, and bridging human intuition with intelligent systems.",
   location: "Indonesia",
   links: {
-    github: "https://github.com/edra-dev",
+    github: "https://github.com/dimsedra",
     linkedin: "https://linkedin.com/in/dimas-edra",
     email: "mailto:edra.contact@example.com",
   },
