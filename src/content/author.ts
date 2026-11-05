@@ -1,4 +1,4 @@
-import { AuthorInfo } from "./types";
+import type { AuthorInfo } from "./types";
 
 export const author: AuthorInfo = {
   name: "Dimas Edra Ar Rafi",
