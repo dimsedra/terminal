@@ -1,267 +1,192 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-
-interface Point3D {
-  x: number;
-  y: number;
-  z: number;
-  nx: number;
-  ny: number;
-  nz: number;
-  isFront: boolean;
-}
+import React, { useEffect, useRef } from "react";
+import { Grid, palette, gradient, rotX, rotY } from "ascii-magic-art/lib/kit.js";
+import { frameHTML } from "ascii-magic-art/runtime/player.js";
 
 interface SpinningAsciiEdsProps {
   compact?: boolean;
 }
 
+const FONT7: Record<string, string> = {
+  E: "#####|#....|#....|####.|#....|#....|#####",
+  D: "####.|#...#|#...#|#...#|#...#|#...#|####.",
+  S: ".###.|#...#|#....|.###.|....#|#...#|.###.",
+  " ": ".....|.....|.....|.....|.....|.....|.....",
+};
+
+const GL7: Record<string, string[]> = {};
+for (const k in FONT7) {
+  GL7[k] = FONT7[k].split("|");
+}
+
+function textMask(word: string, sx = 1, sy = 1, gap = 2) {
+  const cw = 5 * sx + gap;
+  const w = word.length * cw - gap;
+  const h = 7 * sy;
+  const m = new Uint8Array(w * h);
+
+  [...word].forEach((c, k) => {
+    const gl = GL7[c] || GL7[" "];
+    for (let j = 0; j < 7; j++) {
+      for (let i = 0; i < 5; i++) {
+        if (gl[j][i] === "#") {
+          for (let a = 0; a < sy; a++) {
+            for (let b = 0; b < sx; b++) {
+              const p = k * cw + i * sx + b + (j * sy + a) * w;
+              m[p] = 1;
+            }
+          }
+        }
+      }
+    }
+  });
+
+  return {
+    w,
+    h,
+    at: (x: number, y: number) => (x >= 0 && y >= 0 && x < w && y < h ? m[x + y * w] : 0),
+  };
+}
+
+// Brand terminal colors: Mint green face lighting with deep emerald side extrusion
+const FACE = gradient(["#1C4532", "#276749", "#48BB78", "#9AE6B4", "#D1FAE5"], 8);
+const SIDE = gradient(["#0A1A12", "#133023", "#22543D", "#2F855A", "#48BB78"], 8);
+const BRAND_PALETTE = palette([...FACE, ...SIDE]);
+const SH = "░▒▓█";
+
 export function SpinningAsciiEds({ compact = false }: SpinningAsciiEdsProps) {
-  const [frame, setFrame] = useState<string>("");
-  const animRef = useRef<number | null>(null);
+  const preRef = useRef<HTMLPreElement>(null);
 
   useEffect(() => {
-    // 7x9 clean block letter bitmaps for "E D S" with equal column widths
-    const letterE = [
-      "1111111",
-      "1100000",
-      "1100000",
-      "1111110",
-      "1111110",
-      "1100000",
-      "1100000",
-      "1111111",
-      "1111111",
-    ];
+    const cols = compact ? 38 : 54;
+    const rows = compact ? 12 : 16;
+    const g = new Grid(cols, rows);
 
-    const letterD = [
-      "1111110",
-      "1100011",
-      "1100001",
-      "1100001",
-      "1100001",
-      "1100001",
-      "1100011",
-      "1111110",
-      "1111110",
-    ];
+    const mask = textMask("EDS", 1, 1, compact ? 1 : 2);
+    const w = mask.w;
+    const h = mask.h;
+    const depth = 1.6;
 
-    const letterS = [
-      "0111111",
-      "1100001",
-      "1100000",
-      "0111110",
-      "0000011",
-      "0000011",
-      "1000011",
-      "1111110",
-      "0111100",
-    ];
+    // Sample points on exposed voxel faces
+    type Ptr = [number, number, number, [number, number, number], number];
+    const pts: Ptr[] = [];
+    const samples = 4;
 
-    const letters = [
-      { map: letterE, offsetX: -11 },
-      { map: letterD, offsetX: -0.5 },
-      { map: letterS, offsetX: 10 },
-    ];
-
-    const points: Point3D[] = [];
-    const subStep = 0.3; // Dense sampling so letters render solid without gaps
-    const frontZ = 1.0;
-    const backZ = -1.0;
-    const depthSlices = 6;
-
-    letters.forEach(({ map, offsetX }) => {
-      const height = map.length;
-      const width = map[0].length;
-
-      for (let r = 0; r < height; r++) {
-        for (let c = 0; c < width; c++) {
-          if (map[r][c] !== "1") continue;
-
-          // 1. Denser front face points
-          for (let sc = 0; sc < 1; sc += subStep) {
-            for (let sr = 0; sr < 1; sr += subStep) {
-              points.push({
-                x: c + sc - width / 2 + offsetX,
-                y: r + sr - height / 2,
-                z: frontZ,
-                nx: 0,
-                ny: 0,
-                nz: 1,
-                isFront: true,
-              });
-            }
-          }
-
-          // 2. Extrusion edge walls along depth
-          const isTop = r === 0 || map[r - 1][c] !== "1";
-          const isBottom = r === height - 1 || map[r + 1][c] !== "1";
-          const isLeft = c === 0 || map[r][c - 1] !== "1";
-          const isRight = c === width - 1 || map[r][c + 1] !== "1";
-
-          if (!isTop && !isBottom && !isLeft && !isRight) continue;
-
-          for (let s = 1; s <= depthSlices; s++) {
-            const z = frontZ - (s / depthSlices) * (frontZ - backZ);
-            for (let sub = 0; sub < 1; sub += subStep) {
-              if (isTop) {
-                points.push({
-                  x: c + sub - width / 2 + offsetX,
-                  y: r - height / 2,
-                  z,
-                  nx: 0,
-                  ny: -1,
-                  nz: 0,
-                  isFront: false,
-                });
-              }
-              if (isBottom) {
-                points.push({
-                  x: c + sub - width / 2 + offsetX,
-                  y: r + 1 - height / 2,
-                  z,
-                  nx: 0,
-                  ny: 1,
-                  nz: 0,
-                  isFront: false,
-                });
-              }
-              if (isLeft) {
-                points.push({
-                  x: c - width / 2 + offsetX,
-                  y: r + sub - height / 2,
-                  z,
-                  nx: -1,
-                  ny: 0,
-                  nz: 0,
-                  isFront: false,
-                });
-              }
-              if (isRight) {
-                points.push({
-                  x: c + 1 - width / 2 + offsetX,
-                  y: r + sub - height / 2,
-                  z,
-                  nx: 1,
-                  ny: 0,
-                  nz: 0,
-                  isFront: false,
-                });
-              }
-            }
-          }
-        }
-      }
-    });
-
-    const bufferW = compact ? 42 : 58;
-    const bufferH = compact ? 13 : 16;
-    const fontAspect = 1.95; // Compensates for terminal character cells being taller than wide
-
-    // High contrast character ramps
-    const frontChars = ["#", "#", "#", "#", "#"];
-    const sideChars = [".", ":", "-", "=", "+", "*"];
-
-    // Directional light from top-right-front
-    const lx = 0.45;
-    const ly = -0.55;
-    const lz = 0.7;
-
-    const distance = 28;
-    const scale = compact ? 26 : 38;
-
-    const startTime = performance.now();
-
-    const render = () => {
-      const elapsed = (performance.now() - startTime) * 0.001;
-
-      // Oscillating floating sway keeps text permanently front-facing and readable
-      const ay = Math.sin(elapsed * 1.1) * 0.38;
-      const ax = 0.16 + Math.cos(elapsed * 0.8) * 0.08;
-
-      const cosY = Math.cos(ay);
-      const sinY = Math.sin(ay);
-      const cosX = Math.cos(ax);
-      const sinX = Math.sin(ax);
-
-      const output: string[] = new Array(bufferW * bufferH).fill(" ");
-      const zBuffer: number[] = new Array(bufferW * bufferH).fill(-Infinity);
-
-      for (let i = 0; i < points.length; i++) {
-        const p = points[i];
-
-        // 3D rotation
-        const x1 = p.x * cosY + p.z * sinY;
-        const z1 = -p.x * sinY + p.z * cosY;
-        const y1 = p.y * cosX - z1 * sinX;
-        const z2 = p.y * sinX + z1 * cosX;
-
-        // Normal rotation
-        const nx1 = p.nx * cosY + p.nz * sinY;
-        const nz1 = -p.nx * sinY + p.nz * cosY;
-        const ny1 = p.ny * cosX - nz1 * sinX;
-        const nz2 = p.ny * sinX + nz1 * cosX;
-
-        // Backface culling: discard rear-facing polygons
-        if (nz2 < -0.05) continue;
-
-        const ooz = 1 / (distance + z2);
-        const xp = Math.floor(bufferW / 2 + x1 * scale * ooz * fontAspect);
-        const yp = Math.floor(bufferH / 2 + y1 * scale * ooz);
-
-        if (xp < 0 || xp >= bufferW || yp < 0 || yp >= bufferH) continue;
-
-        const idx = xp + yp * bufferW;
-        // Subtle depth bias for front faces to eliminate surface-edge z-fighting
-        const effZ = p.isFront ? ooz + 0.0005 : ooz;
-
-        if (effZ > zBuffer[idx]) {
-          zBuffer[idx] = effZ;
-
-          const lum = Math.max(0, nx1 * lx + ny1 * ly + nz2 * lz);
-
-          if (p.isFront) {
-            const charIdx = Math.min(
-              frontChars.length - 1,
-              Math.max(0, Math.floor(lum * frontChars.length))
-            );
-            output[idx] = frontChars[charIdx] || "#";
-          } else {
-            const charIdx = Math.min(
-              sideChars.length - 1,
-              Math.max(0, Math.floor((lum * 0.7 + 0.3) * sideChars.length))
-            );
-            output[idx] = sideChars[charIdx] || ":";
-          }
-        }
-      }
-
-      let frameStr = "";
-      for (let y = 0; y < bufferH; y++) {
-        frameStr += output.slice(y * bufferW, (y + 1) * bufferW).join("") + "\n";
-      }
-
-      setFrame(frameStr);
-      animRef.current = requestAnimationFrame(render);
+    const addPoint = (
+      fx: number,
+      fy: number,
+      fz: number,
+      normal: [number, number, number],
+      isFront: number
+    ) => {
+      pts.push([fx - w / 2, h / 2 - fy, fz, normal, isFront]);
     };
 
-    animRef.current = requestAnimationFrame(render);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        if (!mask.at(x, y)) continue;
+
+        for (let i = 0; i < samples; i++) {
+          for (let j = 0; j < samples; j++) {
+            const u = (i + 0.5) / samples;
+            const v = (j + 0.5) / samples;
+            addPoint(x + u, y + v, depth / 2, [0, 0, 1], 1);
+            addPoint(x + u, y + v, -depth / 2, [0, 0, -1], 1);
+
+            const zOffset = (v - 0.5) * depth;
+            if (!mask.at(x - 1, y)) addPoint(x, y + u, zOffset, [-1, 0, 0], 0);
+            if (!mask.at(x + 1, y)) addPoint(x + 1, y + u, zOffset, [1, 0, 0], 0);
+            if (!mask.at(x, y - 1)) addPoint(x + u, y, zOffset, [0, 1, 0], 0);
+            if (!mask.at(x, y + 1)) addPoint(x + u, y + 1, zOffset, [0, -1, 0], 0);
+          }
+        }
+      }
+    }
+
+    const lightDir = [0.32, 0.42, 0.85];
+    const scale = compact ? 1.85 : 2.5;
+    const startTime = performance.now();
+    let animId = 0;
+
+    const render = (time: number) => {
+      const elapsed = (time - startTime) * 0.001;
+
+      // Oscillating 3D sway from extruded-word-spin
+      const ay = Math.sin(elapsed * 0.9) * 0.62;
+      const ax = 0.22 + Math.sin(elapsed * 0.6) * 0.1;
+
+      g.clear();
+
+      for (let i = 0; i < pts.length; i++) {
+        const [px, py, pz, normVec, isFace] = pts[i];
+
+        const rotP = rotX(rotY([px, py, pz], ay), ax);
+        const rotN = rotX(rotY(normVec, ay), ax);
+
+        // Discard rear-facing faces
+        if (rotN[2] < -0.05) continue;
+
+        const depthFactor = 48 / (48 - rotP[2]);
+        const sx = cols / 2 + rotP[0] * scale * depthFactor;
+        const sy = rows / 2 - rotP[1] * scale * 0.5 * depthFactor * 1.15;
+
+        const lit =
+          0.2 +
+          0.8 *
+            Math.max(
+              0,
+              rotN[0] * lightDir[0] + rotN[1] * lightDir[1] + rotN[2] * lightDir[2]
+            );
+
+        const colorIndex = Math.min(7, Math.floor(lit * 7.99));
+        const shadeIndex = Math.min(3, Math.floor(lit * 4));
+
+        g.setZ(
+          sx,
+          sy,
+          rotP[2],
+          SH[shadeIndex],
+          isFace ? "01234567"[colorIndex] : "89abcdef"[colorIndex]
+        );
+      }
+
+      if (preRef.current) {
+        preRef.current.innerHTML = frameHTML(g.frame(), BRAND_PALETTE);
+      }
+
+      animId = requestAnimationFrame(render);
+    };
+
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReducedMotion) {
+      render(startTime);
+      cancelAnimationFrame(animId);
+      return;
+    }
+
+    animId = requestAnimationFrame(render);
     return () => {
-      if (animRef.current) cancelAnimationFrame(animRef.current);
+      if (animId) cancelAnimationFrame(animId);
     };
   }, [compact]);
 
   return (
     <div
-      className={`select-none flex justify-center items-center py-2 text-[#9AE6B4] font-mono tracking-wider transition-all max-w-full overflow-hidden ${
+      className={`select-none flex justify-center items-center py-2 font-mono transition-all max-w-full overflow-hidden ${
         compact
           ? "text-[8px] sm:text-[9px] leading-[1.08]"
-          : "text-[9.5px] sm:text-xs md:text-sm leading-[1.15]"
+          : "text-[9.5px] sm:text-xs md:text-sm leading-[1.12]"
       }`}
     >
-      <pre className="font-mono whitespace-pre opacity-90 transition-opacity">
-        {frame}
-      </pre>
+      <pre
+        ref={preRef}
+        aria-label="EDS 3D ASCII Logo"
+        className="font-mono whitespace-pre transition-opacity"
+      />
     </div>
   );
 }
