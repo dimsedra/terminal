@@ -429,45 +429,47 @@ export function TerminalInterface() {
       {!isFase2 ? (
         /* FASE 1: Welcoming Landing View */
         <div className="relative flex-1 min-h-0 flex flex-col justify-between overflow-hidden z-10">
-          <AsciiBackground themeId={currentTheme} />
-          <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col justify-center items-center px-4 py-8">
-            <div className="max-w-2xl w-full text-center space-y-4">
-              {/* Large Centered 3D Spinning ASCII EDS */}
-              <div className="py-2">
-                <SpinningAsciiEds compact={false} />
-              </div>
+          <div className="relative flex-1 min-h-0 w-full overflow-hidden">
+            <AsciiBackground themeId={currentTheme} />
+            <div className="relative z-10 h-full overflow-y-auto overflow-x-hidden flex flex-col justify-center items-center px-4 py-8">
+              <div className="max-w-2xl w-full text-center space-y-4">
+                {/* Large Centered 3D Spinning ASCII EDS */}
+                <div className="py-2">
+                  <SpinningAsciiEds compact={false} />
+                </div>
 
-              <div className="space-y-2">
-                <h1 className="text-base sm:text-lg text-[#F4F4F5] font-semibold tracking-wide">
-                  DIMAS EDRA AR RAFI (EDS)
-                </h1>
-                <p className="text-xs sm:text-sm text-[#8E8E93]">
-                  AI-Assisted Software Engineer & Systems Thinker
-                </p>
-                <p className="text-xs sm:text-sm text-[#52525B] pt-2">
-                  Type a command or click a shortcut to explore:
-                </p>
+                <div className="space-y-2">
+                  <h1 className="text-base sm:text-lg text-[#F4F4F5] font-semibold tracking-wide">
+                    DIMAS EDRA AR RAFI (EDS)
+                  </h1>
+                  <p className="text-xs sm:text-sm text-[#8E8E93]">
+                    AI-Assisted Software Engineer & Systems Thinker
+                  </p>
+                  <p className="text-xs sm:text-sm text-[#52525B] pt-2">
+                    Type a command or click a shortcut to explore:
+                  </p>
 
-                <div className="flex flex-wrap justify-center gap-2 pt-2 text-xs sm:text-sm">
-                  {["/chat", "/projects", "/about", "/skills", "/contact", "/themes"].map((cmd) => (
-                    <button
-                      key={cmd}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCommandExecution(cmd);
-                      }}
-                      className="px-3 py-1 bg-[#141414]/90 text-[#9AE6B4] hover:bg-[#1F1F1F] border border-[#262626] rounded-md transition-colors cursor-pointer"
-                    >
-                      {cmd}
-                    </button>
-                  ))}
+                  <div className="flex flex-wrap justify-center gap-2 pt-2 text-xs sm:text-sm">
+                    {["/chat", "/projects", "/about", "/skills", "/contact", "/themes"].map((cmd) => (
+                      <button
+                        key={cmd}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCommandExecution(cmd);
+                        }}
+                        className="px-3 py-1 bg-[#141414]/90 text-[#9AE6B4] hover:bg-[#1F1F1F] border border-[#262626] rounded-md transition-colors cursor-pointer"
+                      >
+                        {cmd}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Bottom Input Prompt for Fase 1 */}
-          <footer className="h-[52px] shrink-0 w-full bg-[#050505]/90 backdrop-blur-xs border-t border-[#171717] px-4 sm:px-8 flex items-center z-10">
+          <footer className="relative z-20 h-[52px] shrink-0 w-full bg-[#050505] border-t border-[#171717] px-4 sm:px-8 flex items-center">
             <div className="max-w-5xl mx-auto flex items-center space-x-3 w-full">
               <span className="text-[#9AE6B4] font-bold text-base sm:text-lg select-none">❯</span>
               <input
@@ -593,52 +595,53 @@ export function TerminalInterface() {
 
           {/* Right Main CLI Pane (Always full width on mobile) */}
           <main className="relative flex-1 min-h-0 min-w-0 flex flex-col bg-transparent w-full overflow-hidden">
-            {/* Ambient ASCII Background tied strictly to chat pane */}
-            <AsciiBackground themeId={currentTheme} />
+            {/* The Bounded Chat Viewport with scoped ASCII Background */}
+            <div className="relative flex-1 min-h-0 w-full overflow-hidden">
+              <AsciiBackground themeId={currentTheme} />
 
-            {/* The Bounded Chat Viewport */}
-            <div
-              ref={scrollContainerRef}
-              className="relative z-10 flex-1 min-h-0 overflow-y-auto overflow-x-hidden w-full"
-            >
               <div
-                ref={contentWrapperRef}
-                className="w-full px-3.5 sm:px-8 py-4 sm:py-5 space-y-4"
+                ref={scrollContainerRef}
+                className="relative z-10 h-full overflow-y-auto overflow-x-hidden w-full"
               >
-                {history.map((msg) => {
-                  const isStreaming = msg.id === activeStreamingId;
-                  return (
-                    <div key={msg.id} className="space-y-1.5 font-mono">
-                      {msg.type === "user" ? (
-                        <div className="flex items-center space-x-2.5 text-sm">
-                          <span className="text-[#9AE6B4] font-bold">❯</span>
-                          <span className="text-[#F4F4F5] font-medium">{msg.command}</span>
-                        </div>
-                      ) : (
-                        <div className="pl-3 sm:pl-5 border-l-2 border-[#1F1F1F]">
-                          {msg.payload && (
-                            <StreamingTerminalOutput
-                              payload={msg.payload}
-                              alreadyFinished={!isStreaming}
-                              onComplete={() => {
-                                handleStreamComplete(msg.id);
-                                scrollToBottom();
-                              }}
-                              onRunCommand={(c) => handleCommandExecution(c)}
-                              onScroll={scrollToBottom}
-                            />
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-                <div ref={bottomRef} />
+                <div
+                  ref={contentWrapperRef}
+                  className="w-full px-3.5 sm:px-8 py-4 sm:py-5 space-y-4"
+                >
+                  {history.map((msg) => {
+                    const isStreaming = msg.id === activeStreamingId;
+                    return (
+                      <div key={msg.id} className="space-y-1.5 font-mono">
+                        {msg.type === "user" ? (
+                          <div className="flex items-center space-x-2.5 text-sm">
+                            <span className="text-[#9AE6B4] font-bold">❯</span>
+                            <span className="text-[#F4F4F5] font-medium">{msg.command}</span>
+                          </div>
+                        ) : (
+                          <div className="pl-3 sm:pl-5 border-l-2 border-[#1F1F1F]">
+                            {msg.payload && (
+                              <StreamingTerminalOutput
+                                payload={msg.payload}
+                                alreadyFinished={!isStreaming}
+                                onComplete={() => {
+                                  handleStreamComplete(msg.id);
+                                  scrollToBottom();
+                                }}
+                                onRunCommand={(c) => handleCommandExecution(c)}
+                                onScroll={scrollToBottom}
+                              />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  <div ref={bottomRef} />
+                </div>
               </div>
             </div>
 
             {/* Input Prompt Bar for Fase 2 */}
-            <footer className="relative z-10 h-[52px] shrink-0 w-full bg-[#050505]/90 backdrop-blur-xs border-t border-[#171717] px-3.5 sm:px-8 flex items-center">
+            <footer className="relative z-20 h-[52px] shrink-0 w-full bg-[#050505] border-t border-[#171717] px-3.5 sm:px-8 flex items-center">
               <div className="w-full flex items-center space-x-2.5 sm:space-x-3">
                 <span className="text-[#9AE6B4] font-bold text-sm sm:text-base select-none shrink-0">❯</span>
                 <input
