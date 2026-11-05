@@ -11,6 +11,110 @@ import {
   getContactMarkdown,
   getChatPlaceholderMarkdown,
 } from "@/data/portfolioData";
+import {
+  formatContributionGrid,
+  parseContributionsApiResponse,
+  resolveMaxColumnsForViewport,
+  type ParsedContributionsResponse,
+} from "@/content/contributions";
+
+type ContributionsViewState =
+  | { status: "loading" }
+  | ParsedContributionsResponse;
+
+function renderAboutContributions(
+  contributionsState: ContributionsViewState,
+  maxColumns: number
+): React.ReactNode {
+  if (contributionsState.status === "loading") {
+    return (
+      <div className="mt-4 text-xs text-[#52525B] font-mono">
+        [fetching github contributions...]
+      </div>
+    );
+  }
+
+  if (contributionsState.status === "offline") {
+    return (
+      <div className="mt-4 text-xs text-[#52525B] font-mono">
+        [github contributions offline]
+      </div>
+    );
+  }
+
+  const grid = formatContributionGrid({
+    weeks: contributionsState.weeks,
+    totalContributions: contributionsState.totalContributions,
+    maxColumns,
+  });
+
+  if (!grid) {
+    return (
+      <div className="mt-4 text-xs text-[#52525B] font-mono">
+        [github contributions offline]
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 pt-3 border-t border-[#171717] space-y-2.5 font-mono">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <span className="text-xs font-semibold text-[#9AE6B4] tracking-wide">
+          GitHub Contributions
+        </span>
+        <span className="text-xs text-[#8E8E93]">{grid.summaryText}</span>
+      </div>
+
+      <div
+        role="img"
+        aria-label={`GitHub contribution graph showing ${grid.summaryText}`}
+        className="text-xs leading-[1.35] select-none overflow-hidden"
+      >
+        {grid.rows.map((row) => (
+          <div key={row.weekday} className="flex items-center whitespace-pre">
+            <span className="text-[#52525B] w-8 shrink-0 inline-block text-[11px]">
+              {row.label}
+            </span>
+            <span className="tracking-[0.18em]">
+              {row.cells.map((cell, colIdx) => (
+                <span
+                  key={`${row.weekday}-${colIdx}`}
+                  style={{ color: cell.colorHex }}
+                  title={
+                    cell.date
+                      ? `${cell.count} contribution${cell.count === 1 ? "" : "s"} on ${cell.date}`
+                      : undefined
+                  }
+                >
+                  {cell.glyph}
+                </span>
+              ))}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex items-center justify-between text-[11px] text-[#52525B] pt-0.5">
+        <span>
+          {grid.displayedWeeks < 52
+            ? `latest ${grid.displayedWeeks} weeks`
+            : "last 52 weeks"}
+        </span>
+        <div className="flex items-center space-x-1.5">
+          <span>Less</span>
+          <span className="tracking-[0.18em]">
+            {grid.legend.map((item) => (
+              <span key={item.level} style={{ color: item.colorHex }}>
+                {item.glyph}
+              </span>
+            ))}
+          </span>
+          <span>More</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export type OutputPayload =
   | { type: "help" }
@@ -79,6 +183,40 @@ export function StreamingTerminalOutput({
 
   const [tokenIndex, setTokenIndex] = useState<number>(alreadyFinished ? 999999 : 0);
   const [isLocalDone, setIsLocalDone] = useState<boolean>(alreadyFinished);
+  const [contributionsState, setContributionsState] = useState<ContributionsViewState>({
+    status: "loading",
+  });
+  const [maxColumns, setMaxColumns] = useState<number>(52);
+
+  useEffect(() => {
+    if (payload.type !== "about") return;
+
+    const syncViewportColumns = () => {
+      setMaxColumns(resolveMaxColumnsForViewport(window.innerWidth));
+    };
+
+    syncViewportColumns();
+    window.addEventListener("resize", syncViewportColumns);
+    return () => window.removeEventListener("resize", syncViewportColumns);
+  }, [payload.type]);
+
+  useEffect(() => {
+    if (payload.type !== "about") return;
+
+    const controller = new AbortController();
+
+    fetch("/api/github-contributions", { signal: controller.signal })
+      .then((res) => res.json())
+      .then((rawJson: unknown) => {
+        setContributionsState(parseContributionsApiResponse(rawJson));
+        scrollCbRef.current?.();
+      })
+      .catch(() => {
+        setContributionsState({ status: "offline", reason: "NETWORK_ERROR" });
+      });
+
+    return () => controller.abort();
+  }, [payload.type]);
 
   useEffect(() => {
     if (isLiveStream || alreadyFinished) {
@@ -232,6 +370,9 @@ export function StreamingTerminalOutput({
       >
         {currentStreamedText}
       </Streamdown>
+      {isDone &&
+        payload.type === "about" &&
+        renderAboutContributions(contributionsState, maxColumns)}
       {!isDone && <span className="terminal-cursor">▋</span>}
     </div>
   );
