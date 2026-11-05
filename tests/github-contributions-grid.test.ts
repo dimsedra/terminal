@@ -60,11 +60,11 @@ test("ASCII Contribution Grid - maps all five GitHub contribution levels to shad
   assert.deepEqual(
     mondayCells.map((c) => ({ glyph: c.glyph, colorHex: c.colorHex })),
     [
-      { glyph: "·", colorHex: "#3F3F46" },
-      { glyph: "░", colorHex: "#0e4429" },
-      { glyph: "▒", colorHex: "#006d32" },
-      { glyph: "▓", colorHex: "#26a641" },
-      { glyph: "█", colorHex: "#39d353" },
+      { glyph: "·", colorHex: "#52525B" },
+      { glyph: "░", colorHex: "#1f883d" },
+      { glyph: "▒", colorHex: "#26a641" },
+      { glyph: "▓", colorHex: "#39d353" },
+      { glyph: "█", colorHex: "#56f06f" },
     ]
   );
 });

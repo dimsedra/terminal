@@ -57,12 +57,12 @@ function renderAboutContributions(
   }
 
   return (
-    <div className="mt-4 pt-3 border-t border-[#171717] space-y-2.5 font-mono">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
+    <div className="mt-4 w-fit max-w-full bg-[#0A0A0A]/90 border border-[#1F1F1F] rounded-md px-3.5 py-3 space-y-2.5 font-mono">
+      <div className="flex flex-wrap items-baseline justify-between gap-4">
         <span className="text-xs font-semibold text-[#9AE6B4] tracking-wide">
           GitHub Contributions
         </span>
-        <span className="text-xs text-[#8E8E93]">{grid.summaryText}</span>
+        <span className="text-xs text-[#A1A1AA]">{grid.summaryText}</span>
       </div>
 
       <div
@@ -72,7 +72,7 @@ function renderAboutContributions(
       >
         {grid.rows.map((row) => (
           <div key={row.weekday} className="flex items-center whitespace-pre">
-            <span className="text-[#52525B] w-8 shrink-0 inline-block text-[11px]">
+            <span className="text-[#8E8E93] w-8 shrink-0 inline-block text-[11px]">
               {row.label}
             </span>
             <span className="tracking-[0.18em]">
@@ -94,7 +94,7 @@ function renderAboutContributions(
         ))}
       </div>
 
-      <div className="flex items-center justify-between text-[11px] text-[#52525B] pt-0.5">
+      <div className="flex items-center justify-between gap-4 text-[11px] text-[#8E8E93] pt-0.5">
         <span>
           {grid.displayedWeeks < 52
             ? `latest ${grid.displayedWeeks} weeks`

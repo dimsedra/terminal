@@ -119,11 +119,11 @@ const LEVEL_STYLES: Record<
   ContributionLevel,
   { glyph: "·" | "░" | "▒" | "▓" | "█"; colorHex: string }
 > = {
-  NONE: { glyph: "·", colorHex: "#3F3F46" },
-  FIRST_QUARTILE: { glyph: "░", colorHex: "#0e4429" },
-  SECOND_QUARTILE: { glyph: "▒", colorHex: "#006d32" },
-  THIRD_QUARTILE: { glyph: "▓", colorHex: "#26a641" },
-  FOURTH_QUARTILE: { glyph: "█", colorHex: "#39d353" },
+  NONE: { glyph: "·", colorHex: "#52525B" },
+  FIRST_QUARTILE: { glyph: "░", colorHex: "#1f883d" },
+  SECOND_QUARTILE: { glyph: "▒", colorHex: "#26a641" },
+  THIRD_QUARTILE: { glyph: "▓", colorHex: "#39d353" },
+  FOURTH_QUARTILE: { glyph: "█", colorHex: "#56f06f" },
 };
 
 const WEEKDAY_LABELS = ["   ", "Mon", "   ", "Wed", "   ", "Fri", "   "];
