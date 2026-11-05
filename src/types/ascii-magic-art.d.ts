@@ -38,6 +38,17 @@ declare module "ascii-magic-art/lib/kit.js" {
 }
 
 declare module "ascii-magic-art/pieces/*.js" {
+  export const meta: {
+    cols?: number;
+    rows?: number;
+    fps?: number;
+    still?: boolean;
+    cell?: string;
+    dots?: Record<string, any>;
+    palette?: Record<string, string>;
+    params?: Record<string, any>;
+    [key: string]: any;
+  };
   const mod: any;
   export default mod;
 }
