@@ -387,9 +387,6 @@ export function TerminalInterface() {
       onClick={handleContainerClick}
       className="relative w-full h-[100dvh] flex flex-col bg-[#0A0A0A] cursor-text select-text overflow-hidden"
     >
-      {/* Ambient Animated ASCII Background */}
-      <AsciiBackground themeId={currentTheme} />
-
       {/* Top Title Bar */}
       <header className="shrink-0 w-full px-3 sm:px-6 py-2.5 bg-[#050505]/90 backdrop-blur-xs border-b border-[#171717] select-none flex items-center justify-between z-20">
         <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
@@ -432,6 +429,7 @@ export function TerminalInterface() {
       {!isFase2 ? (
         /* FASE 1: Welcoming Landing View */
         <div className="relative flex-1 min-h-0 flex flex-col justify-between overflow-hidden z-10">
+          <AsciiBackground themeId={currentTheme} />
           <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col justify-center items-center px-4 py-8">
             <div className="max-w-2xl w-full text-center space-y-4">
               {/* Large Centered 3D Spinning ASCII EDS */}
@@ -509,7 +507,7 @@ export function TerminalInterface() {
 
           {/* Left Sidebar: Offcanvas drawer on mobile, static side column on desktop */}
           {sidebarOpen && (
-            <aside className="fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] sm:static sm:z-auto sm:w-64 md:w-72 bg-[#080808]/90 backdrop-blur-xs border-r border-[#171717] flex flex-col justify-between select-none shrink-0 h-full transition-all duration-200 shadow-2xl sm:shadow-none">
+            <aside className="fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] sm:static sm:z-auto sm:w-64 md:w-72 bg-[#080808] border-r border-[#171717] flex flex-col justify-between select-none shrink-0 h-full transition-all duration-200 shadow-2xl sm:shadow-none">
               <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
                 {/* Mobile Drawer Header with Close Button */}
                 <div className="flex items-center justify-between sm:hidden pb-2 border-b border-[#171717]">
@@ -594,11 +592,14 @@ export function TerminalInterface() {
           )}
 
           {/* Right Main CLI Pane (Always full width on mobile) */}
-          <main className="flex-1 min-h-0 min-w-0 flex flex-col bg-transparent w-full">
+          <main className="relative flex-1 min-h-0 min-w-0 flex flex-col bg-transparent w-full overflow-hidden">
+            {/* Ambient ASCII Background tied strictly to chat pane */}
+            <AsciiBackground themeId={currentTheme} />
+
             {/* The Bounded Chat Viewport */}
             <div
               ref={scrollContainerRef}
-              className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden w-full"
+              className="relative z-10 flex-1 min-h-0 overflow-y-auto overflow-x-hidden w-full"
             >
               <div
                 ref={contentWrapperRef}
@@ -637,7 +638,7 @@ export function TerminalInterface() {
             </div>
 
             {/* Input Prompt Bar for Fase 2 */}
-            <footer className="h-[52px] shrink-0 w-full bg-[#050505]/90 backdrop-blur-xs border-t border-[#171717] px-3.5 sm:px-8 flex items-center z-10">
+            <footer className="relative z-10 h-[52px] shrink-0 w-full bg-[#050505]/90 backdrop-blur-xs border-t border-[#171717] px-3.5 sm:px-8 flex items-center">
               <div className="w-full flex items-center space-x-2.5 sm:space-x-3">
                 <span className="text-[#9AE6B4] font-bold text-sm sm:text-base select-none shrink-0">❯</span>
                 <input

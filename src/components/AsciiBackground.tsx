@@ -90,7 +90,7 @@ export function AsciiBackground({ themeId }: AsciiBackgroundProps) {
     <div
       ref={containerRef}
       aria-hidden="true"
-      className="fixed inset-0 pointer-events-none select-none overflow-hidden z-0 flex items-center justify-center opacity-20 transition-opacity duration-500"
+      className="absolute inset-0 pointer-events-none select-none overflow-hidden z-0 flex items-center justify-center opacity-20 transition-opacity duration-500"
     >
       <pre
         ref={preRef}
