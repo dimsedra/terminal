@@ -37,20 +37,21 @@ The portfolio is built as an authentic developer terminal and agentic CLI interf
   - Pure monospace font stack (`JetBrains Mono`, `ui-monospace`, `monospace`).
   - Strict text scaling (`text-xs` to `text-sm` for commands and output, `text-base` for section headings).
 - **Ambient ASCII Background**:
-  - Positioned in `fixed inset-0 pointer-events-none select-none overflow-hidden z-0`.
+  - Positioned in `absolute inset-0 pointer-events-none select-none overflow-hidden z-0`.
   - Subdued opacity (`opacity-20`) so it never competes with foreground text.
-  - Centered monospace `<pre>` container cycling through character frames.
+  - Full-bleed `cover` behavior: dynamically scales `<pre>` font size via `ResizeObserver` to match the container's width and height and sizes the rendered `<canvas>` with `w-full h-full object-cover` so no dark borders appear around the edges.
 - **Interactive Command Chips**:
   - Formatted code blocks starting with `/` automatically render as clickable chips with border highlights on hover.
 - **GitHub Contributions ASCII Grid (`/about`)**:
-  - Rendered as a monospace 7-row (Sunday–Saturday) character grid directly below the author bio in `/about`.
-  - Uses character density paired with GitHub's dark-mode green hierarchy:
-    - `NONE`: `·` in `#3F3F46` (dim terminal zinc)
-    - `FIRST_QUARTILE`: `░` in `#0e4429` (deep forest green)
-    - `SECOND_QUARTILE`: `▒` in `#006d32` (medium GitHub green)
-    - `THIRD_QUARTILE`: `▓` in `#26a641` (bright GitHub green)
-    - `FOURTH_QUARTILE`: `█` in `#39d353` (vibrant neon green)
-  - Responsive windowing: slices weeks from the right so mobile viewports display the most recent weeks that fit cleanly (e.g. 14 weeks on `<640px`, 26 weeks on tablet, 52 weeks on desktop) without horizontal scrolling.
+  - Rendered inside a dark terminal surface panel (`bg-[#0A0A0A]/90 border border-[#1F1F1F] rounded-md px-3.5 py-3`) directly below the author bio in `/about` to prevent background ASCII animations from colliding with the grid glyphs.
+  - Uses character density paired with brightness-compensated GitHub greens so stippled glyphs (`░`, `▒`) remain clearly visible:
+    - `NONE`: `·` in `#52525B` (muted terminal zinc)
+    - `FIRST_QUARTILE`: `░` in `#1f883d` (compensated emerald green for 25% glyph density)
+    - `SECOND_QUARTILE`: `▒` in `#26a641` (medium-bright GitHub green for 50% glyph density)
+    - `THIRD_QUARTILE`: `▓` in `#39d353` (bright GitHub green for 75% glyph density)
+    - `FOURTH_QUARTILE`: `█` in `#56f06f` (vibrant neon green for 100% solid block)
+  - Weekday and metadata labels (`Mon`, `Wed`, `Fri`, `last 52 weeks`, `Less / More`) use `#8E8E93` for clear contrast inside the dark panel.
+  - Responsive windowing: slices weeks from the right so mobile viewports display the most recent weeks that fit cleanly (e.g. 16 weeks on `<640px`, 28 weeks on tablet, 52 weeks on desktop) without horizontal scrolling.
 
 ## Non-Goals
 

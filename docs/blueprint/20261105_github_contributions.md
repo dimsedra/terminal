@@ -68,12 +68,12 @@ To incorporate the contribution visualization:
 - Input: `weeks` array from calendar API, and desired maximum column count `maxColumns` (e.g. 52 on desktop, 14-16 on mobile).
 - Behavior:
   - Slices `weeks` from the end (`weeks.slice(-maxColumns)`) to prioritize the most recent contributions on the right side.
-  - Maps GitHub `contributionLevel` to character glyphs and color styles:
-    - `NONE`: `·` (dim gray / terminal text muted)
-    - `FIRST_QUARTILE`: `░` (emerald dark `#0e4429` / `text-emerald-900`)
-    - `SECOND_QUARTILE`: `▒` (emerald medium `#006d32` / `text-emerald-700`)
-    - `THIRD_QUARTILE`: `▓` (emerald bright `#26a641` / `text-emerald-500`)
-    - `FOURTH_QUARTILE`: `█` (emerald neon `#39d353` / `text-emerald-400`)
+  - Maps GitHub `contributionLevel` to character glyphs and brightness-compensated green styles:
+    - `NONE`: `·` (`#52525B`)
+    - `FIRST_QUARTILE`: `░` (`#1f883d`)
+    - `SECOND_QUARTILE`: `▒` (`#26a641`)
+    - `THIRD_QUARTILE`: `▓` (`#39d353`)
+    - `FOURTH_QUARTILE`: `█` (`#56f06f`)
   - Generates 7 weekday rows with weekday abbreviations (`Mon`, `Wed`, `Fri`) for clear orientation.
 - Output: Structured ASCII grid ready for terminal rendering, plus summary line (e.g. `1,248 contributions in the last year`).
 - Failure: If `weeks` is empty, returns null or a fallback string so the UI can handle display gracefully.

@@ -70,9 +70,9 @@ To support animated ASCII backgrounds:
   - When `themeId === "default"`, renders `null` (plain dark surface).
   - When a valid ASCII theme is active, mounts a preformatted `<pre>` element container.
   - Dynamically imports `ascii-magic-art/runtime/player.js` and the specific module from `ascii-magic-art/pieces/[themeId].js`.
-  - Invokes `play(containerElement, pieceModule)` to start frame playback.
-  - On cleanup (component unmount or `themeId` change), calls the returned `stop()` function to cancel animation timers and avoid memory leaks.
-  - Enforces styling: `fixed inset-0 pointer-events-none select-none overflow-hidden flex items-center justify-center opacity-20 transition-opacity duration-500 z-0`.
+  - Invokes `play(containerElement, pieceModule)` to start frame playback, dynamically scaling the `<pre>` font size with a `ResizeObserver` and applying `w-full h-full object-cover` to the rendered `<canvas>` so the artwork fills the entire container edge-to-edge without dark margins.
+  - On cleanup (component unmount or `themeId` change), calls the returned `stop()` function and disconnects the `ResizeObserver` to avoid memory leaks.
+  - Enforces styling: `absolute inset-0 pointer-events-none select-none overflow-hidden flex items-center justify-center opacity-20 transition-opacity duration-500 z-0`.
 - **Output**: Animated monospace text canvas positioned strictly behind all UI components.
 - **Failure**: If dynamic piece import fails (e.g. package error), logs warning and renders `null` without throwing or crashing the parent UI.
 - **Method**: `visual testing`
