@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
 
-// 3D point with surface normal for lighting calculation
 interface Point3D {
   x: number;
   y: number;
@@ -10,6 +9,7 @@ interface Point3D {
   nx: number;
   ny: number;
   nz: number;
+  isFront: boolean;
 }
 
 interface SpinningAsciiEdsProps {
@@ -18,15 +18,10 @@ interface SpinningAsciiEdsProps {
 
 export function SpinningAsciiEds({ compact = false }: SpinningAsciiEdsProps) {
   const [frame, setFrame] = useState<string>("");
-  const angleYRef = useRef(0);
-  const angleXRef = useRef(0.2); // slight downward tilt for 3D depth
+  const animRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // Generate voxel points for 3D letters "E D S"
-    // Each letter is defined on a grid, extruded along Z-axis
-    const points: Point3D[] = [];
-
-    // Grid representations (9 rows x 7 cols per letter)
+    // 7x9 clean block letter bitmaps for "E D S" with equal column widths
     const letterE = [
       "1111111",
       "1100000",
@@ -42,12 +37,12 @@ export function SpinningAsciiEds({ compact = false }: SpinningAsciiEdsProps) {
     const letterD = [
       "1111110",
       "1100011",
-      "11000011",
-      "11000011",
-      "11000011",
-      "11000011",
-      "11000011",
+      "1100001",
+      "1100001",
+      "1100001",
+      "1100001",
       "1100011",
+      "1111110",
       "1111110",
     ];
 
@@ -65,127 +60,195 @@ export function SpinningAsciiEds({ compact = false }: SpinningAsciiEdsProps) {
 
     const letters = [
       { map: letterE, offsetX: -11 },
-      { map: letterD, offsetX: -1 },
-      { map: letterS, offsetX: 9 },
+      { map: letterD, offsetX: -0.5 },
+      { map: letterS, offsetX: 10 },
     ];
 
-    const depths = [-1.4, -0.7, 0, 0.7, 1.4];
+    const points: Point3D[] = [];
+    const subStep = 0.3; // Dense sampling so letters render solid without gaps
+    const frontZ = 1.0;
+    const backZ = -1.0;
+    const depthSlices = 6;
 
     letters.forEach(({ map, offsetX }) => {
-      for (let r = 0; r < map.length; r++) {
-        for (let c = 0; c < map[r].length; c++) {
-          if (map[r][c] === "1") {
-            const px = c + offsetX;
-            const py = r - 4.5; // center vertically
+      const height = map.length;
+      const width = map[0].length;
 
-            // Add front & back faces with normals
-            points.push({ x: px, y: py, z: 1.4, nx: 0, ny: 0, nz: 1 });
-            points.push({ x: px, y: py, z: -1.4, nx: 0, ny: 0, nz: -1 });
+      for (let r = 0; r < height; r++) {
+        for (let c = 0; c < width; c++) {
+          if (map[r][c] !== "1") continue;
 
-            // Add side edges along depth
-            depths.forEach((dz) => {
-              // check boundaries for edge normals
-              const isTop = r === 0 || map[r - 1]?.[c] !== "1";
-              const isBottom = r === map.length - 1 || map[r + 1]?.[c] !== "1";
-              const isLeft = c === 0 || map[r][c - 1] !== "1";
-              const isRight = c === map[r].length - 1 || map[r][c + 1] !== "1";
+          // 1. Denser front face points
+          for (let sc = 0; sc < 1; sc += subStep) {
+            for (let sr = 0; sr < 1; sr += subStep) {
+              points.push({
+                x: c + sc - width / 2 + offsetX,
+                y: r + sr - height / 2,
+                z: frontZ,
+                nx: 0,
+                ny: 0,
+                nz: 1,
+                isFront: true,
+              });
+            }
+          }
 
-              if (isTop || isBottom || isLeft || isRight) {
+          // 2. Extrusion edge walls along depth
+          const isTop = r === 0 || map[r - 1][c] !== "1";
+          const isBottom = r === height - 1 || map[r + 1][c] !== "1";
+          const isLeft = c === 0 || map[r][c - 1] !== "1";
+          const isRight = c === width - 1 || map[r][c + 1] !== "1";
+
+          if (!isTop && !isBottom && !isLeft && !isRight) continue;
+
+          for (let s = 1; s <= depthSlices; s++) {
+            const z = frontZ - (s / depthSlices) * (frontZ - backZ);
+            for (let sub = 0; sub < 1; sub += subStep) {
+              if (isTop) {
                 points.push({
-                  x: px,
-                  y: py,
-                  z: dz,
-                  nx: isRight ? 1 : isLeft ? -1 : 0,
-                  ny: isBottom ? 1 : isTop ? -1 : 0,
+                  x: c + sub - width / 2 + offsetX,
+                  y: r - height / 2,
+                  z,
+                  nx: 0,
+                  ny: -1,
                   nz: 0,
+                  isFront: false,
                 });
               }
-            });
+              if (isBottom) {
+                points.push({
+                  x: c + sub - width / 2 + offsetX,
+                  y: r + 1 - height / 2,
+                  z,
+                  nx: 0,
+                  ny: 1,
+                  nz: 0,
+                  isFront: false,
+                });
+              }
+              if (isLeft) {
+                points.push({
+                  x: c - width / 2 + offsetX,
+                  y: r + sub - height / 2,
+                  z,
+                  nx: -1,
+                  ny: 0,
+                  nz: 0,
+                  isFront: false,
+                });
+              }
+              if (isRight) {
+                points.push({
+                  x: c + 1 - width / 2 + offsetX,
+                  y: r + sub - height / 2,
+                  z,
+                  nx: 1,
+                  ny: 0,
+                  nz: 0,
+                  isFront: false,
+                });
+              }
+            }
           }
         }
       }
     });
 
-    const width = compact ? 38 : 56;
-    const height = compact ? 13 : 18;
-    const chars = " .·:;+*#%@";
+    const bufferW = compact ? 42 : 58;
+    const bufferH = compact ? 13 : 16;
+    const fontAspect = 1.95; // Compensates for terminal character cells being taller than wide
 
-    let animationFrameId: number;
+    // High contrast character ramps
+    const frontChars = ["#", "#", "#", "#", "#"];
+    const sideChars = [".", ":", "-", "=", "+", "*"];
+
+    // Directional light from top-right-front
+    const lx = 0.45;
+    const ly = -0.55;
+    const lz = 0.7;
+
+    const distance = 28;
+    const scale = compact ? 26 : 38;
+
+    const startTime = performance.now();
 
     const render = () => {
-      angleYRef.current += 0.035;
-      const ay = angleYRef.current;
-      const ax = angleXRef.current;
+      const elapsed = (performance.now() - startTime) * 0.001;
+
+      // Oscillating floating sway keeps text permanently front-facing and readable
+      const ay = Math.sin(elapsed * 1.1) * 0.38;
+      const ax = 0.16 + Math.cos(elapsed * 0.8) * 0.08;
 
       const cosY = Math.cos(ay);
       const sinY = Math.sin(ay);
       const cosX = Math.cos(ax);
       const sinX = Math.sin(ax);
 
-      // Light source vector pointing towards screen
-      const lx = 0.577;
-      const ly = -0.577;
-      const lz = 0.577;
-
-      // 2D Character buffer and Z-buffer
-      const output: string[] = new Array(width * height).fill(" ");
-      const zBuffer: number[] = new Array(width * height).fill(-Infinity);
-
-      const distance = compact ? 32 : 30;
-      const k1 = compact ? 23 : 36; // horizontal scale factor
-      const k2 = compact ? 12 : 18; // vertical scale factor (terminal chars are taller than wide)
+      const output: string[] = new Array(bufferW * bufferH).fill(" ");
+      const zBuffer: number[] = new Array(bufferW * bufferH).fill(-Infinity);
 
       for (let i = 0; i < points.length; i++) {
         const p = points[i];
 
-        // 3D rotation Y then X
+        // 3D rotation
         const x1 = p.x * cosY + p.z * sinY;
         const z1 = -p.x * sinY + p.z * cosY;
         const y1 = p.y * cosX - z1 * sinX;
         const z2 = p.y * sinX + z1 * cosX;
 
-        // Rotate normals for lighting
+        // Normal rotation
         const nx1 = p.nx * cosY + p.nz * sinY;
         const nz1 = -p.nx * sinY + p.nz * cosY;
         const ny1 = p.ny * cosX - nz1 * sinX;
         const nz2 = p.ny * sinX + nz1 * cosX;
 
+        // Backface culling: discard rear-facing polygons
+        if (nz2 < -0.05) continue;
+
         const ooz = 1 / (distance + z2);
+        const xp = Math.floor(bufferW / 2 + x1 * scale * ooz * fontAspect);
+        const yp = Math.floor(bufferH / 2 + y1 * scale * ooz);
 
-        // Projected 2D coordinates
-        const xp = Math.floor(width / 2 + x1 * k1 * ooz);
-        const yp = Math.floor(height / 2 + y1 * k2 * ooz);
+        if (xp < 0 || xp >= bufferW || yp < 0 || yp >= bufferH) continue;
 
-        if (xp >= 0 && xp < width && yp >= 0 && yp < height) {
-          const idx = xp + yp * width;
-          if (ooz > zBuffer[idx]) {
-            zBuffer[idx] = ooz;
+        const idx = xp + yp * bufferW;
+        // Subtle depth bias for front faces to eliminate surface-edge z-fighting
+        const effZ = p.isFront ? ooz + 0.0005 : ooz;
 
-            // Calculate diffuse luminance
-            const lum = nx1 * lx + ny1 * ly + nz2 * lz;
-            const ambient = 0.35;
-            const brightness = Math.max(0, lum * 0.65 + ambient);
+        if (effZ > zBuffer[idx]) {
+          zBuffer[idx] = effZ;
+
+          const lum = Math.max(0, nx1 * lx + ny1 * ly + nz2 * lz);
+
+          if (p.isFront) {
             const charIdx = Math.min(
-              chars.length - 1,
-              Math.max(0, Math.floor(brightness * chars.length))
+              frontChars.length - 1,
+              Math.max(0, Math.floor(lum * frontChars.length))
             );
-            output[idx] = chars[charIdx];
+            output[idx] = frontChars[charIdx] || "#";
+          } else {
+            const charIdx = Math.min(
+              sideChars.length - 1,
+              Math.max(0, Math.floor((lum * 0.7 + 0.3) * sideChars.length))
+            );
+            output[idx] = sideChars[charIdx] || ":";
           }
         }
       }
 
-      // Convert buffer array to multi-line string
       let frameStr = "";
-      for (let y = 0; y < height; y++) {
-        frameStr += output.slice(y * width, (y + 1) * width).join("") + "\n";
+      for (let y = 0; y < bufferH; y++) {
+        frameStr += output.slice(y * bufferW, (y + 1) * bufferW).join("") + "\n";
       }
 
       setFrame(frameStr);
-      animationFrameId = requestAnimationFrame(render);
+      animRef.current = requestAnimationFrame(render);
     };
 
-    animationFrameId = requestAnimationFrame(render);
-    return () => cancelAnimationFrame(animationFrameId);
+    animRef.current = requestAnimationFrame(render);
+    return () => {
+      if (animRef.current) cancelAnimationFrame(animRef.current);
+    };
   }, [compact]);
 
   return (
