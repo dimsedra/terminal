@@ -94,11 +94,16 @@ test("Theme Parser - rejects unrecognized theme input with error referencing /th
 });
 
 test("Themes Markdown - generates clickable command chips and active state marker", () => {
-  const md = getThemesMarkdown("default");
-  assert.ok(md.includes("### Ambient Background Themes"), "Should have title");
-  assert.ok(md.includes("`/themes autumn`"), "Should contain clickable command chip for autumn");
-  assert.ok(md.includes("`/themes karsts`"), "Should contain clickable command chip for karsts");
-  assert.ok(md.includes("`/themes neon`"), "Should contain clickable command chip for neon");
-  assert.ok(md.includes("`/themes default`"), "Should contain clickable command chip for default");
-  assert.ok(md.includes("(active)"), "Should indicate active theme");
+  const mdEn = getThemesMarkdown("default", "en");
+  assert.ok(mdEn.includes("### Ambient Background Themes"), "Should have English title");
+  assert.ok(mdEn.includes("`/themes autumn`"), "Should contain clickable command chip for autumn");
+  assert.ok(mdEn.includes("`/themes karsts`"), "Should contain clickable command chip for karsts");
+  assert.ok(mdEn.includes("`/themes neon`"), "Should contain clickable command chip for neon");
+  assert.ok(mdEn.includes("`/themes default`"), "Should contain clickable command chip for default");
+  assert.ok(mdEn.includes("(active)"), "Should indicate active theme in English");
+
+  const mdId = getThemesMarkdown("harbour-neon-skyline", "id");
+  assert.ok(mdId.includes("### Tema Latar Belakang ASCII"), "Should have Indonesian title");
+  assert.ok(mdId.includes("Pemandangan cakrawala kota neon"), "Should contain Indonesian theme description");
+  assert.ok(mdId.includes("(aktif)"), "Should indicate active theme in Indonesian");
 });

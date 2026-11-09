@@ -275,10 +275,11 @@ export function TerminalInterface() {
           : "What's the best way to get in touch, reach out, or collaborate with Eds?";
       } else if (cmdLower === "/themes" || cmdLower.startsWith("/themes ")) {
         const themeArg = trimmed.slice(7).trim();
+        const isId = currentLang === "id";
         if (!themeArg) {
           const payload: OutputPayload = {
             type: "markdown",
-            content: getThemesMarkdown(currentTheme),
+            content: getThemesMarkdown(currentTheme, currentLang),
           };
           appendInteraction(trimmed, payload);
           setInputVal("");
@@ -295,7 +296,9 @@ export function TerminalInterface() {
           }
           const payload: OutputPayload = {
             type: "markdown",
-            content: `Switched background theme to **${parseResult.theme.name}**.\n\nType \`/themes default\` or click \`/themes\` to change anytime.`,
+            content: isId
+              ? `Tema latar belakang berhasil diubah ke **${parseResult.theme.name}**.\n\nKetik \`/themes default\` atau klik \`/themes\` kapan saja untuk mengganti.`
+              : `Switched background theme to **${parseResult.theme.name}**.\n\nType \`/themes default\` or click \`/themes\` to change anytime.`,
           };
           appendInteraction(trimmed, payload);
           setInputVal("");
@@ -304,7 +307,9 @@ export function TerminalInterface() {
 
         const payload: OutputPayload = {
           type: "markdown",
-          content: `### Theme Error\n\n${parseResult.error}`,
+          content: isId
+            ? `### Kesalahan Tema\n\nTema tidak dikenali: "${themeArg}". Ketik \`/themes\` untuk melihat tema yang tersedia.`
+            : `### Theme Error\n\n${parseResult.error}`,
         };
         appendInteraction(trimmed, payload);
         setInputVal("");
@@ -314,8 +319,8 @@ export function TerminalInterface() {
         if (!langArg) {
           const isId = currentLang === "id";
           const content = isId
-            ? `### Pengaturan Bahasa\n\nBahasa saat ini: **Bahasa Indonesia (id)**.\n\nKetik \`/lang en\` untuk beralih ke bahasa Inggris.`
-            : `### Language Settings\n\nCurrent language: **English (en)**.\n\nType \`/lang id\` to switch to Bahasa Indonesia.`;
+            ? `### Pengaturan Bahasa\n\nBahasa saat ini: **Bahasa Indonesia (id)**.\n\nPilihan yang tersedia:\n- \`/lang en\` — Ganti ke English\n- \`/lang id\` — Tetap di Bahasa Indonesia\n\n_Ketik \`/lang en\` atau klik pilihan di atas untuk berganti bahasa._`
+            : `### Language Settings\n\nCurrent language: **English (en)**.\n\nAvailable options:\n- \`/lang id\` — Switch to Bahasa Indonesia\n- \`/lang en\` — Keep English\n\n_Type \`/lang id\` or click an option above to switch._`;
           appendInteraction(trimmed, {
             type: "markdown",
             content,
@@ -351,9 +356,13 @@ export function TerminalInterface() {
         setInputVal("");
         return;
       } else if (cmdLower === "/help") {
+        const isId = currentLang === "id";
+        const content = isId
+          ? `### Perintah Sesi AI Interaktif\n\n- \`/exit\` — Keluar dari sesi AI dan kembali ke beranda terminal\n- \`/projects\` — Minta AI merangkum proyek-proyek unggulan Eds\n- \`/skills\` — Minta AI menjelaskan keahlian teknis dan stack\n- \`/about\` — Minta AI menceritakan latar belakang Eds\n- \`/contact\` — Minta AI memberikan kontak dan touchpoint\n- \`/lang\` — Ganti bahasa terminal (\`/lang en\` atau \`/lang id\`)\n- \`/themes\` — Ganti tema latar belakang animasi ASCII\n\n_Atau tanyakan apa saja secara langsung dalam bahasa sehari-hari._`
+          : `### Interactive AI Session Commands\n\n- \`/exit\` — Exit AI session and return to terminal home\n- \`/projects\` — Ask AI to synthesize Eds's projects\n- \`/skills\` — Ask AI to synthesize technical capabilities\n- \`/about\` — Ask AI about Eds's background\n- \`/contact\` — Ask AI for touchpoints\n- \`/lang\` — Switch language (\`/lang en\` or \`/lang id\`)\n- \`/themes\` — Switch ambient ASCII background theme\n\n_Or simply ask any question directly in everyday language._`;
         const payload: OutputPayload = {
           type: "markdown",
-          content: `### Interactive AI Session Commands\n\n- \`/exit\` — Exit AI session and return to terminal home\n- \`/projects\` — Ask AI to synthesize Eds's projects\n- \`/skills\` — Ask AI to synthesize technical capabilities\n- \`/about\` — Ask AI about Eds's background\n- \`/contact\` — Ask AI for touchpoints\n- \`/themes\` — Switch ambient ASCII background theme\n\n_Or simply ask any question directly in everyday language._`,
+          content,
         };
         appendInteraction(trimmed, payload);
         setInputVal("");
@@ -434,10 +443,11 @@ export function TerminalInterface() {
       return;
     } else if (cmdLower === "/themes" || cmdLower.startsWith("/themes ")) {
       const themeArg = trimmed.slice(7).trim();
+      const isId = currentLang === "id";
       if (!themeArg) {
         appendInteraction(trimmed, {
           type: "markdown",
-          content: getThemesMarkdown(currentTheme),
+          content: getThemesMarkdown(currentTheme, currentLang),
         });
         setInputVal("");
         return;
@@ -453,7 +463,9 @@ export function TerminalInterface() {
         }
         appendInteraction(trimmed, {
           type: "markdown",
-          content: `Switched background theme to **${parseResult.theme.name}**.\n\nType \`/themes default\` or click \`/themes\` to change anytime.`,
+          content: isId
+            ? `Tema latar belakang berhasil diubah ke **${parseResult.theme.name}**.\n\nKetik \`/themes default\` atau klik \`/themes\` kapan saja untuk mengganti.`
+            : `Switched background theme to **${parseResult.theme.name}**.\n\nType \`/themes default\` or click \`/themes\` to change anytime.`,
         });
         setInputVal("");
         return;
@@ -461,7 +473,9 @@ export function TerminalInterface() {
 
       appendInteraction(trimmed, {
         type: "markdown",
-        content: `### Theme Error\n\n${parseResult.error}`,
+        content: isId
+          ? `### Kesalahan Tema\n\nTema tidak dikenali: "${themeArg}". Ketik \`/themes\` untuk melihat tema yang tersedia.`
+          : `### Theme Error\n\n${parseResult.error}`,
       });
       setInputVal("");
       return;
@@ -730,7 +744,7 @@ export function TerminalInterface() {
                 {/* Quick Navigation Commands */}
                 <div className="space-y-1.5 pt-1">
                   <p className="text-[10px] text-[#52525B] uppercase tracking-wider px-2 font-medium">
-                    Commands
+                    {currentLang === "id" ? "Perintah" : "Commands"}
                   </p>
                   <div className="space-y-1 text-xs">
                     {PORTFOLIO_DATA.commands.map((cmd) => (
@@ -759,7 +773,7 @@ export function TerminalInterface() {
                 {/* Touchpoints / Links */}
                 <div className="space-y-1.5 pt-2 border-t border-[#27272A]">
                   <p className="text-[10px] text-[#52525B] uppercase tracking-wider px-2 font-medium">
-                    Links
+                    {currentLang === "id" ? "Tautan" : "Links"}
                   </p>
                   <div className="space-y-1 text-xs">
                     <a
