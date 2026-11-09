@@ -133,6 +133,7 @@ export type TextOpts = {
   padX?: number;
   padY?: number;
   tracking?: number;
+  bounds?: { left: number; top: number; width: number; height: number };
 };
 
 /**
@@ -149,6 +150,11 @@ export function sampleText(o: TextOpts) {
   const SS = 4;
   const W = cols * cellW;
   const H = rows * cellH;
+  const targetW = o.bounds ? o.bounds.width : W;
+  const targetH = o.bounds ? o.bounds.height : H;
+  const targetX = o.bounds ? o.bounds.left : 0;
+  const targetY = o.bounds ? o.bounds.top : 0;
+
   const c = document.createElement('canvas');
   c.width = Math.max(1, cols * SS);
   c.height = Math.max(1, rows * SS);
@@ -164,12 +170,12 @@ export function sampleText(o: TextOpts) {
   const asc = m.actualBoundingBoxAscent || 72;
   const desc = m.actualBoundingBoxDescent || 0;
   const capH = ctx.measureText('H').actualBoundingBoxAscent || asc;
-  const k = Math.min((W * (1 - 2 * padX)) / total, (H * (1 - 2 * padY)) / (asc + desc));
+  const k = Math.min((targetW * (1 - 2 * padX)) / total, (targetH * (1 - 2 * padY)) / (asc + desc));
   ctx.font = font(100 * k);
   ctx.fillStyle = '#fff';
   ctx.textBaseline = 'alphabetic';
-  let x = (W - total * k) / 2;
-  const base = (H - (asc + desc) * k) / 2 + asc * k;
+  let x = targetX + (targetW - total * k) / 2;
+  const base = targetY + (targetH - (asc + desc) * k) / 2 + asc * k;
   chars.forEach((ch, i) => {
     ctx.fillText(ch, x, base);
     x += (adv[i] + trackPx) * k;

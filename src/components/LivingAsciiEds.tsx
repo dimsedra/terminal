@@ -30,7 +30,7 @@ const INK_SMOKE = 3;    // Void air streaks
 
 type Streak = { x: number; y: number; len: number; v: number };
 
-export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
+export function LivingAsciiEds({ compact = false, anchorRef }: LivingAsciiEdsProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -61,6 +61,7 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
     let gust: { t0: number; ph: number; px: number; py: number } | null = null;
     let prev: { x: number; y: number } | null = null;
     let buildId = 0;
+    let edsCenterRow = 0;
 
     const newStreak = (anywhere: boolean): Streak => ({
       x: anywhere ? Math.random() * cols : -Math.random() * cols * 0.35,
@@ -70,8 +71,8 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
     });
 
     const inject = (x: number, y: number, s: number) => {
-      const RX = Math.max(2.5, cols / 36);
-      const RY = Math.max(1.5, RX * 0.45);
+      const RX = Math.max(3, cols / 36);
+      const RY = Math.max(1.8, RX * 0.45);
       const x0 = Math.max(0, Math.floor(x - RX));
       const x1 = Math.min(cols - 1, Math.ceil(x + RX));
       const y0 = Math.max(0, Math.floor(y - RY));
@@ -109,17 +110,19 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       // Ambient gusts keep the emblem lively when idle
       if (!compact && !reduce && intro >= 1) {
         if (!gust && t > nextGust && now - lastPointer > 3500) {
-          gust = { t0: t, ph: Math.random() * 6.28, px: -4, py: rows / 2 };
-          nextGust = t + 8 + Math.random() * 5;
+          const baseRow = edsCenterRow > 0 ? edsCenterRow : rows / 2;
+          gust = { t0: t, ph: Math.random() * 6.28, px: -6, py: baseRow };
+          nextGust = t + 7 + Math.random() * 4;
         }
         if (gust) {
-          const p = (t - gust.t0) / 2.2;
+          const p = (t - gust.t0) / 2.4;
           if (p >= 1) gust = null;
           else {
             const e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
-            const x = -4 + (cols + 8) * e;
-            const y = rows * (0.5 + 0.25 * Math.sin(p * Math.PI * 2 + gust.ph));
-            stroke(gust.px, gust.py, x, y, 0.35);
+            const x = -6 + (cols + 12) * e;
+            const baseRow = edsCenterRow > 0 ? edsCenterRow : rows / 2;
+            const y = baseRow + 2.5 * Math.sin(p * Math.PI * 2 + gust.ph);
+            stroke(gust.px, gust.py, x, y, 0.45);
             gust.px = x;
             gust.py = y;
           }
@@ -213,7 +216,7 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       const dpr = dprOf();
       const fs = compact
         ? Math.max(4.5, Math.min(7.5, W / 48))
-        : Math.max(6, Math.min(10.5, W / 85));
+        : Math.max(7, Math.min(10.5, W / 110));
 
       atlas = makeAtlas(
         CHARS,
@@ -229,6 +232,21 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       ox = (W - cols * atlas.cellW) / 2;
       oy = (H - rows * atlas.cellH) / 2;
 
+      let bounds: { left: number; top: number; width: number; height: number } | undefined;
+      if (!compact && anchorRef?.current) {
+        const wrapRect = wrap.getBoundingClientRect();
+        const anchorRect = anchorRef.current.getBoundingClientRect();
+        bounds = {
+          left: Math.max(0, anchorRect.left - wrapRect.left),
+          top: Math.max(0, anchorRect.top - wrapRect.top),
+          width: anchorRect.width,
+          height: anchorRect.height,
+        };
+        edsCenterRow = Math.floor((bounds.top + bounds.height * 0.45) / atlas.cellH);
+      } else {
+        edsCenterRow = Math.floor(rows / 2);
+      }
+
       const s = sampleText({
         text: "EDS",
         family,
@@ -237,9 +255,10 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
         rows,
         cellW: atlas.cellW,
         cellH: atlas.cellH,
-        padX: compact ? 0.04 : 0.08,
+        padX: compact ? 0.04 : 0.06,
         padY: compact ? 0.04 : 0.06,
-        tracking: 0.05,
+        tracking: 0.06,
+        bounds,
       });
 
       cov = s.cov;
@@ -251,7 +270,7 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
 
       streaks = compact
         ? []
-        : Array.from({ length: Math.max(4, Math.round(N / 320)) }, () => newStreak(true));
+        : Array.from({ length: Math.max(6, Math.round(N / 260)) }, () => newStreak(true));
 
       ctx = fitCanvas(canvas, W, H, dpr);
       draw(performance.now(), 0);
@@ -268,11 +287,15 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       draw(now, dt);
     };
 
-    const onMove = (e: PointerEvent) => {
-      if (compact || !atlas) return;
+    const onMove = (e: PointerEvent | MouseEvent) => {
+      if (compact || !atlas || !canvas) return;
       const rect = canvas.getBoundingClientRect();
       const x = (e.clientX - rect.left - ox) / atlas.cellW;
       const y = (e.clientY - rect.top - oy) / atlas.cellH;
+      if (x < 0 || x >= cols || y < 0 || y >= rows) {
+        prev = null;
+        return;
+      }
       lastPointer = performance.now();
       if (prev) {
         const sp = Math.hypot(x - prev.x, (y - prev.y) * 2);
@@ -286,8 +309,8 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
     };
 
     if (!compact) {
-      wrap.addEventListener("pointermove", onMove);
-      wrap.addEventListener("pointerleave", onLeave);
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerleave", onLeave);
     }
 
     const io = new IntersectionObserver(
@@ -315,6 +338,9 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       tm = window.setTimeout(build, 140);
     });
     ro.observe(wrap);
+    if (anchorRef?.current) {
+      ro.observe(anchorRef.current);
+    }
 
     raf = requestAnimationFrame(loop);
 
@@ -325,23 +351,23 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       ro.disconnect();
       window.clearTimeout(tm);
       if (!compact) {
-        wrap.removeEventListener("pointermove", onMove);
-        wrap.removeEventListener("pointerleave", onLeave);
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerleave", onLeave);
       }
     };
-  }, [compact]);
+  }, [compact, anchorRef]);
 
   return (
     <div
       ref={wrapRef}
-      className={`relative select-none ${
+      className={
         compact
-          ? "aspect-[3.2/1] w-36 mx-auto cursor-default pointer-events-none"
-          : "aspect-[3.6/1] w-full max-w-xl mx-auto cursor-crosshair"
-      }`}
+          ? "relative aspect-[3.2/1] w-36 mx-auto cursor-default pointer-events-none select-none"
+          : "absolute inset-0 w-full h-full pointer-events-none select-none overflow-hidden z-0"
+      }
       aria-label="EDS ASCII Typographical Emblem"
     >
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" aria-hidden />
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block" aria-hidden />
     </div>
   );
 }
