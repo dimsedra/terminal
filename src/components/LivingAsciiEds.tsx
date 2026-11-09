@@ -258,7 +258,7 @@ export function LivingAsciiEds({ compact = false, anchorRef }: LivingAsciiEdsPro
         cellH: atlas.cellH,
         padX: compact ? 0.04 : 0.03,
         padY: compact ? 0.04 : 0.03,
-        tracking: compact ? 0.05 : 0.09,
+        tracking: compact ? 0.05 : 0.07,
         bounds,
       });
 
