@@ -73,11 +73,15 @@ function getEmptyResult(query: string): CommandSuggestionResult {
   };
 }
 
-export function getCommandSuggestions(rawInput: string): CommandSuggestionResult {
+export function getCommandSuggestions(
+  rawInput: string,
+  lang: "en" | "id" = "en"
+): CommandSuggestionResult {
   if (!rawInput.startsWith("/")) {
     return getEmptyResult(rawInput);
   }
 
+  const isId = lang === "id";
   const trimmed = rawInput.trimStart();
   const lower = trimmed.toLowerCase();
 
@@ -187,7 +191,7 @@ export function getCommandSuggestions(rawInput: string): CommandSuggestionResult
   const suggestions: CommandSuggestion[] = matchingCommands.map((cmd) => ({
     name: cmd.name,
     fullText: cmd.name,
-    description: cmd.desc,
+    description: isId && cmd.descId ? cmd.descId : cmd.desc,
   }));
 
   return {

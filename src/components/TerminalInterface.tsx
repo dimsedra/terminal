@@ -14,6 +14,7 @@ import { getCommandSuggestions } from "@/lib/commandSuggestions";
 export function TerminalInterface() {
   const [inputVal, setInputVal] = useState("");
   const [isDismissed, setIsDismissed] = useState(false);
+  const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en");
 
   const suggestions = useMemo(() => {
     if (isDismissed) {
@@ -25,15 +26,14 @@ export function TerminalInterface() {
         suggestions: [],
       };
     }
-    return getCommandSuggestions(inputVal);
-  }, [inputVal, isDismissed]);
+    return getCommandSuggestions(inputVal, currentLang);
+  }, [inputVal, isDismissed, currentLang]);
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeAiOutputId, setActiveAiOutputId] = useState<string | null>(null);
   const [showAiNotice, setShowAiNotice] = useState(false);
   const [isAiSession, setIsAiSession] = useState(false);
   const [currentTheme, setCurrentTheme] = useState<ThemeId>("default");
-  const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en");
   const hasShownNoticeRef = useRef(false);
   const lastAssistantIdRef = useRef<string | null>(null);
   const isAwaitingNewAssistantRef = useRef(false);
@@ -742,7 +742,7 @@ export function TerminalInterface() {
                           {cmd.name}
                         </span>
                         <span className="text-[10px] text-[#52525B] truncate max-w-[120px]">
-                          {cmd.desc.split(" ")[0]}
+                          {(currentLang === "id" && cmd.descId ? cmd.descId : cmd.desc).split(" ")[0]}
                         </span>
                       </button>
                     ))}

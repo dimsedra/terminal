@@ -74,6 +74,10 @@ test("Command Suggestions (Language Command & Arguments) - resolves '/l' to /lan
   const invalidArg = getCommandSuggestions("/lang xyz");
   assert.equal(invalidArg.isOpen, false);
   assert.equal(invalidArg.suggestions.length, 0);
+
+  const idCommandsResult = getCommandSuggestions("/about", "id");
+  assert.equal(idCommandsResult.isOpen, true);
+  assert.equal(idCommandsResult.suggestions[0].description, "Pelajari latar belakang Eds, peran, dan filosofi rekayasa");
 });
 
 test("Command Suggestions (Boundaries) - returns closed state and empty suggestions for non-command or empty inputs", () => {

@@ -55,6 +55,7 @@ export interface ProjectItem {
 export interface CommandItem {
   name: string;
   desc: string;
+  descId?: string;
 }
 
 export type SupportedLanguage = "en" | "id";

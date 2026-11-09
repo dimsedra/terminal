@@ -92,7 +92,10 @@ test("Localized Markdown Generators - renders Indonesian content when 'id' is su
   assert.match(idSkills, /Keahlian Teknis & Rekayasa Inti/i);
 
   const idHelp = getHelpMarkdown("id");
-  assert.match(idHelp, /Daftar Perintah/i);
+  assert.match(idHelp, /Daftar Perintah Terminal/i);
+  assert.match(idHelp, /Mulai sesi AI interaktif/i);
+  assert.match(idHelp, /Lihat proyek unggulan/i);
+  assert.match(idHelp, /Pelajari latar belakang Eds/i);
   assert.match(idHelp, /Ketik `\/chat`/i);
 
   const idContact = getContactMarkdown("id");

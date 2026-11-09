@@ -75,7 +75,10 @@ export function parseLanguageArgument(rawArg: string): ParseLanguageResult {
 export function getHelpMarkdown(lang?: SupportedLanguage): string {
   const isId = resolveLanguage(lang) === "id";
   const cmdList = PORTFOLIO_DATA.commands
-    .map((c) => `- \`${c.name}\` — ${c.desc}`)
+    .map((c) => {
+      const desc = isId && c.descId ? c.descId : c.desc;
+      return `- \`${c.name}\` — ${desc}`;
+    })
     .join("\n");
 
   if (isId) {
