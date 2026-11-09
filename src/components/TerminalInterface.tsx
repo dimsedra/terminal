@@ -488,7 +488,8 @@ export function TerminalInterface() {
                 {/* Large Centered 2D Living Typographical ASCII EDS Anchor */}
                 <div
                   ref={edsAnchorRef}
-                  className="w-full max-w-xl mx-auto aspect-[3.6/1] flex items-center justify-center select-none pointer-events-none pb-2"
+                  className="w-full max-w-4xl mx-auto flex items-center justify-center select-none pointer-events-none pb-2"
+                  style={{ minHeight: "clamp(240px, 36vh, 360px)" }}
                   aria-hidden="true"
                 />
 
