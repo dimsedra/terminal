@@ -27,7 +27,7 @@ function createFullWeek(
   };
 }
 
-test("ASCII Contribution Grid - maps all five GitHub contribution levels to shaded ASCII glyphs and green palette across 7 weekday rows", () => {
+test("ASCII Contribution Grid - maps all five GitHub contribution levels to shaded ASCII glyphs and monochrome palette across 7 weekday rows", () => {
   const weeks: ContributionWeek[] = [
     createFullWeek(0, "NONE", 0),
     createFullWeek(1, "FIRST_QUARTILE", 2),
@@ -61,10 +61,10 @@ test("ASCII Contribution Grid - maps all five GitHub contribution levels to shad
     mondayCells.map((c) => ({ glyph: c.glyph, colorHex: c.colorHex })),
     [
       { glyph: "·", colorHex: "#52525B" },
-      { glyph: "░", colorHex: "#1f883d" },
-      { glyph: "▒", colorHex: "#26a641" },
-      { glyph: "▓", colorHex: "#39d353" },
-      { glyph: "█", colorHex: "#56f06f" },
+      { glyph: "░", colorHex: "#71717A" },
+      { glyph: "▒", colorHex: "#A1A1AA" },
+      { glyph: "▓", colorHex: "#D4D4D8" },
+      { glyph: "█", colorHex: "#FFFFFF" },
     ]
   );
 });
