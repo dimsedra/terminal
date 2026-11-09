@@ -44,6 +44,37 @@ test("Command Suggestions (Theme Arguments) - resolves theme aliases like 'neon'
   assert.ok(result.suggestions.some((s) => s.name === "neon"));
 });
 
+test("Command Suggestions (Language Command & Arguments) - resolves '/l' to /lang and lists language options on '/lang '", () => {
+  const prefixResult = getCommandSuggestions("/lan");
+  assert.equal(prefixResult.isOpen, true);
+  assert.equal(prefixResult.bestMatchFullText, "/lang");
+  assert.equal(prefixResult.ghostSuffix, "g");
+  assert.ok(prefixResult.suggestions.some((s) => s.name === "/lang"));
+
+  const argListResult = getCommandSuggestions("/lang ");
+  assert.equal(argListResult.isOpen, true);
+  assert.equal(argListResult.suggestions.length, 2);
+  const argNames = argListResult.suggestions.map((s) => s.name);
+  assert.deepEqual(argNames, ["en", "id"]);
+  assert.equal(argListResult.bestMatchFullText, "/lang en");
+  assert.equal(argListResult.ghostSuffix, "en");
+
+  const idResult = getCommandSuggestions("/lang i");
+  assert.equal(idResult.isOpen, true);
+  assert.equal(idResult.bestMatchFullText, "/lang id");
+  assert.equal(idResult.ghostSuffix, "d");
+  assert.equal(idResult.suggestions[0].name, "id");
+
+  const aliasResult = getCommandSuggestions("/lang indo");
+  assert.equal(aliasResult.isOpen, true);
+  assert.equal(aliasResult.bestMatchFullText, "/lang id");
+  assert.equal(aliasResult.suggestions[0].name, "id");
+
+  const invalidArg = getCommandSuggestions("/lang xyz");
+  assert.equal(invalidArg.isOpen, false);
+  assert.equal(invalidArg.suggestions.length, 0);
+});
+
 test("Command Suggestions (Boundaries) - returns closed state and empty suggestions for non-command or empty inputs", () => {
   assert.deepEqual(getCommandSuggestions(""), {
     isOpen: false,
