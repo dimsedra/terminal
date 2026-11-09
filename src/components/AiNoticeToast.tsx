@@ -38,7 +38,7 @@ export function AiNoticeToast({ isOpen, onClose }: AiNoticeToastProps) {
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-16 right-4 sm:right-8 z-30 w-80 sm:w-88 bg-[#1C1C1C]/95 backdrop-blur-sm border border-[#27272A] rounded-md p-3.5 shadow-xl shadow-black/50 font-mono transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 select-none"
+      className="fixed bottom-16 right-4 sm:right-8 z-30 w-80 sm:w-88 bg-[#1C1C1C]/95 backdrop-blur-sm border border-[#27272A] p-3.5 shadow-xl shadow-black/50 font-mono transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 select-none"
     >
       <div className="flex items-center justify-between pb-1.5 border-b border-[#27272A]">
         <div className="flex items-center space-x-2">

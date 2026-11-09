@@ -452,7 +452,7 @@ export function TerminalInterface() {
                 e.stopPropagation();
                 setSidebarOpen(!sidebarOpen);
               }}
-              className="text-xs px-2 py-0.5 rounded bg-[#1C1C1C] hover:bg-[#27272A] text-[#8E8E93] hover:text-[#FFFFFF] border border-[#27272A] transition-colors cursor-pointer font-mono shrink-0"
+              className="text-xs px-2 py-0.5 bg-[#1C1C1C] hover:bg-[#27272A] text-[#8E8E93] hover:text-[#FFFFFF] border border-[#27272A] transition-colors cursor-pointer font-mono shrink-0"
               title="Toggle sidebar"
             >
               <span className="sm:hidden">{sidebarOpen ? "[sidebar: ×]" : "[sidebar]"}</span>
@@ -506,7 +506,7 @@ export function TerminalInterface() {
                           e.stopPropagation();
                           handleCommandExecution(cmd);
                         }}
-                        className="px-3 py-1 bg-[#1C1C1C]/90 text-[#E4E4E7] hover:bg-[#27272A] hover:text-[#FFFFFF] border border-[#27272A] rounded-md transition-colors cursor-pointer"
+                        className="px-3 py-1 bg-[#1C1C1C]/90 text-[#E4E4E7] hover:bg-[#27272A] hover:text-[#FFFFFF] border border-[#27272A] transition-colors cursor-pointer"
                       >
                         {cmd}
                       </button>
@@ -524,7 +524,7 @@ export function TerminalInterface() {
               <div className="relative flex-1 min-w-0 flex items-center">
                 {/* Floating Recommendation Chips Popover */}
                 {suggestions.isOpen && suggestions.suggestions.length > 0 && (
-                  <div className="absolute bottom-full left-0 mb-3 z-50 w-full max-w-sm sm:max-w-md bg-[#18181B]/95 backdrop-blur-md border border-[#27272A] rounded-lg p-1.5 shadow-2xl flex flex-col gap-1 max-h-56 overflow-y-auto">
+                  <div className="absolute bottom-full left-0 mb-3 z-50 w-full max-w-sm sm:max-w-md bg-[#18181B]/95 backdrop-blur-md border border-[#27272A] p-1.5 shadow-2xl flex flex-col gap-1 max-h-56 overflow-y-auto">
                     {suggestions.suggestions.map((item) => (
                       <button
                         key={item.fullText}
@@ -533,7 +533,7 @@ export function TerminalInterface() {
                           e.preventDefault();
                           handleApplySuggestion(item.fullText);
                         }}
-                        className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs font-mono rounded hover:bg-[#27272A] text-left transition-colors cursor-pointer group"
+                        className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs font-mono hover:bg-[#27272A] text-left transition-colors cursor-pointer group"
                       >
                         <span className="text-[#E4E4E7] group-hover:text-white font-medium">{item.name}</span>
                         <span className="text-[#71717A] text-[11px] truncate ml-3">{item.description}</span>
@@ -600,7 +600,7 @@ export function TerminalInterface() {
                   <span className="text-xs font-mono text-[#52525B] uppercase tracking-wider">Navigation</span>
                   <button
                     onClick={() => setSidebarOpen(false)}
-                    className="text-xs text-[#8E8E93] hover:text-[#FFFFFF] px-1.5 py-0.5 rounded border border-[#27272A] font-mono cursor-pointer"
+                    className="text-xs text-[#8E8E93] hover:text-[#FFFFFF] px-1.5 py-0.5 border border-[#27272A] font-mono cursor-pointer"
                   >
                     [close ×]
                   </button>
@@ -631,7 +631,7 @@ export function TerminalInterface() {
                             setSidebarOpen(false);
                           }
                         }}
-                        className="w-full flex items-center justify-between px-2.5 py-1.5 rounded hover:bg-[#1C1C1C] text-left transition-colors cursor-pointer group"
+                        className="w-full flex items-center justify-between px-2.5 py-1.5 hover:bg-[#1C1C1C] text-left transition-colors cursor-pointer group"
                       >
                         <span className="text-[#E4E4E7] font-medium group-hover:underline group-hover:text-[#FFFFFF]">
                           {cmd.name}
@@ -731,7 +731,7 @@ export function TerminalInterface() {
                 <div className="relative flex-1 min-w-0 flex items-center">
                   {/* Floating Recommendation Chips Popover */}
                   {suggestions.isOpen && suggestions.suggestions.length > 0 && (
-                    <div className="absolute bottom-full left-0 mb-3 z-50 w-full max-w-sm sm:max-w-md bg-[#18181B]/95 backdrop-blur-md border border-[#27272A] rounded-lg p-1.5 shadow-2xl flex flex-col gap-1 max-h-56 overflow-y-auto">
+                    <div className="absolute bottom-full left-0 mb-3 z-50 w-full max-w-sm sm:max-w-md bg-[#18181B]/95 backdrop-blur-md border border-[#27272A] p-1.5 shadow-2xl flex flex-col gap-1 max-h-56 overflow-y-auto">
                       {suggestions.suggestions.map((item) => (
                         <button
                           key={item.fullText}
@@ -740,7 +740,7 @@ export function TerminalInterface() {
                             e.preventDefault();
                             handleApplySuggestion(item.fullText);
                           }}
-                          className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs font-mono rounded hover:bg-[#27272A] text-left transition-colors cursor-pointer group"
+                          className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs font-mono hover:bg-[#27272A] text-left transition-colors cursor-pointer group"
                         >
                           <span className="text-[#E4E4E7] group-hover:text-white font-medium">{item.name}</span>
                           <span className="text-[#71717A] text-[11px] truncate ml-3">{item.description}</span>

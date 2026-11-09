@@ -51,10 +51,13 @@ The portfolio is built as an authentic developer terminal and agentic CLI interf
   - **Sidebar Variant (Compact & Non-Hover)**:
     - Scaled down cleanly to fit within the sidebar column without wrapping or clipping.
     - Retains the living matrix glyph shimmering and subtle ambient breathing, but omits the interactive mouse hover trail to keep sidebar navigation distraction-free.
+- **Border & Corner Geometry (Strictly Sharp Terminal Edges)**:
+  - All UI containers, buttons, popover panels, interactive chips, markdown code blocks, and toast notifications use strictly sharp, right-angle corners (`rounded-none` / 0px border-radius) to preserve an authentic, industrial, and disciplined CLI workstation aesthetic.
+  - The only deliberate exception is circular indicator dots (such as the 3 decorative window control dots at the top left of the terminal header and status indicator lights), which retain `rounded-full`.
 - **Interactive Command Chips**:
   - Formatted code blocks starting with `/` automatically render as clickable chips with border highlights on hover in neutral gray (`#A1A1AA`).
 - **GitHub Contributions ASCII Grid (`/about`)**:
-  - Rendered inside a dark terminal surface panel (`bg-[#1C1C1C]/90 border border-[#27272A] rounded-md px-3.5 py-3`) directly below the author bio in `/about` to prevent background ASCII animations from colliding with the grid glyphs.
+  - Rendered inside a dark terminal surface panel (`bg-[#1C1C1C]/90 border border-[#27272A] px-3.5 py-3`) directly below the author bio in `/about` to prevent background ASCII animations from colliding with the grid glyphs.
   - Uses character density paired with a clean monochrome gradient rising from base dark gray up to bright white (strictly no green):
     - `NONE`: `·` in `#52525B` (subdued zinc glyph)
     - `FIRST_QUARTILE`: `░` in `#71717A` (light-subdued zinc for 25% density)

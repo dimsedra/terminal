@@ -57,7 +57,7 @@ function renderAboutContributions(
   }
 
   return (
-    <div className="mt-4 w-fit max-w-full bg-[#1C1C1C]/90 border border-[#27272A] rounded-md px-3.5 py-3 space-y-2.5 font-mono">
+    <div className="mt-4 w-fit max-w-full bg-[#1C1C1C]/90 border border-[#27272A] px-3.5 py-3 space-y-2.5 font-mono">
       <div className="flex flex-wrap items-baseline justify-between gap-4">
         <span className="text-xs font-semibold text-[#FFFFFF] tracking-wide">
           GitHub Contributions
@@ -341,7 +341,7 @@ export function StreamingTerminalOutput({
           return (
             <code
               onClick={() => onRunCommandRef.current?.(text)}
-              className="px-1.5 py-0.5 rounded bg-[#1C1C1C] text-[#E4E4E7] text-xs border border-[#27272A] cursor-pointer hover:border-[#E4E4E7]/60 hover:text-[#FFFFFF] transition-colors inline-block"
+              className="px-1.5 py-0.5 bg-[#1C1C1C] text-[#E4E4E7] text-xs border border-[#27272A] cursor-pointer hover:border-[#E4E4E7]/60 hover:text-[#FFFFFF] transition-colors inline-block"
               title={`Run ${text}`}
               {...props}
             >
@@ -351,7 +351,7 @@ export function StreamingTerminalOutput({
         }
         return (
           <code
-            className="px-1.5 py-0.5 rounded bg-[#1C1C1C] text-[#D4D4D8] text-xs border border-[#27272A]"
+            className="px-1.5 py-0.5 bg-[#1C1C1C] text-[#D4D4D8] text-xs border border-[#27272A]"
             {...props}
           >
             {children}
