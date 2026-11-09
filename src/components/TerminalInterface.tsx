@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useChat } from "@ai-sdk/react";
-import { SpinningAsciiEds } from "./SpinningAsciiEds";
+import { LivingAsciiEds } from "./LivingAsciiEds";
 import { AsciiBackground } from "./AsciiBackground";
 import { ThemeId, THEME_LIST, parseThemeArgument, getThemesMarkdown } from "@/content/themes";
 import { PORTFOLIO_DATA } from "@/data/portfolioData";
@@ -433,9 +433,9 @@ export function TerminalInterface() {
             <AsciiBackground themeId={currentTheme} />
             <div className="relative z-10 h-full overflow-y-auto overflow-x-hidden flex flex-col justify-center items-center px-4 py-8">
               <div className="max-w-2xl w-full text-center space-y-4">
-                {/* Large Centered 3D Spinning ASCII EDS */}
+                {/* Large Centered 2D Living Typographical ASCII EDS */}
                 <div className="py-2">
-                  <SpinningAsciiEds compact={false} />
+                  <LivingAsciiEds compact={false} />
                 </div>
 
                 <div className="space-y-2">
@@ -522,9 +522,9 @@ export function TerminalInterface() {
                   </button>
                 </div>
 
-                {/* Sidebar Header: Compact 3D Spinning ASCII EDS */}
+                {/* Sidebar Header: Compact 2D Living Typographical ASCII EDS */}
                 <div className="border-b border-[#27272A] pb-3 text-center">
-                  <SpinningAsciiEds compact={true} />
+                  <LivingAsciiEds compact={true} />
                   <p className="text-xs font-semibold text-[#FFFFFF] pt-1">
                     DIMAS EDRA AR RAFI
                   </p>
