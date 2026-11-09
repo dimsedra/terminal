@@ -6,62 +6,59 @@ interface LivingAsciiEdsProps {
   compact?: boolean;
 }
 
-const DENSE_GLYPHS = ["@", "#", "%", "0", "O", "8", "&"];
-const MEDIUM_GLYPHS = ["+", "*", "=", "x", "#", "~"];
-const LIGHT_GLYPHS = [":", "-", "=", "+", "·"];
-const DUST_GLYPHS = [".", "·", ":", "'", "`"];
-const BORDER_GLYPHS = ["/", "\\", "|", "_", "-", "=", "[", "]"];
+const DENSE_GLYPHS = ["@", "#", "%"];
+const MEDIUM_GLYPHS = ["%", "#", "*", "+", "="];
+const LIGHT_GLYPHS = ["+", "=", "-", ":"];
+const DUST_GLYPHS = [".", ":", "-"];
+const BORDER_GLYPHS = ["/", "\\", "|", "_"];
 
-// 37 rows x 94 columns template with rich vertical degradation matching reference
+// 29 rows x 126 columns clean typographical template modeled on the ATMOS reference
+// E (30 cols) + 6 spaces + D (38 cols) + 8 spaces + S (44 cols) = 126 cols
 const CINEMATIC_LARGE_TEMPLATE = [
-  ".__________________________.    .________________________.                 _.-===-._            ",
-  "|@@ @# %%%@%@% @@#%#%# @@%0|    |@@ @# %%%@%@% @@#%#%# @@%0\\           ..%#%#00#%@%#%@%0%_..    ",
-  "|@@# @@# @@%@%%%#@@#%#@%00#|    |@@# @@# @@%@%%%#@@#%#@%00#\\\\       /__%#@#%#%@#0#%#%#@#%@#%@__ ",
-  "|%@%@% @%% @@# @%@%%%#%#%00|    |%@%@% @%% @@# @%@%%%#%#%000\\\\     /%#%#%#000%#%#00#%#0%#%0%#00%\\\\",
-  "|%%%%%%@@ #%## #%@#% @@#000|    |%%%%%%@@ #%## #%@#% @@#00000\\\\    /#0%#%#0#0#0#0%#%0%#%0#%#0%#0%0\\\\",
-  "|0%%0% 00|=================|    |0%%0% 00|====0000 00 \\00% 00|   |#%#%@%0%0%0#%0%0%0#%00%00%000#0%|",
-  "|%00 000%|                      |%00 000%|             \\00 00|   |%%00%0%@%0%0#0%000%   \\%%%%000@#%|",
-  "|%00 000%|                      |%00 000%|              |000 |   |%00#0%00%00#0#000%     \\##@%#@#00|",
-  "|0%0 000%|                      |0%0 000%|              |000 |   |00%00#0#0000#0#00*      |@%0%#00@|",
-  "|000 000%|                      |000 000%|              |000 |   |%00#0%00%00#0#00%*       `---\\00%|",
-  "|%00 000%|                      |%00 000%|              |000 |   \\%@%#%#0#0#0#0%#%#*+-: · . ·  \\00#/",
-  "|%00 0%00%00000000000000000|    |%00 000%|              |000 |    \\%#0%#%%%#%#*+=__     . .    /00%|",
-  "|%%00%000000 00000000000000|    |%%00%000|              |000 |     \\##%%#0#%#%#%%%#*__\\       /0#00|",
-  "|00%00 000%00 0000000000000|    |00%00 00|              |000 |      \\%%%%%%%%%%%#%%%#%*\\\\   //%0%#0/",
-  "|0%0%0 000000 0000000000000|    |0%0%0 00|              |000 |      -=*#%#%#+*%+#%%%%%%%#%#*\\\\    / ",
-  "|%00 000%|=================|    |%00 000%|              |000 |         \\%%#*%#*#*%#%*#%##*   /--=   ",
-  "|%00 000%|                      |%00 000%|              |000 |          \\   `%##%#00#*+--==*#%*+    ",
-  "|%00 000%|                      |%00 000%|              |000 |                \\%%%#0%#*+-:==#%*+    ",
-  "|0%0 000%|                      |0%0 000%|              |000 |                --===+*#%#*+=+#%*+--  ",
-  "|000 000%|                      |000 000%|              |000 |           -+--===*#%#*+=+*#%#*+=---  ",
-  "|%00 000%|                      |%00 000%|              |000 |        ==+==+*#%#*+=+*#%#*+=---      ",
-  "|0%%0% 00|_________________|    |0%%0% 00|              /000 |       =+-+*#%#*+=+*#%#*+=---        ",
-  "|0 00%00 %000 0%00 00000000|    |0 00%00 %000 0%00 000 /00 00|      =+-*#%#*+=+*#%#*+=--- \\000#00|  ",
-  "|0%0% |%00 00%0000 00000000|    |0%0% |%00 00%0000 00 /00% 00|     /--*#%#*+=+*#%#*+=---   \\00#00%| ",
-  "|00 0%0 0%%00%00 00 0000000|    |00 0%0 0%%00%00 00 0//00000//    |00#--*#%#*+=+*#%#*+=--   |00000| ",
-  "|%0%0%00 0%%===%%% 00000000|    |%0%0%00 0%%===%%% 0//00000//     |0#0%--*#%#*+=+*#%#*+=--  |000#0| ",
-  "|=+%#=#==#*#%*+%#=##=+#*#%#|    |=+%#=#==#*#%*+%#=##=+#*#%#/      \\000%#--*#%#*+=+*#%#*+=--/000#00| ",
-  "|#%=+##%--%#%=+%#-#+#%==+#*|    |#%=+##%--%#%=+%#-#+#%==+#*        \\00#00--*#%#*+=+*#%#*+=--#000#0/ ",
-  "|=+%-+-#%#+#+#-=#%=#+#==#%#|    |=+%-+-#%#+#+#-=#%=#+#==#%#       |-+=#+--*#%#*:%#%#++:-*:- -##*+=* ",
-  "|:= -#-#%#*- -%#+#*- +++%=#|    |:= -#-#%#*- -%#+#*- +++%=#       \\+#+#%%-%=##*:#::-*%+-=##:%:--%*  ",
-  "|: * + - # = : - ** : *%**%|    |: * + - # = : - ** : *%**%       --:+%+%+=:::#*:%:#:=%+-=+-++#=*:: ",
-  "|· ** + - ++ : - :++ · · = |    |· ** + - ++ : - :++ · · =          =% -+++-: %**+-*+==:*%=#-**+=:  ",
-  "|· * = + + : ; - * - *# = +|    |· * = + + : ; - * - *# = +         == . == *= .=+*+--#* -- -#%#*:. ",
-  "|- + , · + = - : · - * · : |    |- + , · + = - : · - * · :            :: . -+=*+ :==  . :* + . . .  ",
-  "|= = : , : · · = - · : · : |    |= = : , : · · = - · : · :               . : - -  . .   .   .       ",
-  "|· · · · · · · · · · · · · |    |· · · · · · · · · · · · ·                 . . .    .               ",
-  "`                          '    `                             '              .                      ",
+  ".____________________________.      .____________________________.                         ...._...                 ",
+  "|@%@@#%@%%@@@#%%%@@@#%#@@#%@@|      |%@@@#=%#%#@#%%#%@@@@##%@@#%@\\.                  .____%###%@#%#%@%____.        ",
+  "|@@%#@#%%@%%@@@#%@@#%#%%#%@%%|      |@#%@#@@%%%@%@@%@@#%@@%%#@@#%@\\\\.              /_%##@#%#%%@@#@##%%#@#%%#@__.   ",
+  "|%@#@%#%#%#@@#@#%#%%#@@#@@#%@|      |@#%@#%#%##@%%@%#%@%#%@@#%#@@#%@\\\\           ./@@#%#@@#@@@%%@@@%@#%%#@@##@@\\\\  ",
+  "|#@#@#%%%@%@%#@@%@@@@@@%@%@%%|      |@#%@@@##%#%@%@#%#@%@@#%@@#%%@#%@@\\         /#@%@#%@#@@#%%@#%@@#%@%%#%@@#%#@\\. ",
+  "|%%%@%@@#%%@%#%#%@@@%@#@@#%%%|      |%@%@#%@@#%#%@#%#%%@%%@#@%@@#%@@#%@\\       /#%#%%@@%@%#%@%#%@@#%@@#%%@%%@@@%#@@\\",
+  "|@%@@#%#%@%@@#%#@#@%#%%%#%@#%|      |#%#@@#%@%%%@##@@@@@@#@@%#%%@%%@@#%@\\     |%%#%@%@@%#%@#@#%------\\%#%@%@@@##@#%%.",
+  "|%%#@@%%%%%@#.................      |##@#@@@#@@##%/--------\\%##@@#%@@#%%@|    #%%%@@%@@%#%@@%/ .       \\##@%#%%@#%@%|",
+  "|%%#%#%#%%%#@|                      |@@%#@@@#@##%/          \\@@#%#%#@@%%@|   |#%%@@@%%#%@%%@@           |@%@%%#@@@%%@|",
+  "|%#%%#%%@#%@#|                      |#%@%@#@%%@#/            \\##@@#%%@@%#|   |%#@@@@#@@%%#%#%\\.         .-----------/ ",
+  "|%#%%#%#%%#@@|                      |@%%#@#%%%%#|            |%%##@@#@@%%|   |%@%%#@#%#%%#%#@%_____.                 ",
+  "|%%#%@#%#%%#%|______________.       |@#%#@#%#%%#|            |%%#@#%%#@%%|    %@%%%%#%#@#@%%%@@#%##%%_____.          ",
+  "|%%#%#%#%%%#%%@@#%#%%#@@#%@@|       |=%#%%@%#%#%|            |%%#%#%#%%#%|    \\##%%#@@%%%#%#@#%#%%#%#%%%%#%@__\\      ",
+  "|%%#%#%#%%#%%@%%#@#%%@%%#%@@|       |%%#%#%#%%#%|            |*%%#%#%%#%#|     \\%%#%#%%%%#%%#%###%%#%@%%@#%#%%\\\\     ",
+  "|%*#%+#%%*%#%%#%#%%%#%%%#%@@|       |#%%%#%%*%#*|            |%%*#%%*#%#%|      .=#%#%#####%#%%%###%#%%#%%#%%#%%#\\.  ",
+  "|%%*#*%#%#*#%#--------------.       |#%%#%%%*#%*|            |#%#%%#*%#%#|        :\\%##%%%*%*%#%#%%*#%%***%%%#%#%##- ",
+  "|#%#%#%#+%#%#|                      |=%#**%*#*%+|            |%+#%##**#%#|          \\--%#%%#%#%+*%%*%*#%%*%%**#%%+%**|",
+  "|*#%##+*=*#%#|                      |#%#%%#+%#+%|            |%+*=*%*%#+%|              .--:--+=###%###***%#%%#+%#%*%+%*",
+  "|*#%##=+%*#%#|                      |=#**%##=%%#+\\          /#%#=%*#%#%%/    .____.____.__.      .---+%+%####*%##**%##+.",
+  "|#%#-***#%%**|________________.     |=+%+++=##=#*%\\        /=#%=*%#%#%%/    |=%+=#++=*#+%#=%            \\\\*+=#%*#+#=##%%+",
+  "|-*#=%=+%#%#=-%#%*=+%#=#==#*#%|     |-++%+-%%*%#*=+\\______/+=*#--**#%#/     +##-#==%++-#=%*\\             .%#+++%%=+*==%**=",
+  "|#*+-%%%%#=%=#%#%%+#%=+##%--%#|     |-*#--=*#%#%#%+=*#+=#%*#%==+*#%#%/      *=#%+%+%-%%%#-#=.           :*#-#*#%==+#%**+--",
+  "|+%*+#+#=%+++:%#+-=+%-+-#%#+#+|     |:%+#+=--#-=-:#*%+#+-*%#%#+-=#%#.       |-*=#+-*#%#*:%#%#++:-*:--###*=***:+=%%%%%=*=.",
+  "|*=:%-#%=-#==%-:+:=--#-#%#*--%|     |:=%%-#+--#=-:--*#%*-+#%#*--*#*.         \\+#+#%%-%=##*:#::-*%+-=##:%:--%*::+#-%::**%.",
+  "|*:%#+:==:+:-*:%=--:+#+%+=:::#|     |.++-##-**-+:+:-=+%+-*#%#+--#:            --:+#+%+=:::#*:%:#:=%+-=+-++#=*:::++:--.  ",
+  "|.*..:*+:-*::.#..:.:=%--+++-:%|     |.#=:##+..+.-=-.:+*=:+##+=--:               .:.=%--+++-:%**+-*+%=:*%=#-**++=:...    ",
+  "|-+.:..--+-.:-:-..==.:.==.*=..|     |.:=..-:+=.=-:..:+=:-+*+=-:.                    .==.:.==.*=..=.=+*+--=#---:###*:.    ",
+  " . . ..  . .  . .  .::=:-+*=*+       . .  .  . .  .  . . . .                           .::=:-+*=*+:+==...:.:*+...       ",
+  "                     . . . .                                                                  . . . . .                   ",
 ];
 
-// 7 rows x 29 cols template for Sidebar view
+// 11 rows x 43 cols clean template for Sidebar view
 const COMPACT_TEMPLATE = [
-  "|%0%===%|  |%0%==%0\\    /%0%===%\\",
-  "|0%0%0 0|  |0%0  \\00|  //00%    |",
-  "|%00    |  |%00   |0|  \\00%====/ ",
-  "|0%0===0|  |0%0   |0|   \\000%==\\ ",
-  "|%00    |  |%00   |0|       \\000\\\\",
-  "|0%0%0 0|  |0%0  /00|  |00%====//",
-  "+==+===+  +==+==%0/    \\ %0%==/ ",
+  " .__________.   ._________.     .___###___. ",
+  " |@@#%@@#%@@|   |@@#%@@#%@\\.   /@@#%@@@#%@\\",
+  " |@#%@@#|....   |@#%@@|  \\@\\  |@@#%.   .\\@|",
+  " |@#%@@#|___    |@#%@@|   |@|  \\@@#%@___   ",
+  " |@#%#%@@#%@|   |@#%@@|   |@|   \\@@@#%%@\\  ",
+  " |%#*#%#|...    |%#*#%|   |%|     .\\*#%%#\\ ",
+  " |*#%#*%+===.   |*#%#%|  /#%| .____. \\*#%#|",
+  " |+#%+=*#%#*|   |+#%+=+/#%#%| |+*=*#+/+#%#/",
+  " |:=+-*+=+*+|   |:=+-*+=+*+.   \\+=*+-=*+:. ",
+  "  .:=-:..:-:     .:=-:..:-:     .:=-:..:.  ",
+  "    .  ..          .  ..          .  ..    ",
 ];
 
 type DensityType = "space" | "border" | "dense" | "medium" | "light" | "dust";
@@ -70,7 +67,9 @@ interface CellState {
   initialChar: string;
   char: string;
   type: DensityType;
-  intensity: number; // 0..1 (orange trail glow)
+  intensity: number; // 0..1 (orange glyph trail glow)
+  scanIntensity: number; // 0..1 (horizontal scanline trail across voids)
+  scanChar: string;
   baseColor: string;
 }
 
@@ -83,33 +82,35 @@ interface Particle {
   opacity: number;
 }
 
-function getDensityType(ch: string, rowIndex: number): DensityType {
+function getDensityType(ch: string, rowIndex: number, totalRows: number): DensityType {
   if (ch === " ") return "space";
   if (BORDER_GLYPHS.includes(ch)) return "border";
-  if (rowIndex >= 31) return "dust";
-  if (rowIndex >= 26) return "light";
-  if (rowIndex >= 16 && (MEDIUM_GLYPHS.includes(ch) || LIGHT_GLYPHS.includes(ch))) return "medium";
+  const ratio = rowIndex / totalRows;
+  if (ratio >= 0.88) return "dust";
+  if (ratio >= 0.75) return "light";
   if (DENSE_GLYPHS.includes(ch)) return "dense";
   if (MEDIUM_GLYPHS.includes(ch)) return "medium";
-  return "light";
+  if (LIGHT_GLYPHS.includes(ch)) return "light";
+  return "dust";
 }
 
-function getRandomGlyph(type: DensityType): string {
+function getRandomGlyph(type: DensityType, fallback: string): string {
   if (type === "dense") return DENSE_GLYPHS[Math.floor(Math.random() * DENSE_GLYPHS.length)];
   if (type === "medium") return MEDIUM_GLYPHS[Math.floor(Math.random() * MEDIUM_GLYPHS.length)];
   if (type === "light") return LIGHT_GLYPHS[Math.floor(Math.random() * LIGHT_GLYPHS.length)];
   if (type === "dust") return DUST_GLYPHS[Math.floor(Math.random() * DUST_GLYPHS.length)];
-  return "·";
+  return fallback;
 }
 
-function getBaseColor(type: DensityType, rowIndex: number): string {
-  if (rowIndex >= 32) return "#52525B";
-  if (rowIndex >= 27) return "#71717A";
-  if (rowIndex >= 20) return "#A1A1AA";
+function getBaseColor(type: DensityType, rowIndex: number, totalRows: number): string {
+  const ratio = rowIndex / totalRows;
+  if (ratio >= 0.9) return "#52525B";
+  if (ratio >= 0.78) return "#71717A";
+  if (ratio >= 0.62) return "#A1A1AA";
   if (type === "dense") return "#FFFFFF";
   if (type === "medium") return "#E4E4E7";
-  if (type === "border") return "#D4D4D8";
-  return "#8E8E93";
+  if (type === "border") return "#E4E4E7";
+  return "#A1A1AA";
 }
 
 export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
@@ -128,6 +129,18 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
     const rows = lines.length;
     const cols = Math.max(...lines.map((l) => l.length));
 
+    const getResolvedFontFamily = () => {
+      const cssVar = window.getComputedStyle(document.body).getPropertyValue("--font-ioskeley-mono").trim();
+      if (cssVar) {
+        return `${cssVar}, monospace`;
+      }
+      const computed = window.getComputedStyle(container).fontFamily;
+      if (computed && !computed.includes("var(")) {
+        return computed;
+      }
+      return "monospace";
+    };
+
     // Initialize grid cells
     const grid: CellState[][] = [];
     for (let r = 0; r < rows; r++) {
@@ -135,13 +148,15 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       const line = lines[r].padEnd(cols, " ");
       for (let c = 0; c < cols; c++) {
         const ch = line[c];
-        const type = getDensityType(ch, r);
+        const type = getDensityType(ch, r, rows);
         grid[r][c] = {
           initialChar: ch,
           char: ch,
           type,
           intensity: 0,
-          baseColor: getBaseColor(type, r),
+          scanIntensity: 0,
+          scanChar: r % 2 === 0 ? "-" : c % 3 === 0 ? "=" : ".",
+          baseColor: getBaseColor(type, r, rows),
         };
       }
     }
@@ -163,25 +178,14 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
     let sweepStartTime = 0;
 
     const computeMetrics = () => {
-      const containerWidth = container.clientWidth || (compact ? 240 : 800);
-      let fontSize = compact ? 8 : 11;
+      const fontFamily = getResolvedFontFamily();
+      const containerWidth = container.clientWidth || (compact ? 230 : 900);
 
-      if (!compact) {
-        if (containerWidth < 480) {
-          fontSize = 4.8;
-        } else if (containerWidth < 640) {
-          fontSize = 6.4;
-        } else if (containerWidth < 840) {
-          fontSize = 8.5;
-        } else if (containerWidth < 1024) {
-          fontSize = 10.5;
-        } else {
-          fontSize = 11.5;
-        }
-      }
-
-      const charWidth = fontSize * 0.6;
-      const charHeight = fontSize * 1.15;
+      const maxCharWidth = compact ? 5.2 : 7.4;
+      const charWidth = Math.min(maxCharWidth, Math.max(2.4, (containerWidth - 8) / cols));
+      // Use 1.42x charWidth for fontSize so each glyph (~0.85 * charWidth) has crisp horizontal breathing space
+      const fontSize = charWidth * 1.42;
+      const charHeight = charWidth * 1.82;
       const totalWidth = Math.ceil(cols * charWidth);
       const totalHeight = Math.ceil(rows * charHeight);
 
@@ -191,19 +195,70 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       canvas.style.width = `${totalWidth}px`;
       canvas.style.height = `${totalHeight}px`;
 
-      ctx.scale(dpr, dpr);
-      ctx.font = `${fontSize}px var(--font-ioskeley-mono), monospace`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.font = `${fontSize}px ${fontFamily}`;
       ctx.textBaseline = "top";
 
-      return { fontSize, charWidth, charHeight, totalWidth, totalHeight };
+      return { fontSize, fontFamily, charWidth, charHeight, totalWidth, totalHeight };
     };
 
     let metrics = computeMetrics();
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => {
+        metrics = computeMetrics();
+      });
+    }
 
     const resizeObserver = new ResizeObserver(() => {
       metrics = computeMetrics();
     });
     resizeObserver.observe(container);
+
+    const applyWakeAt = (colCenter: number, rowCenter: number) => {
+      const glyphRadius = 6.2;
+      const scanHalfRows = 2.6;
+      const scanHalfCols = 32;
+
+      for (let r = 0; r < rows; r++) {
+        const rowDiff = Math.abs(r - rowCenter);
+        for (let c = 0; c < cols; c++) {
+          const cell = grid[r][c];
+          const colDiff = Math.abs(c - colCenter);
+
+          if (cell.type !== "space") {
+            const dist = Math.hypot((c - colCenter) * 0.85, (r - rowCenter) * 1.35);
+            if (dist <= glyphRadius) {
+              const addedIntensity = Math.max(0, 1.0 - (dist / glyphRadius) * 0.65);
+              cell.intensity = Math.max(cell.intensity, addedIntensity);
+
+              if (cell.type !== "border" && Math.random() < 0.35) {
+                cell.char = getRandomGlyph(cell.type, cell.initialChar);
+              }
+
+              if (Math.random() < 0.05 && particles.length < 40) {
+                particles.push({
+                  x: c * metrics.charWidth + (Math.random() - 0.5) * 8,
+                  y: r * metrics.charHeight + (Math.random() - 0.5) * 8,
+                  vx: (Math.random() - 0.5) * 14,
+                  vy: -Math.random() * 16 - 4,
+                  char: [".", ":", "-", "+", "="][Math.floor(Math.random() * 5)],
+                  opacity: 0.9,
+                });
+              }
+            } else if (rowDiff <= scanHalfRows && colDiff <= scanHalfCols) {
+              // Subtle horizontal scanline illumination across letter rows too
+              const scanBoost = Math.max(0, 0.55 - (colDiff / scanHalfCols) * 0.45 - rowDiff * 0.12);
+              cell.intensity = Math.max(cell.intensity, scanBoost);
+            }
+          } else if (rowDiff <= scanHalfRows && colDiff <= scanHalfCols) {
+            // Persistent horizontal dashed scanline trail in empty spaces
+            const scanBoost = Math.max(0, 0.62 - (colDiff / scanHalfCols) * 0.52 - rowDiff * 0.15);
+            cell.scanIntensity = Math.max(cell.scanIntensity, scanBoost);
+          }
+        }
+      }
+    };
 
     // Mouse / Touch Interaction Handler (Hero only)
     const handlePointer = (clientX: number, clientY: number) => {
@@ -218,43 +273,26 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       }
 
       isPointerInside = true;
-      targetX = Math.max(0, Math.min(x, metrics.totalWidth));
-      targetY = Math.max(0, Math.min(y, metrics.totalHeight));
+      const nextX = Math.max(0, Math.min(x, metrics.totalWidth));
+      const nextY = Math.max(0, Math.min(y, metrics.totalHeight));
 
-      const touchedCol = targetX / metrics.charWidth;
-      const touchedRow = targetY / metrics.charHeight;
-      const radius = 3.2;
-
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const cell = grid[r][c];
-          if (cell.type === "space") continue;
-
-          const dist = Math.hypot(c - touchedCol, (r - touchedRow) * 1.2);
-          if (dist <= radius) {
-            const addedIntensity = 1.0 - (dist / radius) * 0.4;
-            cell.intensity = Math.max(cell.intensity, addedIntensity);
-
-            // Contact mutation
-            if (Math.random() < 0.35) {
-              cell.char = getRandomGlyph(cell.type);
-            }
-
-            // Spawn particle whispers along path
-            if (Math.random() < 0.08 && particles.length < 40) {
-              particles.push({
-                x: c * metrics.charWidth + (Math.random() - 0.5) * 8,
-                y: r * metrics.charHeight + (Math.random() - 0.5) * 8,
-                vx: (Math.random() - 0.5) * 16,
-                vy: -Math.random() * 18 - 6,
-                char: [".", ":", "-", "·", "+", "="][Math.floor(Math.random() * 6)],
-                opacity: 1.0,
-              });
-            }
-          }
+      // Interpolate intermediate steps if pointer moved fast so the trail never has gaps
+      if (targetX >= 0 && targetY >= 0) {
+        const dx = nextX - targetX;
+        const dy = nextY - targetY;
+        const stepDist = Math.hypot(dx, dy);
+        const steps = Math.min(12, Math.max(1, Math.ceil(stepDist / (metrics.charWidth * 2))));
+        for (let s = 1; s <= steps; s++) {
+          const ix = targetX + (dx * s) / steps;
+          const iy = targetY + (dy * s) / steps;
+          applyWakeAt(ix / metrics.charWidth, iy / metrics.charHeight);
         }
+      } else {
+        applyWakeAt(nextX / metrics.charWidth, nextY / metrics.charHeight);
       }
 
+      targetX = nextX;
+      targetY = nextY;
       lastInteractionTime = performance.now();
     };
 
@@ -270,6 +308,8 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
 
     const onPointerLeave = () => {
       isPointerInside = false;
+      targetX = -999;
+      targetY = -999;
     };
 
     if (!compact) {
@@ -283,17 +323,17 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       const delta = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
 
-      // 1. Shimmer engine: micro-mutate random cells periodically
-      if (now - lastShimmerTime > 80) {
+      // 1. Shimmer engine: micro-mutate random interior cells periodically
+      if (now - lastShimmerTime > 90) {
         lastShimmerTime = now;
         const shimmerCount = compact ? 2 : 5;
         for (let i = 0; i < shimmerCount; i++) {
           const randR = Math.floor(Math.random() * rows);
           const randC = Math.floor(Math.random() * cols);
           const cell = grid[randR][randC];
-          if (cell.type !== "space") {
-            if (Math.random() < 0.4) {
-              cell.char = getRandomGlyph(cell.type);
+          if (cell.type !== "space" && cell.type !== "border") {
+            if (Math.random() < 0.35) {
+              cell.char = getRandomGlyph(cell.type, cell.initialChar);
             } else {
               cell.char = cell.initialChar;
             }
@@ -308,14 +348,14 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
 
       if (!compact) {
         const idleDuration = now - lastInteractionTime;
-        if (!isPointerInside && !isSweeping && idleDuration > 3800) {
+        if (!isPointerInside && !isSweeping && idleDuration > 3500) {
           isSweeping = true;
           sweepProgress = 0;
           sweepStartTime = now;
         }
 
         if (isSweeping) {
-          const sweepDuration = 2800; // ms
+          const sweepDuration = 3200; // ms
           const elapsed = now - sweepStartTime;
           sweepProgress = elapsed / sweepDuration;
 
@@ -323,39 +363,14 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
             isSweeping = false;
             lastInteractionTime = now;
           } else {
-            // Sweep coordinates across the matrix
-            const sweepCol = sweepProgress * (cols + 20) - 10;
-            const sweepRow = 14 + Math.sin(sweepProgress * Math.PI * 2.2) * 8;
+            const sweepCol = sweepProgress * (cols + 16) - 8;
+            const sweepRow = rows * 0.48 + Math.sin(sweepProgress * Math.PI * 2.1) * (rows * 0.24);
 
             activeScanX = sweepCol * metrics.charWidth;
             activeScanY = sweepRow * metrics.charHeight;
             drawScanReticle = true;
 
-            for (let r = 0; r < rows; r++) {
-              for (let c = 0; c < cols; c++) {
-                const cell = grid[r][c];
-                if (cell.type === "space") continue;
-
-                const dist = Math.hypot(c - sweepCol, (r - sweepRow) * 1.3);
-                if (dist <= 3.2) {
-                  const added = 1.0 - (dist / 3.2) * 0.4;
-                  cell.intensity = Math.max(cell.intensity, added);
-                  if (Math.random() < 0.3) {
-                    cell.char = getRandomGlyph(cell.type);
-                  }
-                  if (Math.random() < 0.06 && particles.length < 35) {
-                    particles.push({
-                      x: c * metrics.charWidth,
-                      y: r * metrics.charHeight,
-                      vx: (Math.random() - 0.5) * 10,
-                      vy: -Math.random() * 14,
-                      char: [".", "-", ":", "+"][Math.floor(Math.random() * 4)],
-                      opacity: 0.9,
-                    });
-                  }
-                }
-              }
-            }
+            applyWakeAt(sweepCol, sweepRow);
           }
         } else if (isPointerInside) {
           activeScanX = targetX;
@@ -367,58 +382,44 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       // 3. Clear Canvas
       ctx.clearRect(0, 0, metrics.totalWidth, metrics.totalHeight);
 
-      const { charWidth, charHeight, fontSize } = metrics;
-      ctx.font = `${fontSize}px var(--font-ioskeley-mono), monospace`;
+      const { charWidth, charHeight, fontSize, fontFamily } = metrics;
+      ctx.font = `${fontSize}px ${fontFamily}`;
 
-      // 4. Draw Horizontal Scanline Guideline Band (Ref: dashed lines across voids)
-      if (!compact && drawScanReticle && activeScanY >= 0) {
-        const scanRowIndex = Math.floor(activeScanY / charHeight);
-        const bandRows = [scanRowIndex - 1, scanRowIndex, scanRowIndex + 1];
-
-        for (const br of bandRows) {
-          if (br < 0 || br >= rows) continue;
-          const yPos = br * charHeight;
-
-          for (let c = 0; c < cols; c++) {
-            const cell = grid[br][c];
-            if (cell.type === "space") {
-              // Draw dashed / dotted guideline characters in empty space near scanline
-              const distFromX = Math.abs(c * charWidth - activeScanX) / (charWidth * 16);
-              if (distFromX < 2.5) {
-                const alpha = Math.max(0, 0.45 - distFromX * 0.16);
-                ctx.fillStyle = `rgba(234, 88, 12, ${alpha})`;
-                const dashChar = br === scanRowIndex ? "-" : (c % 2 === 0 ? "=" : "+");
-                ctx.fillText(dashChar, c * charWidth, yPos);
-              }
-            }
-          }
-        }
-      }
-
-      // 5. Render Grid Cells
+      // 4. Render Grid Cells (both letter glyphs and horizontal scanline trails)
       for (let r = 0; r < rows; r++) {
+        const y = r * charHeight;
         for (let c = 0; c < cols; c++) {
           const cell = grid[r][c];
-          if (cell.type === "space") continue;
+          const x = c * charWidth;
 
-          // Smooth exponential decay
-          if (cell.intensity > 0) {
-            cell.intensity = Math.max(0, cell.intensity - delta * 1.5);
+          if (cell.type === "space") {
+            if (cell.scanIntensity > 0) {
+              cell.scanIntensity = Math.max(0, cell.scanIntensity - delta * 0.55);
+              if (cell.scanIntensity > 0.02) {
+                ctx.fillStyle = `rgba(234, 88, 12, ${Math.min(0.65, cell.scanIntensity)})`;
+                ctx.fillText(cell.scanChar, x, y);
+              }
+            }
+            continue;
           }
 
-          const x = c * charWidth;
-          const y = r * charHeight;
+          // Smooth exponential decay for letter trail
+          if (cell.intensity > 0) {
+            cell.intensity = Math.max(0, cell.intensity - delta * 0.65);
+            if (cell.intensity === 0 && cell.type !== "border") {
+              cell.char = cell.initialChar;
+            }
+          }
 
           if (cell.intensity > 0.02) {
-            // Rich orange / ember glowing illumination (#FF4500 to #EA580C)
             const glowAlpha = Math.min(cell.intensity, 1.0);
-            ctx.fillStyle = `rgba(255, 69, 0, ${glowAlpha})`;
+            ctx.fillStyle = `rgba(255, 69, 0, ${Math.max(0.35, glowAlpha)})`;
             ctx.fillText(cell.char, x, y);
 
-            if (cell.intensity > 0.5 && !compact) {
-              ctx.shadowColor = "rgba(255, 69, 0, 0.6)";
-              ctx.shadowBlur = 5;
-              ctx.fillStyle = "#FF7A1A";
+            if (cell.intensity > 0.55 && !compact) {
+              ctx.shadowColor = "rgba(255, 69, 0, 0.55)";
+              ctx.shadowBlur = 4;
+              ctx.fillStyle = "#FF6B1A";
               ctx.fillText(cell.char, x, y);
               ctx.shadowBlur = 0;
             }
@@ -429,14 +430,14 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
         }
       }
 
-      // 6. Draw Sci-Fi Crosshair Reticle & Status Tag (Ref: circle with ✕ prongs & label)
+      // 5. Draw Sci-Fi Crosshair Reticle & Status Tag (Ref: circle with ✕ prongs & label)
       if (!compact && drawScanReticle && activeScanX >= 0 && activeScanY >= 0) {
         ctx.save();
         ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
         ctx.lineWidth = 1.2;
 
         // Outer ring
-        const reticleR = fontSize * 1.1;
+        const reticleR = fontSize * 1.05;
         ctx.beginPath();
         ctx.arc(activeScanX, activeScanY, reticleR, 0, Math.PI * 2);
         ctx.stroke();
@@ -457,20 +458,20 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
         ctx.arc(activeScanX, activeScanY, 1.8, 0, Math.PI * 2);
         ctx.fill();
 
-        // Label beside reticle (Ref: "BREATHE" / "EDS / ACTIVE")
-        ctx.font = `bold ${Math.max(8, fontSize * 0.85)}px var(--font-ioskeley-mono), monospace`;
+        // Label beside reticle (Ref: "BREATHE")
+        ctx.font = `bold ${Math.max(8, fontSize * 0.85)}px ${fontFamily}`;
         ctx.fillStyle = "#E4E4E7";
         ctx.fillText("BREATHE", activeScanX + reticleR + 6, activeScanY - 4);
 
         ctx.restore();
       }
 
-      // 7. Update & Render Trail Particles
+      // 6. Update & Render Trail Particles
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.x += p.vx * delta;
         p.y += p.vy * delta;
-        p.opacity -= delta * 1.2;
+        p.opacity -= delta * 1.1;
 
         if (p.opacity <= 0) {
           particles.splice(i, 1);
@@ -500,7 +501,7 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
   return (
     <div
       ref={containerRef}
-      className={`relative flex items-center justify-center select-none overflow-hidden ${
+      className={`relative flex items-center justify-center select-none overflow-hidden font-mono ${
         compact ? "w-full py-1 pointer-events-none" : "w-full max-w-full py-1 cursor-crosshair"
       }`}
       aria-label="EDS ASCII Typographical Emblem"
