@@ -9,7 +9,6 @@ import {
   fitCanvas,
   fontsReady,
   getMonoFont,
-  getResolvedFont,
   makeAtlas,
   reducedMotion,
   sampleText,
@@ -200,11 +199,11 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
 
     const build = async () => {
       const id = ++buildId;
-      const family = getResolvedFont('--font-bodoni-moda', '"Bodoni Moda", serif');
       const monoFont = getMonoFont();
-      const weight = 900;
+      const family = monoFont;
+      const weight = 700;
 
-      await fontsReady(`900 100px ${family}`, `400 12px ${monoFont}`);
+      await fontsReady(`700 100px ${family}`, `400 12px ${monoFont}`);
       if (disposed || id !== buildId) return;
 
       const W = wrap.clientWidth;
