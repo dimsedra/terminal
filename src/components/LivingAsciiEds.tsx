@@ -343,10 +343,6 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       }
 
       // 2. Autonomous Idle Sweep (Hero only)
-      let activeScanY = -999;
-      let activeScanX = -999;
-      let drawScanReticle = false;
-
       if (!compact) {
         const idleDuration = now - lastInteractionTime;
         if (!isPointerInside && !isSweeping && idleDuration > 3500) {
@@ -366,17 +362,8 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
           } else {
             const sweepCol = sweepProgress * (cols + 16) - 8;
             const sweepRow = rows * 0.48 + Math.sin(sweepProgress * Math.PI * 2.1) * (rows * 0.24);
-
-            activeScanX = sweepCol * metrics.charWidth;
-            activeScanY = sweepRow * metrics.charHeight;
-            drawScanReticle = true;
-
             applyWakeAt(sweepCol, sweepRow);
           }
-        } else if (isPointerInside) {
-          activeScanX = targetX;
-          activeScanY = targetY;
-          drawScanReticle = true;
         }
       }
 
@@ -431,43 +418,7 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
         }
       }
 
-      // 5. Draw Sci-Fi Crosshair Reticle & Status Tag (Ref: circle with ✕ prongs & label)
-      if (!compact && drawScanReticle && activeScanX >= 0 && activeScanY >= 0) {
-        ctx.save();
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
-        ctx.lineWidth = 1.2;
-
-        // Outer ring
-        const reticleR = fontSize * 1.05;
-        ctx.beginPath();
-        ctx.arc(activeScanX, activeScanY, reticleR, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Diagonal cross prongs
-        const prongLen = reticleR * 1.5;
-        ctx.beginPath();
-        ctx.moveTo(activeScanX - prongLen, activeScanY - prongLen);
-        ctx.lineTo(activeScanX + prongLen, activeScanY + prongLen);
-        ctx.moveTo(activeScanX - prongLen, activeScanY + prongLen);
-        ctx.lineTo(activeScanX + prongLen, activeScanY - prongLen);
-        ctx.strokeStyle = "rgba(234, 88, 12, 0.9)";
-        ctx.stroke();
-
-        // Center dot
-        ctx.fillStyle = "#FFFFFF";
-        ctx.beginPath();
-        ctx.arc(activeScanX, activeScanY, 1.8, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Label beside reticle (Ref: "BREATHE")
-        ctx.font = `bold ${Math.max(8, fontSize * 0.85)}px ${fontFamily}`;
-        ctx.fillStyle = "#E4E4E7";
-        ctx.fillText("BREATHE", activeScanX + reticleR + 6, activeScanY - 4);
-
-        ctx.restore();
-      }
-
-      // 6. Update & Render Trail Particles
+      // 5. Update & Render Trail Particles
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.x += p.vx * delta;
@@ -503,7 +454,7 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
     <div
       ref={containerRef}
       className={`relative flex items-center justify-center select-none overflow-hidden font-mono ${
-        compact ? "w-full py-1 pointer-events-none" : "w-full max-w-full py-1 cursor-crosshair"
+        compact ? "w-full py-1 pointer-events-none" : "w-full max-w-full py-1 cursor-default"
       }`}
       aria-label="EDS ASCII Typographical Emblem"
     >
