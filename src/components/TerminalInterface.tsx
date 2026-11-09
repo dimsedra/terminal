@@ -5,7 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { LivingAsciiEds } from "./LivingAsciiEds";
 import { AsciiBackground } from "./AsciiBackground";
 import { ThemeId, THEME_LIST, parseThemeArgument, getThemesMarkdown } from "@/content/themes";
-import { PORTFOLIO_DATA } from "@/data/portfolioData";
+import { PORTFOLIO_DATA, parseLanguageArgument, type SupportedLanguage } from "@/data/portfolioData";
 import { StreamingTerminalOutput, OutputPayload } from "./StreamingTerminalOutput";
 import { AiNoticeToast } from "./AiNoticeToast";
 import { useTerminalSession } from "@/hooks/useTerminalSession";
@@ -33,6 +33,7 @@ export function TerminalInterface() {
   const [showAiNotice, setShowAiNotice] = useState(false);
   const [isAiSession, setIsAiSession] = useState(false);
   const [currentTheme, setCurrentTheme] = useState<ThemeId>("default");
+  const [currentLang, setCurrentLang] = useState<SupportedLanguage>("en");
   const hasShownNoticeRef = useRef(false);
   const lastAssistantIdRef = useRef<string | null>(null);
   const isAwaitingNewAssistantRef = useRef(false);
@@ -56,6 +57,10 @@ export function TerminalInterface() {
       const savedTheme = sessionStorage.getItem("eds_terminal_theme");
       if (savedTheme && THEME_LIST.some((t) => t.id === savedTheme)) {
         setCurrentTheme(savedTheme as ThemeId);
+      }
+      const savedLang = sessionStorage.getItem("eds_terminal_lang");
+      if (savedLang === "en" || savedLang === "id") {
+        setCurrentLang(savedLang as SupportedLanguage);
       }
     } catch (e) {
       // ignore
@@ -288,6 +293,47 @@ export function TerminalInterface() {
         appendInteraction(trimmed, payload);
         setInputVal("");
         return;
+      } else if (cmdLower === "/lang" || cmdLower.startsWith("/lang ")) {
+        const langArg = trimmed.slice(5).trim();
+        if (!langArg) {
+          const isId = currentLang === "id";
+          const content = isId
+            ? `### Pengaturan Bahasa\n\nBahasa saat ini: **Bahasa Indonesia (id)**.\n\nKetik \`/lang en\` untuk beralih ke bahasa Inggris.`
+            : `### Language Settings\n\nCurrent language: **English (en)**.\n\nType \`/lang id\` to switch to Bahasa Indonesia.`;
+          appendInteraction(trimmed, {
+            type: "markdown",
+            content,
+          });
+          setInputVal("");
+          return;
+        }
+
+        const parseResult = parseLanguageArgument(langArg);
+        if (parseResult.success) {
+          setCurrentLang(parseResult.lang);
+          try {
+            sessionStorage.setItem("eds_terminal_lang", parseResult.lang);
+          } catch (e) {
+            // ignore
+          }
+          const isId = parseResult.lang === "id";
+          const content = isId
+            ? `Bahasa berhasil diubah ke **Bahasa Indonesia (id)**.`
+            : `Switched language to **English (en)**.`;
+          appendInteraction(trimmed, {
+            type: "markdown",
+            content,
+          });
+          setInputVal("");
+          return;
+        }
+
+        appendInteraction(trimmed, {
+          type: "markdown",
+          content: `### Language Error\n\n${parseResult.error}`,
+        });
+        setInputVal("");
+        return;
       } else if (cmdLower === "/help") {
         const payload: OutputPayload = {
           type: "markdown",
@@ -317,15 +363,56 @@ export function TerminalInterface() {
     let payload: OutputPayload;
 
     if (cmdLower === "/help") {
-      payload = { type: "help" };
+      payload = { type: "help", lang: currentLang };
     } else if (cmdLower === "/about") {
-      payload = { type: "about" };
+      payload = { type: "about", lang: currentLang };
     } else if (cmdLower === "/projects" || cmdLower === "/project") {
-      payload = { type: "projects" };
+      payload = { type: "projects", lang: currentLang };
     } else if (cmdLower === "/skills") {
-      payload = { type: "skills" };
+      payload = { type: "skills", lang: currentLang };
     } else if (cmdLower === "/contact") {
-      payload = { type: "contact" };
+      payload = { type: "contact", lang: currentLang };
+    } else if (cmdLower === "/lang" || cmdLower.startsWith("/lang ")) {
+      const langArg = trimmed.slice(5).trim();
+      if (!langArg) {
+        const isId = currentLang === "id";
+        const content = isId
+          ? `### Pengaturan Bahasa\n\nBahasa saat ini: **Bahasa Indonesia (id)**.\n\nPilihan yang tersedia:\n- \`/lang en\` — Ganti ke English\n- \`/lang id\` — Tetap di Bahasa Indonesia\n\n_Ketik \`/lang en\` atau klik pilihan di atas untuk berganti bahasa._`
+          : `### Language Settings\n\nCurrent language: **English (en)**.\n\nAvailable options:\n- \`/lang id\` — Switch to Bahasa Indonesia\n- \`/lang en\` — Keep English\n\n_Type \`/lang id\` or click an option above to switch._`;
+        appendInteraction(trimmed, {
+          type: "markdown",
+          content,
+        });
+        setInputVal("");
+        return;
+      }
+
+      const parseResult = parseLanguageArgument(langArg);
+      if (parseResult.success) {
+        setCurrentLang(parseResult.lang);
+        try {
+          sessionStorage.setItem("eds_terminal_lang", parseResult.lang);
+        } catch (e) {
+          // ignore
+        }
+        const isId = parseResult.lang === "id";
+        const content = isId
+          ? `Bahasa berhasil diubah ke **Bahasa Indonesia (id)**.\n\nKetik \`/help\` untuk melihat perintah yang tersedia atau \`/about\` untuk membaca profil.`
+          : `Switched language to **English (en)**.\n\nType \`/help\` to see available commands or \`/about\` to view profile.`;
+        appendInteraction(trimmed, {
+          type: "markdown",
+          content,
+        });
+        setInputVal("");
+        return;
+      }
+
+      appendInteraction(trimmed, {
+        type: "markdown",
+        content: `### Language Error\n\n${parseResult.error}`,
+      });
+      setInputVal("");
+      return;
     } else if (cmdLower === "/themes" || cmdLower.startsWith("/themes ")) {
       const themeArg = trimmed.slice(7).trim();
       if (!themeArg) {

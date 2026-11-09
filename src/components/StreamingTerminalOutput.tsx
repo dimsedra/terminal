@@ -10,6 +10,7 @@ import {
   getSkillsMarkdown,
   getContactMarkdown,
   getChatPlaceholderMarkdown,
+  type SupportedLanguage,
 } from "@/data/portfolioData";
 import {
   formatContributionGrid,
@@ -117,12 +118,12 @@ function renderAboutContributions(
 }
 
 export type OutputPayload =
-  | { type: "help" }
-  | { type: "about" }
-  | { type: "projects" }
-  | { type: "skills" }
-  | { type: "contact" }
-  | { type: "chat"; query?: string }
+  | { type: "help"; lang?: SupportedLanguage }
+  | { type: "about"; lang?: SupportedLanguage }
+  | { type: "projects"; lang?: SupportedLanguage }
+  | { type: "skills"; lang?: SupportedLanguage }
+  | { type: "contact"; lang?: SupportedLanguage }
+  | { type: "chat"; query?: string; lang?: SupportedLanguage }
   | { type: "markdown"; content: string; isLiveStream?: boolean; isDone?: boolean }
   | { type: "text"; text: string; actionCmd?: string };
 
@@ -154,17 +155,17 @@ export function StreamingTerminalOutput({
   const fullMarkdown = useMemo(() => {
     switch (payload.type) {
       case "help":
-        return getHelpMarkdown();
+        return getHelpMarkdown(payload.lang);
       case "about":
-        return getAboutMarkdown();
+        return getAboutMarkdown(payload.lang);
       case "projects":
-        return getProjectsMarkdown();
+        return getProjectsMarkdown(payload.lang);
       case "skills":
-        return getSkillsMarkdown();
+        return getSkillsMarkdown(payload.lang);
       case "contact":
-        return getContactMarkdown();
+        return getContactMarkdown(payload.lang);
       case "chat":
-        return getChatPlaceholderMarkdown(payload.query);
+        return getChatPlaceholderMarkdown(payload.query, payload.lang);
       case "markdown":
         return payload.content;
       case "text":
