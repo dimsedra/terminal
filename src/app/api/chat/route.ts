@@ -28,22 +28,28 @@ export async function POST(req: Request) {
       );
     }
 
-    const { en, id } = BILINGUAL_PORTFOLIO_DATA;
+    const { en } = BILINGUAL_PORTFOLIO_DATA;
+
+    const languageDirective =
+      lang === "id"
+        ? `ACTIVE LANGUAGE DIRECTIVE (INDONESIAN TERMINAL MODE ACTIVE):
+- The visitor's active terminal language preference is set to Bahasa Indonesia (id).
+- You MUST respond, explain, and converse entirely in natural, fluent, and professional Bahasa Indonesia.
+- Seamlessly translate and articulate all English factual knowledge, project details, and architectural concepts into Bahasa Indonesia.
+- Keep standard technical terms (such as "client-side", "memory pipeline", "lazy loading", "embedding", "zero-server", "webhook", "transfer learning", "fine-tuning") in their recognizable industry forms for technical precision.`
+        : `ACTIVE LANGUAGE DIRECTIVE (ENGLISH TERMINAL MODE ACTIVE):
+- The visitor's active terminal language preference is set to English (en).
+- Respond, explain, and converse in natural, authentic, and professional English.`;
 
     const systemPrompt = `You are the exclusive virtual terminal representative for Dimas Edra Ar Rafi (callsign: Eds).
-Role: ${en.author.role} (${id.author.role})
+Role: ${en.author.role}
 Callsign: ${en.author.callsign}
 Location: ${en.author.location}
-Bio (EN): ${en.author.bio}
-Bio (ID): ${id.author.bio}
+Bio: ${en.author.bio}
 Active Model: ${DEFAULT_AI_MODEL}
-Active Language Preference: ${lang === "id" ? "Bahasa Indonesia (id)" : "English (en)"}
 
-LANGUAGE & CONVERSATIONAL DIRECTIVE:
-- You are natively bilingual in English and Bahasa Indonesia.
-- If the visitor communicates in Bahasa Indonesia (or starts the conversation in Indonesian), respond naturally, warmly, and fluently in Bahasa Indonesia using standard tech terms where appropriate.
-- If the visitor communicates in English, respond in English.
-- Maintain a direct, authentic, and professional tone like a software engineer talking across a desk without fluff or empty flattery.
+${languageDirective}
+
 
 Education & Credentials:
 - Institution: ${en.education.institution} (${en.education.period})
@@ -52,27 +58,23 @@ Education & Credentials:
 - Test Scores: ${en.education.scores || "N/A"}
 
 Organizational Experience:
-${en.experience.map((e, idx) => `- **${e.organization}** (${e.role}, ${e.period}):\n  EN: ${e.description}\n  ID: ${id.experience[idx]?.description || e.description}`).join("\n")}
+${en.experience.map((e) => `- **${e.organization}** (${e.role}, ${e.period}):\n  ${e.description}`).join("\n")}
 
 Key Projects by Eds (Overview & Links):
-${en.projects.map((p, idx) => {
-  const pId = id.projects[idx];
+${en.projects.map((p) => {
   const links = [
     p.github ? `[GitHub Repository](${p.github})` : null,
     p.link ? `[Live Web Demo](${p.link})` : null,
   ].filter(Boolean).join(" · ");
   const linksStr = links ? `\n  Links: ${links}` : "";
-  return `- **${p.name}** (${p.period || "Project"}):\n  EN: ${p.description}\n  ID: ${pId ? pId.description : p.description}\n  Stack: ${p.stack.join(", ")}${linksStr}`;
+  return `- **${p.name}** (${p.period || "Project"}):\n  ${p.description}\n  Stack: ${p.stack.join(", ")}${linksStr}`;
 }).join("\n\n")}
 
 Deep Technical Context & Architectural Details of Eds's Projects:
 ${formatProjectsDeepDivePrompt()}
 
 Technical Capabilities & Skills:
-- English Categories:
 ${en.skills.map((s) => `  * ${s.category}: ${s.items.join(", ")}`).join("\n")}
-- Indonesian Categories:
-${id.skills.map((s) => `  * ${s.category}: ${s.items.join(", ")}`).join("\n")}
 
 Touchpoints:
 - GitHub: ${en.author.links.github}

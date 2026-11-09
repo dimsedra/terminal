@@ -22,9 +22,12 @@ test("Projects Deep Dive (Invariants) - contains all 4 key projects with complet
     assert.ok(project.role.length > 0);
     assert.ok(project.github?.startsWith("https://github.com/dimsedra/"));
     assert.ok(project.stack.length > 0);
-    assert.ok(project.summary.en.length > 0);
-    assert.ok(project.summary.id.length > 0);
+    assert.ok(project.summary.length > 0);
     assert.ok(project.architecturalPillars.length > 0);
+    for (const pillar of project.architecturalPillars) {
+      assert.ok(pillar.title.length > 0);
+      assert.ok(pillar.description.length > 0);
+    }
     assert.ok(project.technicalHighlights.length > 0);
     assert.ok(project.systemTradeoffsAndDecisions.length > 0);
   }
