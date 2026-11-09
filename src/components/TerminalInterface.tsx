@@ -431,10 +431,10 @@ export function TerminalInterface() {
         <div className="relative flex-1 min-h-0 flex flex-col justify-between overflow-hidden z-10">
           <div className="relative flex-1 min-h-0 w-full overflow-hidden">
             <AsciiBackground themeId={currentTheme} />
-            <div className="relative z-10 h-full overflow-y-auto overflow-x-hidden flex flex-col justify-center items-center px-4 py-8">
-              <div className="max-w-5xl w-full text-center space-y-3">
+            <div className="relative z-10 h-full overflow-y-auto overflow-x-hidden flex flex-col justify-center items-center px-4 py-4 sm:py-6">
+              <div className="max-w-6xl w-full text-center space-y-2">
                 {/* Large Centered 2D Living Typographical ASCII EDS */}
-                <div className="py-1 w-full overflow-hidden">
+                <div className="w-full overflow-hidden">
                   <LivingAsciiEds compact={false} />
                 </div>
 

@@ -109,6 +109,18 @@ function getBaseColor(): string {
   return ASCII_BASE_COLOR;
 }
 
+const PAD_TOP_ROWS = 6;
+const PAD_BOTTOM_ROWS = 6;
+const PAD_SIDE_COLS = 16;
+
+const PADDED_LARGE_TEMPLATE = [
+  ...Array.from({ length: PAD_TOP_ROWS }, () => " ".repeat(126 + PAD_SIDE_COLS * 2)),
+  ...CINEMATIC_LARGE_TEMPLATE.map(
+    (line) => " ".repeat(PAD_SIDE_COLS) + line.padEnd(126, " ") + " ".repeat(PAD_SIDE_COLS)
+  ),
+  ...Array.from({ length: PAD_BOTTOM_ROWS }, () => " ".repeat(126 + PAD_SIDE_COLS * 2)),
+];
+
 export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -121,7 +133,7 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const lines = compact ? COMPACT_TEMPLATE : CINEMATIC_LARGE_TEMPLATE;
+    const lines = compact ? COMPACT_TEMPLATE : PADDED_LARGE_TEMPLATE;
     const rows = lines.length;
     const cols = Math.max(...lines.map((l) => l.length));
 
@@ -175,13 +187,13 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
 
     const computeMetrics = () => {
       const fontFamily = getResolvedFontFamily();
-      const containerWidth = container.clientWidth || (compact ? 230 : 900);
+      const containerWidth = container.clientWidth || (compact ? 230 : 1150);
 
-      const maxCharWidth = compact ? 5.2 : 7.4;
-      const charWidth = Math.min(maxCharWidth, Math.max(2.4, (containerWidth - 8) / cols));
-      // Use 1.42x charWidth for fontSize so each glyph (~0.85 * charWidth) has crisp horizontal breathing space
+      const targetCharWidth = compact ? 5.2 : 7.25;
+      const charWidth = Math.min(targetCharWidth, Math.max(2.2, (containerWidth - 8) / cols));
+      // Use 1.42x charWidth for fontSize so each glyph has crisp horizontal breathing space
       const fontSize = charWidth * 1.42;
-      const charHeight = charWidth * 1.82;
+      const charHeight = charWidth * 1.78;
       const totalWidth = Math.ceil(cols * charWidth);
       const totalHeight = Math.ceil(rows * charHeight);
 
@@ -212,45 +224,66 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
     resizeObserver.observe(container);
 
     const applyWakeAt = (colCenter: number, rowCenter: number) => {
-      const glyphRadius = 6.2;
-      const scanHalfRows = 2.6;
-      const scanHalfCols = 32;
+      // Sleek, laser-tight vertical radius to eliminate giant circular blobs
+      const activeRadiusCols = 26; // scanline horizontal reach
 
       for (let r = 0; r < rows; r++) {
         const rowDiff = Math.abs(r - rowCenter);
+        if (rowDiff > 1.35) continue; // Laser beam is strictly ~1 row high (+ soft adjacent fringe)
+
+        const isCoreRow = rowDiff <= 0.65;
+
         for (let c = 0; c < cols; c++) {
-          const cell = grid[r][c];
           const colDiff = Math.abs(c - colCenter);
+          if (colDiff > activeRadiusCols) continue;
+
+          const cell = grid[r][c];
 
           if (cell.type !== "space") {
-            const dist = Math.hypot((c - colCenter) * 0.85, (r - rowCenter) * 1.35);
-            if (dist <= glyphRadius) {
-              const addedIntensity = Math.max(0, 1.0 - (dist / glyphRadius) * 0.65);
+            // Letter glyphs: tight, focused contact illumination
+            if (isCoreRow && colDiff <= 4.5) {
+              const addedIntensity = Math.max(0, 1.0 - (colDiff / 4.5) * 0.45);
               cell.intensity = Math.max(cell.intensity, addedIntensity);
 
-              if (cell.type !== "border" && Math.random() < 0.35) {
+              if (cell.type !== "border" && Math.random() < 0.3) {
                 cell.char = getRandomGlyph(cell.type, cell.initialChar);
               }
 
-              if (Math.random() < 0.05 && particles.length < 40) {
+              if (Math.random() < 0.03 && particles.length < 25) {
                 particles.push({
-                  x: c * metrics.charWidth + (Math.random() - 0.5) * 8,
-                  y: r * metrics.charHeight + (Math.random() - 0.5) * 8,
-                  vx: (Math.random() - 0.5) * 14,
-                  vy: -Math.random() * 16 - 4,
-                  char: [".", ":", "-", "+", "="][Math.floor(Math.random() * 5)],
-                  opacity: 0.9,
+                  x: c * metrics.charWidth + (Math.random() - 0.5) * 6,
+                  y: r * metrics.charHeight,
+                  vx: (Math.random() - 0.5) * 12,
+                  vy: -Math.random() * 14 - 4,
+                  char: [".", ":", "·", "-"][Math.floor(Math.random() * 4)],
+                  opacity: 0.85,
                 });
               }
-            } else if (rowDiff <= scanHalfRows && colDiff <= scanHalfCols) {
-              // Subtle horizontal scanline illumination across letter rows too
-              const scanBoost = Math.max(0, 0.55 - (colDiff / scanHalfCols) * 0.45 - rowDiff * 0.12);
-              cell.intensity = Math.max(cell.intensity, scanBoost);
+            } else if (!isCoreRow && colDiff <= 3.0) {
+              // Subtle edge fringe on immediate adjacent row
+              const fringeIntensity = Math.max(0, 0.38 - (colDiff / 3.0) * 0.25);
+              cell.intensity = Math.max(cell.intensity, fringeIntensity);
             }
-          } else if (rowDiff <= scanHalfRows && colDiff <= scanHalfCols) {
-            // Persistent horizontal dashed scanline trail in empty spaces
-            const scanBoost = Math.max(0, 0.62 - (colDiff / scanHalfCols) * 0.52 - rowDiff * 0.15);
-            cell.scanIntensity = Math.max(cell.scanIntensity, scanBoost);
+          } else {
+            // Empty spaces: horizontal laser scanline (Ref: dashed lines across voids)
+            if (isCoreRow) {
+              const scanBoost = Math.max(0, 0.72 - (colDiff / activeRadiusCols) * 0.58);
+              cell.scanIntensity = Math.max(cell.scanIntensity, scanBoost);
+
+              // Distinctive laser scanline typography matching ATMOS
+              if (colDiff < 4) {
+                cell.scanChar = ["=", "+", "*", "-"][Math.floor(Math.random() * 4)];
+              } else if (colDiff < 14) {
+                cell.scanChar = ["-", "=", "+"][Math.floor(Math.random() * 3)];
+              } else {
+                cell.scanChar = ["-", "·", "."][Math.floor(Math.random() * 3)];
+              }
+            } else if (colDiff <= 14) {
+              // Faint dotted fringe 1 row above/below
+              const fringeScan = Math.max(0, 0.32 - (colDiff / 14) * 0.25);
+              cell.scanIntensity = Math.max(cell.scanIntensity, fringeScan);
+              cell.scanChar = ["·", "."][Math.floor(Math.random() * 2)];
+            }
           }
         }
       }
@@ -263,7 +296,7 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       const x = clientX - rect.left;
       const y = clientY - rect.top;
 
-      if (x < -20 || x > metrics.totalWidth + 20 || y < -20 || y > metrics.totalHeight + 20) {
+      if (x < -30 || x > metrics.totalWidth + 30 || y < -30 || y > metrics.totalHeight + 30) {
         isPointerInside = false;
         return;
       }
