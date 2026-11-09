@@ -103,15 +103,10 @@ function getRandomGlyph(type: DensityType, fallback: string): string {
   return fallback;
 }
 
-function getBaseColor(type: DensityType, rowIndex: number, totalRows: number): string {
-  const ratio = rowIndex / totalRows;
-  if (ratio >= 0.9) return "#52525B";
-  if (ratio >= 0.78) return "#71717A";
-  if (ratio >= 0.62) return "#A1A1AA";
-  if (type === "dense") return "#FFFFFF";
-  if (type === "medium") return "#E4E4E7";
-  if (type === "border") return "#E4E4E7";
-  return "#A1A1AA";
+const ASCII_BASE_COLOR = "#FFFFFF";
+
+function getBaseColor(): string {
+  return ASCII_BASE_COLOR;
 }
 
 export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
@@ -157,7 +152,7 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
           intensity: 0,
           scanIntensity: 0,
           scanChar: r % 2 === 0 ? "-" : c % 3 === 0 ? "=" : ".",
-          baseColor: getBaseColor(type, r, rows),
+          baseColor: getBaseColor(),
         };
       }
     }
