@@ -2,6 +2,8 @@ export interface AuthorLinks {
   github: string;
   linkedin: string;
   email: string;
+  phone?: string;
+  portfolio?: string;
 }
 
 export interface AuthorInfo {
@@ -11,6 +13,25 @@ export interface AuthorInfo {
   bio: string;
   location: string;
   links: AuthorLinks;
+}
+
+export interface EducationInfo {
+  institution: string;
+  location: string;
+  period: string;
+  degree: string;
+  gpa: string;
+  certifications: string[];
+  scores?: string;
+}
+
+export interface ExperienceItem {
+  organization: string;
+  role: string;
+  period: string;
+  location?: string;
+  description: string;
+  highlights?: string[];
 }
 
 export interface SkillCategory {
@@ -26,9 +47,27 @@ export interface ProjectItem {
   stack: string[];
   link?: string;
   github?: string;
+  period?: string;
+  role?: string;
+  highlights?: string[];
 }
 
 export interface CommandItem {
   name: string;
   desc: string;
+}
+
+export type SupportedLanguage = "en" | "id";
+
+export interface PortfolioContent {
+  author: AuthorInfo;
+  education: EducationInfo;
+  experience: ExperienceItem[];
+  skills: SkillCategory[];
+  projects: ProjectItem[];
+}
+
+export interface BilingualPortfolio {
+  en: PortfolioContent;
+  id: PortfolioContent;
 }

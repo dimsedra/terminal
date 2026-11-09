@@ -1,14 +1,4 @@
-import type { AuthorInfo } from "./types";
+import type { AuthorInfo } from "./types.ts";
+import portfolioData from "../data/portfolio.json" with { type: "json" };
 
-export const author: AuthorInfo = {
-  name: "Dimas Edra Ar Rafi",
-  callsign: "Eds",
-  role: "AI-Assisted Software Engineer & Systems Thinker",
-  bio: "Passionate about building refined developer experiences, agentic workflows, and modern web architectures. Focused on disciplined simplicity, pattern recognition, and bridging human intuition with intelligent systems.",
-  location: "Indonesia",
-  links: {
-    github: "https://github.com/dimsedra",
-    linkedin: "https://linkedin.com/in/dimas-edra",
-    email: "mailto:edra.contact@example.com",
-  },
-};
+export const author: AuthorInfo = portfolioData.en.author as AuthorInfo;

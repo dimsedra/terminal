@@ -1,33 +1,4 @@
-import { SkillCategory } from "./types";
+import type { SkillCategory } from "./types.ts";
+import portfolioData from "../data/portfolio.json" with { type: "json" };
 
-export const skills: SkillCategory[] = [
-  {
-    category: "AI & Agentic Workflows",
-    items: [
-      "Vercel AI SDK",
-      "Prompt Engineering & Guardrails",
-      "Agentic CLI Tools",
-      "Tool Calling / Function Calling",
-      "Context Grounding",
-    ],
-  },
-  {
-    category: "Frontend & Architecture",
-    items: [
-      "Next.js (App Router)",
-      "React",
-      "TypeScript",
-      "Tailwind CSS",
-      "Design Systems",
-    ],
-  },
-  {
-    category: "Backend & Systems",
-    items: [
-      "Node.js",
-      "Serverless Edge Functions",
-      "REST & Streaming APIs",
-      "Systemic Architecture",
-    ],
-  },
-];
+export const skills: SkillCategory[] = portfolioData.en.skills as SkillCategory[];

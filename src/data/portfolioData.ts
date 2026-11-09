@@ -1,25 +1,42 @@
+import portfolioData from "./portfolio.json" with { type: "json" };
 import {
-  author,
-  skills,
-  projects,
   commands,
   ProjectItem,
   AuthorInfo,
   SkillCategory,
   CommandItem,
-} from "@/content";
+  EducationInfo,
+  ExperienceItem,
+  SupportedLanguage,
+  PortfolioContent,
+  BilingualPortfolio,
+} from "../content/index.ts";
 
 // Re-export types for backward compatibility across consumers
-export type { ProjectItem, AuthorInfo, SkillCategory, CommandItem };
+export type {
+  ProjectItem,
+  AuthorInfo,
+  SkillCategory,
+  CommandItem,
+  EducationInfo,
+  ExperienceItem,
+  SupportedLanguage,
+  PortfolioContent,
+  BilingualPortfolio,
+};
+
+export const BILINGUAL_PORTFOLIO_DATA = portfolioData as unknown as BilingualPortfolio;
 
 /**
- * Backward-compatible aggregated portfolio data object.
+ * Backward-compatible aggregated portfolio data object (defaults to English).
  * Consumers like /api/chat/route.ts and TerminalInterface.tsx continue to import PORTFOLIO_DATA cleanly.
  */
 export const PORTFOLIO_DATA = {
-  author,
-  skills,
-  projects,
+  author: portfolioData.en.author as AuthorInfo,
+  education: portfolioData.en.education as EducationInfo,
+  experience: portfolioData.en.experience as ExperienceItem[],
+  skills: portfolioData.en.skills as SkillCategory[],
+  projects: portfolioData.en.projects as ProjectItem[],
   commands,
 };
 
@@ -39,16 +56,23 @@ export function getChatPlaceholderMarkdown(query?: string): string {
 }
 
 export function getAboutMarkdown(): string {
-  const { author: a } = PORTFOLIO_DATA;
-  return `### ${a.name} (${a.callsign})\n**${a.role}**\n\n> Location: ${a.location} · [GitHub](${a.links.github}) · [LinkedIn](${a.links.linkedin})\n\n${a.bio}`;
+  const { author: a, education } = PORTFOLIO_DATA;
+  let bioText = `### ${a.name} (${a.callsign})\n**${a.role}**\n\n> Location: ${a.location} · [GitHub](${a.links.github}) · [LinkedIn](${a.links.linkedin})\n\n${a.bio}`;
+
+  if (education) {
+    bioText += `\n\n#### Education & Credentials\n- **${education.institution}** (${education.period})\n  ${education.degree} (GPA: ${education.gpa})\n  _Certifications:_ ${education.certifications.join(", ")}`;
+  }
+
+  return bioText;
 }
 
 export function getProjectsMarkdown(): string {
   const projList = PORTFOLIO_DATA.projects
     .map((p) => {
       const stackBadges = p.stack.map((s) => `\`${s}\``).join(" ");
+      const rolePeriod = p.role && p.period ? `\n  _${p.role} · ${p.period}_` : "";
       const repoLink = p.github ? `\n  [view repository ↗](${p.github})` : "";
-      return `- **${p.name}**\n  ${p.description}\n  ${stackBadges}${repoLink}`;
+      return `- **${p.name}**${rolePeriod}\n  ${p.description}\n  ${stackBadges}${repoLink}`;
     })
     .join("\n\n");
 
@@ -69,5 +93,7 @@ export function getSkillsMarkdown(): string {
 export function getContactMarkdown(): string {
   const { links } = PORTFOLIO_DATA.author;
   const cleanEmail = links.email.replace("mailto:", "");
-  return `### Contact & Touchpoints\n\n- **GitHub:** [${links.github.replace("https://", "")}](${links.github})\n- **LinkedIn:** [${links.linkedin.replace("https://", "")}](${links.linkedin})\n- **Email:** [${cleanEmail}](${links.email})\n\n_Feel free to reach out for collaborations, system architecture discussions, or agentic tooling experiments._`;
+  const phoneLine = links.phone ? `\n- **Phone / WhatsApp:** [${links.phone}](tel:${links.phone})` : "";
+  const portfolioLine = links.portfolio ? `\n- **Live Portfolio:** [${links.portfolio.replace("https://", "")}](${links.portfolio})` : "";
+  return `### Contact & Touchpoints\n\n- **GitHub:** [${links.github.replace("https://", "")}](${links.github})\n- **LinkedIn:** [${links.linkedin.replace("https://", "")}](${links.linkedin})\n- **Email:** [${cleanEmail}](${links.email})${phoneLine}${portfolioLine}\n\n_Feel free to reach out for collaborations, system architecture discussions, or agentic tooling experiments._`;
 }
