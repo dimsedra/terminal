@@ -206,14 +206,12 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
     let targetY = -999;
     let isPointerInside = false;
 
-    // Autonomous sweep state
+    // Autonomous sweep state (Shooting star trajectory)
     interface SweepTrajectory {
       direction: 1 | -1;
       startRow: number;
       endRow: number;
-      frequency: number;
-      amplitude: number;
-      phase: number;
+      bowHeight: number;
       duration: number;
       nextIdleDelay: number;
       lastCol: number;
@@ -228,28 +226,27 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
     const createRandomTrajectory = (): SweepTrajectory => {
       const padTop = compact ? 0 : PAD_TOP_ROWS;
       const letterRows = 29;
-      const minRow = padTop + 3;
-      const maxRow = padTop + letterRows - 2;
+      const minRow = padTop + 2;
+      const maxRow = padTop + letterRows - 1;
 
       const startRow = minRow + Math.random() * (maxRow - minRow);
       const endRow = minRow + Math.random() * (maxRow - minRow);
       const direction: 1 | -1 = Math.random() > 0.5 ? 1 : -1;
-      const frequency = 1.2 + Math.random() * 1.6;
-      const amplitude = 2.5 + Math.random() * 4.5;
-      const phase = Math.random() * Math.PI * 2;
-      const duration = 2500 + Math.random() * 1100;
-      const delay = 4000 + Math.random() * 3500;
+      // Gentle subtle curvature (-3.0 to +3.0 rows)
+      const bowHeight = (Math.random() - 0.5) * 6.0;
+      // Swift shooting star streak: 1400ms to 2000ms
+      const duration = 1400 + Math.random() * 600;
+      // Random cadence: 3800ms to 7000ms
+      const delay = 3800 + Math.random() * 3200;
 
       return {
         direction,
         startRow,
         endRow,
-        frequency,
-        amplitude,
-        phase,
+        bowHeight,
         duration,
         nextIdleDelay: delay,
-        lastCol: direction === 1 ? -12 : cols + 12,
+        lastCol: direction === 1 ? -14 : cols + 14,
         lastRow: startRow,
       };
     };
@@ -479,17 +476,17 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
             activeTrajectory = null;
             lastInteractionTime = now;
           } else {
-            const { direction, startRow, endRow, amplitude, frequency, phase } = activeTrajectory;
+            const { direction, startRow, endRow, bowHeight } = activeTrajectory;
 
             // Parametric continuous column progress
             const col = direction === 1
-              ? t * (cols + 24) - 12
-              : (1 - t) * (cols + 24) - 12;
+              ? t * (cols + 28) - 14
+              : (1 - t) * (cols + 28) - 14;
 
-            // Parametric continuous row with harmonic wave
+            // Straightforward shooting star streak with a single gentle bow curvature
             const baseRow = startRow + (endRow - startRow) * t;
-            const wave = amplitude * Math.sin(t * Math.PI * 2 * frequency + phase);
-            const row = Math.max(2, Math.min(rows - 3, baseRow + wave));
+            const bow = bowHeight * Math.sin(t * Math.PI);
+            const row = Math.max(2, Math.min(rows - 3, baseRow + bow));
 
             // Smooth interpolation between frames to guarantee an unbroken trail
             const dCol = col - activeTrajectory.lastCol;
