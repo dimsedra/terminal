@@ -58,25 +58,25 @@ function renderAboutContributions(
   }
 
   return (
-    <div className="mt-4 w-fit max-w-full bg-[#1C1C1C]/90 border border-[#27272A] px-3.5 py-3 space-y-2.5 font-mono">
-      <div className="flex flex-wrap items-baseline justify-between gap-4">
+    <div className="mt-3 sm:mt-4 w-fit max-w-full bg-[#1C1C1C]/90 border border-[#27272A] px-2.5 sm:px-3.5 py-2 sm:py-3 space-y-2 sm:space-y-2.5 font-mono">
+      <div className="flex flex-wrap items-baseline justify-between gap-3 sm:gap-4">
         <span className="text-xs font-semibold text-[#FFFFFF] tracking-wide">
           GitHub Contributions
         </span>
-        <span className="text-xs text-[#A1A1AA]">{grid.summaryText}</span>
+        <span className="text-[11px] sm:text-xs text-[#A1A1AA]">{grid.summaryText}</span>
       </div>
 
       <div
         role="img"
         aria-label={`GitHub contribution graph showing ${grid.summaryText}`}
-        className="text-xs leading-[1.35] select-none overflow-hidden"
+        className="text-[11px] sm:text-xs leading-[1.35] select-none overflow-hidden"
       >
         {grid.rows.map((row) => (
           <div key={row.weekday} className="flex items-center whitespace-pre">
-            <span className="text-[#8E8E93] w-8 shrink-0 inline-block text-[11px]">
+            <span className="text-[#8E8E93] w-6 sm:w-8 shrink-0 inline-block text-[10px] sm:text-[11px]">
               {row.label}
             </span>
-            <span className="tracking-[0.18em]">
+            <span className="tracking-[0.14em] sm:tracking-[0.18em]">
               {row.cells.map((cell, colIdx) => (
                 <span
                   key={`${row.weekday}-${colIdx}`}
@@ -95,7 +95,7 @@ function renderAboutContributions(
         ))}
       </div>
 
-      <div className="flex items-center justify-between gap-4 text-[11px] text-[#8E8E93] pt-0.5">
+      <div className="flex items-center justify-between gap-4 text-[10px] sm:text-[11px] text-[#8E8E93] pt-0.5">
         <span>
           {grid.displayedWeeks < 52
             ? `latest ${grid.displayedWeeks} weeks`
@@ -275,37 +275,37 @@ export function StreamingTerminalOutput({
   const components = useMemo(() => {
     return {
       h1: ({ children, ...props }: React.ComponentProps<"h1">) => (
-        <h1 className="text-base font-semibold text-[#F4F4F5] mt-5 mb-2.5" {...props}>
+        <h1 className="text-sm sm:text-base font-semibold text-[#F4F4F5] mt-3.5 sm:mt-5 mb-1.5 sm:mb-2.5" {...props}>
           {children}
         </h1>
       ),
       h2: ({ children, ...props }: React.ComponentProps<"h2">) => (
-        <h2 className="text-sm sm:text-base font-semibold text-[#F4F4F5] mt-4 mb-2" {...props}>
+        <h2 className="text-xs sm:text-base font-semibold text-[#F4F4F5] mt-3 sm:mt-4 mb-1.5 sm:mb-2" {...props}>
           {children}
         </h2>
       ),
       h3: ({ children, ...props }: React.ComponentProps<"h3">) => (
-        <h3 className="text-sm font-semibold text-[#FFFFFF] tracking-wide mt-4 mb-2" {...props}>
+        <h3 className="text-xs sm:text-sm font-semibold text-[#FFFFFF] tracking-wide mt-2.5 sm:mt-4 mb-1 sm:mb-2" {...props}>
           {children}
         </h3>
       ),
       p: ({ children, ...props }: React.ComponentProps<"p">) => (
-        <p className="text-sm text-[#D4D4D8] leading-[1.7] my-3.5 sm:my-4" {...props}>
+        <p className="text-xs sm:text-sm text-[#D4D4D8] leading-relaxed my-2 sm:my-4" {...props}>
           {children}
         </p>
       ),
       ul: ({ children, ...props }: React.ComponentProps<"ul">) => (
-        <ul className="space-y-2.5 my-3.5 list-none pl-0" {...props}>
+        <ul className="space-y-1.5 sm:space-y-2.5 my-2 sm:my-3.5 list-none pl-0" {...props}>
           {children}
         </ul>
       ),
       ol: ({ children, ...props }: React.ComponentProps<"ol">) => (
-        <ol className="space-y-2 my-3.5 pl-4 list-decimal text-sm text-[#D4D4D8]" {...props}>
+        <ol className="space-y-1.5 sm:space-y-2 my-2 sm:my-3.5 pl-4 list-decimal text-xs sm:text-sm text-[#D4D4D8]" {...props}>
           {children}
         </ol>
       ),
       li: ({ children, ...props }: React.ComponentProps<"li">) => (
-        <li className="text-sm text-[#D4D4D8] leading-[1.65]" {...props}>
+        <li className="text-xs sm:text-sm text-[#D4D4D8] leading-relaxed" {...props}>
           {children}
         </li>
       ),
@@ -315,12 +315,12 @@ export function StreamingTerminalOutput({
         </strong>
       ),
       em: ({ children, ...props }: React.ComponentProps<"em">) => (
-        <em className="text-[#A1A1AA] italic text-sm" {...props}>
+        <em className="text-[#A1A1AA] italic text-xs sm:text-sm" {...props}>
           {children}
         </em>
       ),
       blockquote: ({ children, ...props }: React.ComponentProps<"blockquote">) => (
-        <blockquote className="border-l-2 border-[#A1A1AA]/60 pl-3 my-3.5 text-xs text-[#8E8E93] leading-[1.65]" {...props}>
+        <blockquote className="border-l-2 border-[#A1A1AA]/60 pl-2.5 sm:pl-3 my-2 sm:my-3.5 text-xs text-[#8E8E93] leading-relaxed" {...props}>
           {children}
         </blockquote>
       ),
@@ -342,7 +342,7 @@ export function StreamingTerminalOutput({
           return (
             <code
               onClick={() => onRunCommandRef.current?.(text)}
-              className="px-1.5 py-0.5 bg-[#1C1C1C] text-[#E4E4E7] text-xs border border-[#27272A] cursor-pointer hover:border-[#E4E4E7]/60 hover:text-[#FFFFFF] transition-colors inline-block"
+              className="px-1.5 py-0.5 bg-[#1C1C1C] text-[#E4E4E7] text-[11px] sm:text-xs border border-[#27272A] cursor-pointer hover:border-[#E4E4E7]/60 hover:text-[#FFFFFF] transition-colors inline-block"
               title={`Run ${text}`}
               {...props}
             >
@@ -352,7 +352,7 @@ export function StreamingTerminalOutput({
         }
         return (
           <code
-            className="px-1.5 py-0.5 bg-[#1C1C1C] text-[#D4D4D8] text-xs border border-[#27272A]"
+            className="px-1.5 py-0.5 bg-[#1C1C1C] text-[#D4D4D8] text-[11px] sm:text-xs border border-[#27272A]"
             {...props}
           >
             {children}
@@ -363,7 +363,7 @@ export function StreamingTerminalOutput({
   }, []);
 
   return (
-    <div className="text-sm text-[#D4D4D8] py-1 streamdown-output">
+    <div className="text-xs sm:text-sm text-[#D4D4D8] py-0.5 sm:py-1 streamdown-output">
       <Streamdown
         mode="streaming"
         components={components}

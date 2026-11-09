@@ -537,7 +537,7 @@ export function TerminalInterface() {
       className="relative w-full h-[100dvh] flex flex-col bg-[#161616] cursor-text select-text overflow-hidden"
     >
       {/* Top Title Bar */}
-      <header className="shrink-0 w-full px-3 sm:px-6 py-2.5 bg-[#161616]/90 backdrop-blur-xs border-b border-[#27272A] select-none flex items-center justify-between z-20">
+      <header className="shrink-0 w-full px-3 sm:px-6 py-2 sm:py-2.5 bg-[#161616]/90 backdrop-blur-xs border-b border-[#27272A] select-none flex items-center justify-between z-20">
         <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
           <div className="flex items-center space-x-1.5 shrink-0">
             <div className="w-2.5 h-2.5 rounded-full bg-[#3F3F46]" />
@@ -592,18 +592,18 @@ export function TerminalInterface() {
                   aria-hidden="true"
                 />
 
-                <div className="max-w-2xl mx-auto space-y-2">
-                  <h1 className="text-base sm:text-lg text-[#FFFFFF] font-semibold tracking-wide">
+                <div className="max-w-2xl mx-auto space-y-1.5 sm:space-y-2">
+                  <h1 className="text-sm sm:text-lg text-[#FFFFFF] font-semibold tracking-wide">
                     DIMAS EDRA AR RAFI (EDS)
                   </h1>
                   <p className="text-xs sm:text-sm text-[#8E8E93]">
                     AI-Assisted Software Engineer & Systems Thinker
                   </p>
-                  <p className="text-xs sm:text-sm text-[#52525B] pt-2">
+                  <p className="text-xs sm:text-sm text-[#52525B] pt-1 sm:pt-2">
                     Type a command or click a shortcut to explore:
                   </p>
 
-                  <div className="flex flex-wrap justify-center gap-2 pt-2 text-xs sm:text-sm">
+                  <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 pt-1 sm:pt-2 text-xs sm:text-sm">
                     {["/chat", "/projects", "/about", "/skills", "/contact", "/themes"].map((cmd) => (
                       <button
                         key={cmd}
@@ -611,7 +611,7 @@ export function TerminalInterface() {
                           e.stopPropagation();
                           handleCommandExecution(cmd);
                         }}
-                        className="px-3 py-1 bg-[#1C1C1C]/90 text-[#E4E4E7] hover:bg-[#27272A] hover:text-[#FFFFFF] border border-[#27272A] transition-colors cursor-pointer"
+                        className="px-2.5 py-0.5 sm:px-3 sm:py-1 bg-[#1C1C1C]/90 text-[#E4E4E7] hover:bg-[#27272A] hover:text-[#FFFFFF] border border-[#27272A] transition-colors cursor-pointer text-xs sm:text-sm"
                       >
                         {cmd}
                       </button>
@@ -623,13 +623,13 @@ export function TerminalInterface() {
           </div>
 
           {/* Bottom Input Prompt for Fase 1 */}
-          <footer className={`relative shrink-0 w-full bg-[#161616] border-t border-[#27272A] px-4 sm:px-8 flex items-center h-[52px] ${suggestions.isOpen ? "z-40" : "z-20"}`}>
-            <div className="max-w-5xl mx-auto flex items-center space-x-3 w-full">
-              <span className="text-[#E4E4E7] font-bold text-base sm:text-lg select-none shrink-0">❯</span>
+          <footer className={`relative shrink-0 w-full bg-[#161616] border-t border-[#27272A] px-3 sm:px-8 flex items-center h-11 sm:h-[52px] ${suggestions.isOpen ? "z-40" : "z-20"}`}>
+            <div className="max-w-5xl mx-auto flex items-center space-x-2 sm:space-x-3 w-full">
+              <span className="text-[#E4E4E7] font-bold text-xs sm:text-lg select-none shrink-0">❯</span>
               <div className="relative flex-1 min-w-0 flex items-center">
                 {/* Floating Recommendation Chips Popover */}
                 {suggestions.isOpen && suggestions.suggestions.length > 0 && (
-                  <div className="absolute bottom-full left-0 mb-3 z-50 w-full max-w-sm sm:max-w-md bg-[#18181B]/95 backdrop-blur-md border border-[#27272A] p-1.5 shadow-2xl flex flex-col gap-1 max-h-56 overflow-y-auto">
+                  <div className="absolute bottom-full left-0 mb-2 sm:mb-3 z-50 w-full max-w-sm sm:max-w-md bg-[#18181B]/95 backdrop-blur-md border border-[#27272A] p-1 sm:p-1.5 shadow-2xl flex flex-col gap-1 max-h-48 sm:max-h-56 overflow-y-auto">
                     {suggestions.suggestions.map((item) => (
                       <button
                         key={item.fullText}
@@ -638,7 +638,7 @@ export function TerminalInterface() {
                           e.preventDefault();
                           handleApplySuggestion(item.fullText);
                         }}
-                        className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs font-mono hover:bg-[#27272A] text-left transition-colors cursor-pointer group"
+                        className="w-full flex items-center justify-between px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-mono hover:bg-[#27272A] text-left transition-colors cursor-pointer group"
                       >
                         <span className="text-[#E4E4E7] group-hover:text-white font-medium">{item.name}</span>
                         <span className="text-[#71717A] text-[11px] truncate ml-3">{item.description}</span>
@@ -649,7 +649,7 @@ export function TerminalInterface() {
                 {/* Ghost Text Underlay */}
                 <div
                   aria-hidden="true"
-                  className="absolute inset-0 pointer-events-none flex items-center font-mono text-sm leading-normal overflow-hidden whitespace-pre select-none p-0 m-0"
+                  className="absolute inset-0 pointer-events-none flex items-center font-mono text-xs sm:text-sm leading-normal overflow-hidden whitespace-pre select-none p-0 m-0"
                 >
                   <span className="invisible">{inputVal}</span>
                   <span className="text-[#71717A]">{suggestions.ghostSuffix}</span>
@@ -672,7 +672,7 @@ export function TerminalInterface() {
                   autoFocus
                   spellCheck={false}
                   autoComplete="off"
-                  className="relative z-10 w-full bg-transparent border-none outline-none text-[#F4F4F5] text-sm font-mono leading-normal placeholder:text-[#52525B] p-0 m-0"
+                  className="relative z-10 w-full bg-transparent border-none outline-none text-[#F4F4F5] text-xs sm:text-sm font-mono leading-normal placeholder:text-[#52525B] p-0 m-0"
                 />
               </div>
               <div className="text-xs text-[#44444A] select-none hidden sm:block shrink-0">
@@ -794,19 +794,19 @@ export function TerminalInterface() {
               >
                 <div
                   ref={contentWrapperRef}
-                  className="w-full px-3.5 sm:px-8 py-4 sm:py-5 space-y-4"
+                  className="w-full px-3 sm:px-8 py-2.5 sm:py-5 space-y-2.5 sm:space-y-4"
                 >
                   {history.map((msg) => {
                     const isStreaming = msg.id === activeStreamingId;
                     return (
-                      <div key={msg.id} className="space-y-1.5 font-mono">
+                      <div key={msg.id} className="space-y-1 sm:space-y-1.5 font-mono">
                         {msg.type === "user" ? (
-                          <div className="flex items-center space-x-2.5 text-sm">
+                          <div className="flex items-center space-x-2 sm:space-x-2.5 text-xs sm:text-sm">
                             <span className="text-[#E4E4E7] font-bold">❯</span>
                             <span className="text-[#FFFFFF] font-medium">{msg.command}</span>
                           </div>
                         ) : (
-                          <div className="pl-3 sm:pl-5 border-l-2 border-[#27272A]">
+                          <div className="pl-2.5 sm:pl-5 border-l-2 border-[#27272A]">
                             {msg.payload && (
                               <StreamingTerminalOutput
                                 payload={msg.payload}
@@ -830,13 +830,13 @@ export function TerminalInterface() {
             </div>
 
             {/* Input Prompt Bar for Fase 2 */}
-            <footer className={`relative shrink-0 w-full bg-[#161616] border-t border-[#27272A] px-3.5 sm:px-8 flex items-center h-[52px] ${suggestions.isOpen ? "z-40" : "z-20"}`}>
-              <div className="w-full flex items-center space-x-2.5 sm:space-x-3">
-                <span className="text-[#E4E4E7] font-bold text-sm sm:text-base select-none shrink-0">❯</span>
+            <footer className={`relative shrink-0 w-full bg-[#161616] border-t border-[#27272A] px-3 sm:px-8 flex items-center h-11 sm:h-[52px] ${suggestions.isOpen ? "z-40" : "z-20"}`}>
+              <div className="w-full flex items-center space-x-2 sm:space-x-3">
+                <span className="text-[#E4E4E7] font-bold text-xs sm:text-base select-none shrink-0">❯</span>
                 <div className="relative flex-1 min-w-0 flex items-center">
                   {/* Floating Recommendation Chips Popover */}
                   {suggestions.isOpen && suggestions.suggestions.length > 0 && (
-                    <div className="absolute bottom-full left-0 mb-3 z-50 w-full max-w-sm sm:max-w-md bg-[#18181B]/95 backdrop-blur-md border border-[#27272A] p-1.5 shadow-2xl flex flex-col gap-1 max-h-56 overflow-y-auto">
+                    <div className="absolute bottom-full left-0 mb-2 sm:mb-3 z-50 w-full max-w-sm sm:max-w-md bg-[#18181B]/95 backdrop-blur-md border border-[#27272A] p-1 sm:p-1.5 shadow-2xl flex flex-col gap-1 max-h-48 sm:max-h-56 overflow-y-auto">
                       {suggestions.suggestions.map((item) => (
                         <button
                           key={item.fullText}
@@ -845,7 +845,7 @@ export function TerminalInterface() {
                             e.preventDefault();
                             handleApplySuggestion(item.fullText);
                           }}
-                          className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs font-mono hover:bg-[#27272A] text-left transition-colors cursor-pointer group"
+                          className="w-full flex items-center justify-between px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-mono hover:bg-[#27272A] text-left transition-colors cursor-pointer group"
                         >
                           <span className="text-[#E4E4E7] group-hover:text-white font-medium">{item.name}</span>
                           <span className="text-[#71717A] text-[11px] truncate ml-3">{item.description}</span>
@@ -856,7 +856,7 @@ export function TerminalInterface() {
                   {/* Ghost Text Underlay */}
                   <div
                     aria-hidden="true"
-                    className="absolute inset-0 pointer-events-none flex items-center font-mono text-sm leading-normal overflow-hidden whitespace-pre select-none p-0 m-0"
+                    className="absolute inset-0 pointer-events-none flex items-center font-mono text-xs sm:text-sm leading-normal overflow-hidden whitespace-pre select-none p-0 m-0"
                   >
                     <span className="invisible">{inputVal}</span>
                     <span className="text-[#71717A]">{suggestions.ghostSuffix}</span>
@@ -884,7 +884,7 @@ export function TerminalInterface() {
                     autoFocus
                     spellCheck={false}
                     autoComplete="off"
-                    className="relative z-10 w-full bg-transparent border-none outline-none text-[#F4F4F5] text-sm font-mono leading-normal placeholder:text-[#52525B] p-0 m-0"
+                    className="relative z-10 w-full bg-transparent border-none outline-none text-[#F4F4F5] text-xs sm:text-sm font-mono leading-normal placeholder:text-[#52525B] p-0 m-0"
                   />
                 </div>
                 <div className="text-xs text-[#44444A] select-none hidden sm:block shrink-0">
