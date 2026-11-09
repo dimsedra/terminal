@@ -57,9 +57,9 @@ function renderAboutContributions(
   }
 
   return (
-    <div className="mt-4 w-fit max-w-full bg-[#0A0A0A]/90 border border-[#1F1F1F] rounded-md px-3.5 py-3 space-y-2.5 font-mono">
+    <div className="mt-4 w-fit max-w-full bg-[#1C1C1C]/90 border border-[#27272A] rounded-md px-3.5 py-3 space-y-2.5 font-mono">
       <div className="flex flex-wrap items-baseline justify-between gap-4">
-        <span className="text-xs font-semibold text-[#9AE6B4] tracking-wide">
+        <span className="text-xs font-semibold text-[#FFFFFF] tracking-wide">
           GitHub Contributions
         </span>
         <span className="text-xs text-[#A1A1AA]">{grid.summaryText}</span>
@@ -284,7 +284,7 @@ export function StreamingTerminalOutput({
         </h2>
       ),
       h3: ({ children, ...props }: React.ComponentProps<"h3">) => (
-        <h3 className="text-sm font-semibold text-[#9AE6B4] tracking-wide mt-4 mb-2" {...props}>
+        <h3 className="text-sm font-semibold text-[#FFFFFF] tracking-wide mt-4 mb-2" {...props}>
           {children}
         </h3>
       ),
@@ -309,7 +309,7 @@ export function StreamingTerminalOutput({
         </li>
       ),
       strong: ({ children, ...props }: React.ComponentProps<"strong">) => (
-        <strong className="font-semibold text-[#F4F4F5]" {...props}>
+        <strong className="font-semibold text-[#FFFFFF]" {...props}>
           {children}
         </strong>
       ),
@@ -319,7 +319,7 @@ export function StreamingTerminalOutput({
         </em>
       ),
       blockquote: ({ children, ...props }: React.ComponentProps<"blockquote">) => (
-        <blockquote className="border-l-2 border-[#9AE6B4]/60 pl-3 my-3.5 text-xs text-[#9E9EA5] leading-[1.65]" {...props}>
+        <blockquote className="border-l-2 border-[#A1A1AA]/60 pl-3 my-3.5 text-xs text-[#8E8E93] leading-[1.65]" {...props}>
           {children}
         </blockquote>
       ),
@@ -328,7 +328,7 @@ export function StreamingTerminalOutput({
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[#9AE6B4] hover:underline cursor-pointer transition-colors"
+          className="text-[#E4E4E7] hover:underline cursor-pointer transition-colors"
           {...props}
         >
           {children}
@@ -341,7 +341,7 @@ export function StreamingTerminalOutput({
           return (
             <code
               onClick={() => onRunCommandRef.current?.(text)}
-              className="px-1.5 py-0.5 rounded bg-[#141414] text-[#9AE6B4] text-xs border border-[#1F1F1F] cursor-pointer hover:border-[#9AE6B4]/50 transition-colors inline-block"
+              className="px-1.5 py-0.5 rounded bg-[#1C1C1C] text-[#E4E4E7] text-xs border border-[#27272A] cursor-pointer hover:border-[#E4E4E7]/60 hover:text-[#FFFFFF] transition-colors inline-block"
               title={`Run ${text}`}
               {...props}
             >
@@ -351,7 +351,7 @@ export function StreamingTerminalOutput({
         }
         return (
           <code
-            className="px-1.5 py-0.5 rounded bg-[#141414] text-[#D4D4D8] text-xs border border-[#1F1F1F]"
+            className="px-1.5 py-0.5 rounded bg-[#1C1C1C] text-[#D4D4D8] text-xs border border-[#27272A]"
             {...props}
           >
             {children}

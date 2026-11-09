@@ -38,18 +38,18 @@ export function AiNoticeToast({ isOpen, onClose }: AiNoticeToastProps) {
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-16 right-4 sm:right-8 z-30 w-80 sm:w-88 bg-[#080808]/95 backdrop-blur-sm border border-[#1F1F1F] rounded-md p-3.5 shadow-xl shadow-black/50 font-mono transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 select-none"
+      className="fixed bottom-16 right-4 sm:right-8 z-30 w-80 sm:w-88 bg-[#1C1C1C]/95 backdrop-blur-sm border border-[#27272A] rounded-md p-3.5 shadow-xl shadow-black/50 font-mono transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 select-none"
     >
-      <div className="flex items-center justify-between pb-1.5 border-b border-[#171717]">
+      <div className="flex items-center justify-between pb-1.5 border-b border-[#27272A]">
         <div className="flex items-center space-x-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#9AE6B4] inline-block animate-pulse" />
-          <span className="text-[10px] text-[#9AE6B4] tracking-wider uppercase font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#E4E4E7] inline-block animate-pulse" />
+          <span className="text-[10px] text-[#E4E4E7] tracking-wider uppercase font-medium">
             ai notice [{step}/2]
           </span>
         </div>
         <button
           onClick={onClose}
-          className="text-[#66666E] hover:text-[#9AE6B4] text-xs transition-colors cursor-pointer"
+          className="text-[#8E8E93] hover:text-[#FFFFFF] text-xs transition-colors cursor-pointer"
           title="Dismiss notification"
           aria-label="Dismiss"
         >

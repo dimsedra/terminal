@@ -2,12 +2,12 @@
 @import "streamdown/styles.css";
 
 :root {
-  --background: #050505;
-  --surface: #0A0A0A;
+  --background: #161616;
+  --surface: #1C1C1C;
   --foreground: #D4D4D8;
   --muted: #8E8E93;
-  --border: #1F1F1F;
-  --accent: #9AE6B4;
+  --border: #27272A;
+  --accent: #E4E4E7;
 
   --stream-gap: 20ms;
   --stream-fade: 200ms;
@@ -30,14 +30,14 @@ body {
   height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #050505;
+  background: #161616;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1F1F1F;
+  background: #27272A;
   border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2C2C2C;
+  background: #3F3F46;
 }
 
 /* Terminal text selection */
@@ -80,7 +80,7 @@ body {
 
 .terminal-cursor {
   display: inline-block;
-  color: #9AE6B4;
+  color: #E4E4E7;
   animation: cursor-pulse 0.8s steps(2, start) infinite;
   margin-left: 2px;
   vertical-align: middle;
