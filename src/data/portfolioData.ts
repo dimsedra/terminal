@@ -29,7 +29,7 @@ export const BILINGUAL_PORTFOLIO_DATA = portfolioData as unknown as BilingualPor
 
 /**
  * Backward-compatible aggregated portfolio data object (defaults to English).
- * Consumers like /api/chat/route.ts and TerminalInterface.tsx continue to import PORTFOLIO_DATA cleanly.
+ * Consumed by TerminalInterface.tsx for local deterministic command execution.
  */
 export const PORTFOLIO_DATA = {
   author: portfolioData.en.author as AuthorInfo,
