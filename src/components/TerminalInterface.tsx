@@ -604,7 +604,7 @@ export function TerminalInterface() {
                   </p>
 
                   <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 pt-1 sm:pt-2 text-xs sm:text-sm">
-                    {["/chat", "/projects", "/about", "/skills", "/contact", "/themes"].map((cmd) => (
+                    {["/chat", "/projects", "/about", "/skills", "/contact", "/lang", "/themes"].map((cmd) => (
                       <button
                         key={cmd}
                         onClick={(e) => {
