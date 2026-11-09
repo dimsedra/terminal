@@ -7,6 +7,7 @@ import {
 } from "ai";
 import { getAiModel, DEFAULT_AI_MODEL } from "@/config/ai";
 import { BILINGUAL_PORTFOLIO_DATA, SupportedLanguage } from "@/data/portfolioData";
+import { formatProjectsDeepDivePrompt } from "@/data/projectsDeepDive";
 
 export const maxDuration = 30;
 
@@ -53,11 +54,19 @@ Education & Credentials:
 Organizational Experience:
 ${en.experience.map((e, idx) => `- **${e.organization}** (${e.role}, ${e.period}):\n  EN: ${e.description}\n  ID: ${id.experience[idx]?.description || e.description}`).join("\n")}
 
-Key Projects by Eds:
+Key Projects by Eds (Overview & Links):
 ${en.projects.map((p, idx) => {
   const pId = id.projects[idx];
-  return `- **${p.name}** (${p.period || "Project"}):\n  EN: ${p.description}\n  ID: ${pId ? pId.description : p.description}\n  Stack: ${p.stack.join(", ")}${p.github ? ` [GitHub](${p.github})` : ""}`;
+  const links = [
+    p.github ? `[GitHub Repository](${p.github})` : null,
+    p.link ? `[Live Web Demo](${p.link})` : null,
+  ].filter(Boolean).join(" · ");
+  const linksStr = links ? `\n  Links: ${links}` : "";
+  return `- **${p.name}** (${p.period || "Project"}):\n  EN: ${p.description}\n  ID: ${pId ? pId.description : p.description}\n  Stack: ${p.stack.join(", ")}${linksStr}`;
 }).join("\n\n")}
+
+Deep Technical Context & Architectural Details of Eds's Projects:
+${formatProjectsDeepDivePrompt()}
 
 Technical Capabilities & Skills:
 - English Categories:
@@ -89,6 +98,8 @@ Tone & Conversational Style:
   * Strictly avoid rigid, repetitive template patterns (e.g. NEVER repeat robotic labels like "What it is:", "Why it matters:", "Tech Stack:", "Category:", or "Role: ... Bio: ...").
   * Tell a natural, cohesive story about Eds's work, systems thinking mindset, and engineering choices in smooth, readable paragraphs or brief, organic bullet points.
   * Keep responses concise, punchy, and easy on the eyes in a terminal window (avoid overwhelming walls of text).
+- Project Links & Live Demos:
+  * When visitors ask about where to view a project, see the source code, or try it live, share the relevant Markdown links (GitHub repository and/or live web demo) directly and clearly.
 
 Formatting Guidelines:
 - Output strictly in clean terminal markdown suitable for CLI rendering.
