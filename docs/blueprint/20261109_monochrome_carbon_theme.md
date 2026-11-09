@@ -157,3 +157,12 @@ Translates [docs/intent/20261109_monochrome_carbon_theme.md](file:///home/eds/Co
 4. `feat(theme): transition global surfaces and accents to carbon black and neutral gray`
 5. `feat(ascii): implement 2d living typographical ascii emblem with smooth orange trail`
 6. `docs(blueprint): mark monochrome carbon theme blueprint as approved and verified`
+
+---
+
+## Verification Results
+
+- **BP-THEME-001 (Theme & Tokens)**: Verified in live browser. Background is Carbon Black (`#161616`), surfaces are `#1C1C1C`, borders are `#27272A`. All green elements (`#9AE6B4`) have been replaced with neutral gray and crisp white (`#E4E4E7` / `#A1A1AA` / `#FFFFFF`). Contrast verified.
+- **BP-FONT-002 (Typography)**: Verified via production build (`npm run build`) and live browser inspection. Self-hosted Ioskeley Mono (`.woff2`) renders across all terminal components without external font requests.
+- **BP-GRID-003 (Monochrome Contributions)**: Verified via automated unit tests (`node --test`, 14/14 passing) and live `/about` command output displaying a stepped zinc-to-white monochrome grid.
+- **BP-ASCII-004 (2D Living ASCII Emblem & Orange Trail)**: Verified via visual testing across desktop (`1280x800`) and mobile (`360x640`) viewports. Canvas-based 2D typographic "EDS" emblem features smooth orange hover trail with glowing decay, living matrix glyph shimmering, autonomous idle sweep, and compact responsive sidebar rendering.
