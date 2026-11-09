@@ -117,16 +117,22 @@ export const HOVER_EFFECT_CONFIG = {
   scanlineReachCols: 26,
 
   // Ketebalan vertikal sinar laser (1.35 = sekitar 1-2 baris, naikkan jika ingin lebih tebal)
-  laserHeightRows: 1.35,
+  laserHeightRows: 1.75,
 
   // Batas baris utama yang mendapat pendaran oranye paling terang
-  coreRowThreshold: 0.65,
+  coreRowThreshold: 1,
 
   // Lebar pendaran efek saat mengenai huruf EDS (dalam kolom)
   letterGlowRadiusCols: 4.5,
 
   // Kecepatan pudarnya jejak trail (semakin besar nilainya, semakin cepat hilang)
   decaySpeed: 0.75,
+
+  // Kecepatan interval pergantian karakter saat terkena hover (dalam milidetik, 45ms = ~22 fps mutation)
+  mutationIntervalMs: 45,
+
+  // Jumlah sel yang berkedip per siklus saat idle agar huruf terasa hidup dan berdenyut
+  idleShimmerCount: 26,
 };
 
 const PAD_TOP_ROWS = 6;
@@ -374,16 +380,35 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       const delta = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
 
-      // 1. Shimmer engine: micro-mutate random interior cells periodically
-      if (now - lastShimmerTime > 90) {
+      // 1. Continuous real-time mutation engine
+      if (now - lastShimmerTime > HOVER_EFFECT_CONFIG.mutationIntervalMs) {
         lastShimmerTime = now;
-        const shimmerCount = compact ? 2 : 5;
+
+        // Keep refreshing wake when hovering in place so mutation stays continuous
+        if (isPointerInside && targetX >= 0 && targetY >= 0) {
+          applyWakeAt(targetX / metrics.charWidth, targetY / metrics.charHeight);
+        }
+
+        // Active trail cells constantly cycle glyphs in real-time
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const cell = grid[r][c];
+            if (cell.type === "space" || cell.type === "border") continue;
+
+            if (cell.intensity > 0.06) {
+              cell.char = getRandomGlyph(cell.type, cell.initialChar);
+            }
+          }
+        }
+
+        // Ambient shimmer: micro-mutate random cells so typography stays living
+        const shimmerCount = compact ? 4 : HOVER_EFFECT_CONFIG.idleShimmerCount;
         for (let i = 0; i < shimmerCount; i++) {
           const randR = Math.floor(Math.random() * rows);
           const randC = Math.floor(Math.random() * cols);
           const cell = grid[randR][randC];
-          if (cell.type !== "space" && cell.type !== "border") {
-            if (Math.random() < 0.35) {
+          if (cell.type !== "space" && cell.type !== "border" && cell.intensity <= 0.06) {
+            if (Math.random() < 0.45) {
               cell.char = getRandomGlyph(cell.type, cell.initialChar);
             } else {
               cell.char = cell.initialChar;
@@ -444,7 +469,7 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
           // Smooth exponential decay for letter trail
           if (cell.intensity > 0) {
             cell.intensity = Math.max(0, cell.intensity - delta * HOVER_EFFECT_CONFIG.decaySpeed);
-            if (cell.intensity === 0 && cell.type !== "border") {
+            if (cell.intensity <= 0.02 && cell.type !== "border") {
               cell.char = cell.initialChar;
             }
           }
