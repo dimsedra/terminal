@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useChat } from "@ai-sdk/react";
 import { LivingAsciiEds } from "./LivingAsciiEds";
 import { AsciiBackground } from "./AsciiBackground";
@@ -9,9 +9,24 @@ import { PORTFOLIO_DATA } from "@/data/portfolioData";
 import { StreamingTerminalOutput, OutputPayload } from "./StreamingTerminalOutput";
 import { AiNoticeToast } from "./AiNoticeToast";
 import { useTerminalSession } from "@/hooks/useTerminalSession";
+import { getCommandSuggestions } from "@/lib/commandSuggestions";
 
 export function TerminalInterface() {
   const [inputVal, setInputVal] = useState("");
+  const [isDismissed, setIsDismissed] = useState(false);
+
+  const suggestions = useMemo(() => {
+    if (isDismissed) {
+      return {
+        isOpen: false,
+        query: inputVal,
+        ghostSuffix: "",
+        bestMatchFullText: "",
+        suggestions: [],
+      };
+    }
+    return getCommandSuggestions(inputVal);
+  }, [inputVal, isDismissed]);
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeAiOutputId, setActiveAiOutputId] = useState<string | null>(null);
@@ -355,30 +370,64 @@ export function TerminalInterface() {
     setInputVal("");
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputVal(e.target.value);
+    setIsDismissed(false);
+  };
 
+  const handleApplySuggestion = (fullText: string) => {
+    const nextVal = fullText === "/themes" ? "/themes " : fullText;
+    setInputVal(nextVal);
+    setIsDismissed(false);
+    inputRef.current?.focus();
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Shift" || e.key === "Tab") {
+      if (suggestions.ghostSuffix) {
+        e.preventDefault();
+        handleApplySuggestion(suggestions.bestMatchFullText);
+        return;
+      }
+    }
+
+    if (e.key === "Escape") {
+      setIsDismissed(true);
+      return;
+    }
+
     if (e.key === "Enter") {
       e.preventDefault();
+      setIsDismissed(true);
       handleCommandExecution(inputVal);
-    } else if (e.key === "ArrowUp") {
+      return;
+    }
+
+    if (e.key === "ArrowUp") {
       e.preventDefault();
       if (commandHistory.length === 0) return;
       const nextIndex = historyIndex + 1;
       if (nextIndex < commandHistory.length) {
         setHistoryIndex(nextIndex);
         setInputVal(commandHistory[commandHistory.length - 1 - nextIndex]);
+        setIsDismissed(true);
       }
-    } else if (e.key === "ArrowDown") {
+      return;
+    }
+
+    if (e.key === "ArrowDown") {
       e.preventDefault();
       if (historyIndex > 0) {
         const nextIndex = historyIndex - 1;
         setHistoryIndex(nextIndex);
         setInputVal(commandHistory[commandHistory.length - 1 - nextIndex]);
+        setIsDismissed(true);
       } else if (historyIndex === 0) {
         setHistoryIndex(-1);
         setInputVal("");
+        setIsDismissed(true);
       }
+      return;
     }
   };
 
@@ -469,29 +518,64 @@ export function TerminalInterface() {
           </div>
 
           {/* Bottom Input Prompt for Fase 1 */}
-          <footer className="relative z-20 h-[52px] shrink-0 w-full bg-[#161616] border-t border-[#27272A] px-4 sm:px-8 flex items-center">
+          <footer className={`relative shrink-0 w-full bg-[#161616] border-t border-[#27272A] px-4 sm:px-8 flex items-center h-[52px] ${suggestions.isOpen ? "z-40" : "z-20"}`}>
             <div className="max-w-5xl mx-auto flex items-center space-x-3 w-full">
-              <span className="text-[#E4E4E7] font-bold text-base sm:text-lg select-none">❯</span>
-              <input
-                ref={inputRef}
-                type="text"
-                value={inputVal}
-                onChange={(e) => setInputVal(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onFocus={() => {
-                  requestAnimationFrame(() => {
-                    inputRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-                  });
-                }}
-                placeholder="Type /chat, /projects, /themes, or /help..."
-                autoFocus
-                spellCheck={false}
-
-                autoComplete="off"
-                className="flex-1 min-w-0 bg-transparent border-none outline-none text-[#F4F4F5] text-sm font-mono placeholder:text-[#52525B]"
-              />
-              <div className="text-xs text-[#44444A] select-none hidden sm:block">
-                [Enter: run | ↑↓: history]
+              <span className="text-[#E4E4E7] font-bold text-base sm:text-lg select-none shrink-0">❯</span>
+              <div className="relative flex-1 min-w-0 flex items-center">
+                {/* Floating Recommendation Chips Popover */}
+                {suggestions.isOpen && suggestions.suggestions.length > 0 && (
+                  <div className="absolute bottom-full left-0 mb-3 z-50 w-full max-w-sm sm:max-w-md bg-[#18181B]/95 backdrop-blur-md border border-[#27272A] rounded-lg p-1.5 shadow-2xl flex flex-col gap-1 max-h-56 overflow-y-auto">
+                    {suggestions.suggestions.map((item) => (
+                      <button
+                        key={item.fullText}
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          handleApplySuggestion(item.fullText);
+                        }}
+                        className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs font-mono rounded hover:bg-[#27272A] text-left transition-colors cursor-pointer group"
+                      >
+                        <span className="text-[#E4E4E7] group-hover:text-white font-medium">{item.name}</span>
+                        <span className="text-[#71717A] text-[11px] truncate ml-3">{item.description}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {/* Ghost Text Underlay */}
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0 pointer-events-none flex items-center font-mono text-sm leading-normal overflow-hidden whitespace-pre select-none p-0 m-0"
+                >
+                  <span className="invisible">{inputVal}</span>
+                  <span className="text-[#71717A]">{suggestions.ghostSuffix}</span>
+                </div>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={inputVal}
+                  onChange={handleInputChange}
+                  onKeyDown={handleKeyDown}
+                  onFocus={() => {
+                    if (typeof window !== "undefined" && window.innerWidth < 640) {
+                      setSidebarOpen(false);
+                    }
+                    requestAnimationFrame(() => {
+                      inputRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                    });
+                  }}
+                  placeholder="Type /chat, /projects, /themes, or /help..."
+                  autoFocus
+                  spellCheck={false}
+                  autoComplete="off"
+                  className="relative z-10 w-full bg-transparent border-none outline-none text-[#F4F4F5] text-sm font-mono leading-normal placeholder:text-[#52525B] p-0 m-0"
+                />
+              </div>
+              <div className="text-xs text-[#44444A] select-none hidden sm:block shrink-0">
+                {suggestions.ghostSuffix ? (
+                  <span className="text-[#71717A]">[Shift: complete | Enter: run]</span>
+                ) : (
+                  "[Enter: run | ↑↓: history]"
+                )}
               </div>
             </div>
           </footer>
@@ -641,34 +725,69 @@ export function TerminalInterface() {
             </div>
 
             {/* Input Prompt Bar for Fase 2 */}
-            <footer className="relative z-20 h-[52px] shrink-0 w-full bg-[#161616] border-t border-[#27272A] px-3.5 sm:px-8 flex items-center">
+            <footer className={`relative shrink-0 w-full bg-[#161616] border-t border-[#27272A] px-3.5 sm:px-8 flex items-center h-[52px] ${suggestions.isOpen ? "z-40" : "z-20"}`}>
               <div className="w-full flex items-center space-x-2.5 sm:space-x-3">
                 <span className="text-[#E4E4E7] font-bold text-sm sm:text-base select-none shrink-0">❯</span>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={inputVal}
-                  onChange={(e) => setInputVal(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  onFocus={() => {
-                    requestAnimationFrame(() => {
-                      scrollToBottom();
-                      inputRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-                    });
-                  }}
-                  placeholder={
-                    isAiSession
-                      ? "Ask anything (or /exit to return)..."
-                      : "Type /chat, /projects, /themes, or /help..."
-                  }
-                  autoFocus
-                  spellCheck={false}
-
-                  autoComplete="off"
-                  className="flex-1 min-w-0 bg-transparent border-none outline-none text-[#F4F4F5] text-sm font-mono placeholder:text-[#52525B]"
-                />
+                <div className="relative flex-1 min-w-0 flex items-center">
+                  {/* Floating Recommendation Chips Popover */}
+                  {suggestions.isOpen && suggestions.suggestions.length > 0 && (
+                    <div className="absolute bottom-full left-0 mb-3 z-50 w-full max-w-sm sm:max-w-md bg-[#18181B]/95 backdrop-blur-md border border-[#27272A] rounded-lg p-1.5 shadow-2xl flex flex-col gap-1 max-h-56 overflow-y-auto">
+                      {suggestions.suggestions.map((item) => (
+                        <button
+                          key={item.fullText}
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            handleApplySuggestion(item.fullText);
+                          }}
+                          className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs font-mono rounded hover:bg-[#27272A] text-left transition-colors cursor-pointer group"
+                        >
+                          <span className="text-[#E4E4E7] group-hover:text-white font-medium">{item.name}</span>
+                          <span className="text-[#71717A] text-[11px] truncate ml-3">{item.description}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {/* Ghost Text Underlay */}
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0 pointer-events-none flex items-center font-mono text-sm leading-normal overflow-hidden whitespace-pre select-none p-0 m-0"
+                  >
+                    <span className="invisible">{inputVal}</span>
+                    <span className="text-[#71717A]">{suggestions.ghostSuffix}</span>
+                  </div>
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={inputVal}
+                    onChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
+                    onFocus={() => {
+                      if (typeof window !== "undefined" && window.innerWidth < 640) {
+                        setSidebarOpen(false);
+                      }
+                      requestAnimationFrame(() => {
+                        scrollToBottom();
+                        inputRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                      });
+                    }}
+                    placeholder={
+                      isAiSession
+                        ? "Ask anything (or /exit to return)..."
+                        : "Type /chat, /projects, /themes, or /help..."
+                    }
+                    autoFocus
+                    spellCheck={false}
+                    autoComplete="off"
+                    className="relative z-10 w-full bg-transparent border-none outline-none text-[#F4F4F5] text-sm font-mono leading-normal placeholder:text-[#52525B] p-0 m-0"
+                  />
+                </div>
                 <div className="text-xs text-[#44444A] select-none hidden sm:block shrink-0">
-                  [Enter: run | ↑↓: history]
+                  {suggestions.ghostSuffix ? (
+                    <span className="text-[#71717A]">[Shift: complete | Enter: run]</span>
+                  ) : (
+                    "[Enter: run | ↑↓: history]"
+                  )}
                 </div>
               </div>
             </footer>

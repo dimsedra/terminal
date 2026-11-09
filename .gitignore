@@ -36,3 +36,6 @@ Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
+
+# Playwright CLI session data
+.playwright-cli/
