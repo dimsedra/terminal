@@ -1,4 +1,4 @@
-import { CommandItem } from "./types";
+import type { CommandItem } from "./types.ts";
 
 export const commands: CommandItem[] = [
   { name: "/chat", desc: "Enter interactive AI session" },
