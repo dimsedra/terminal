@@ -109,6 +109,26 @@ function getBaseColor(): string {
   return ASCII_BASE_COLOR;
 }
 
+// ============================================================================
+// SETTING RADIUS & ANIMASI HOVER (Ubah nilainya di sini sesuai seleramu)
+// ============================================================================
+export const HOVER_EFFECT_CONFIG = {
+  // Seberapa jauh garis scanline menjalar ke kiri dan kanan di ruang kosong (dalam kolom)
+  scanlineReachCols: 26,
+
+  // Ketebalan vertikal sinar laser (1.35 = sekitar 1-2 baris, naikkan jika ingin lebih tebal)
+  laserHeightRows: 1.35,
+
+  // Batas baris utama yang mendapat pendaran oranye paling terang
+  coreRowThreshold: 0.65,
+
+  // Lebar pendaran efek saat mengenai huruf EDS (dalam kolom)
+  letterGlowRadiusCols: 4.5,
+
+  // Kecepatan pudarnya jejak trail (semakin besar nilainya, semakin cepat hilang)
+  decaySpeed: 0.75,
+};
+
 const PAD_TOP_ROWS = 6;
 const PAD_BOTTOM_ROWS = 6;
 const PAD_SIDE_COLS = 16;
@@ -224,14 +244,16 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
     resizeObserver.observe(container);
 
     const applyWakeAt = (colCenter: number, rowCenter: number) => {
-      // Sleek, laser-tight vertical radius to eliminate giant circular blobs
-      const activeRadiusCols = 26; // scanline horizontal reach
+      const activeRadiusCols = HOVER_EFFECT_CONFIG.scanlineReachCols;
+      const laserHeight = HOVER_EFFECT_CONFIG.laserHeightRows;
+      const coreThreshold = HOVER_EFFECT_CONFIG.coreRowThreshold;
+      const letterRadius = HOVER_EFFECT_CONFIG.letterGlowRadiusCols;
 
       for (let r = 0; r < rows; r++) {
         const rowDiff = Math.abs(r - rowCenter);
-        if (rowDiff > 1.35) continue; // Laser beam is strictly ~1 row high (+ soft adjacent fringe)
+        if (rowDiff > laserHeight) continue;
 
-        const isCoreRow = rowDiff <= 0.65;
+        const isCoreRow = rowDiff <= coreThreshold;
 
         for (let c = 0; c < cols; c++) {
           const colDiff = Math.abs(c - colCenter);
@@ -240,9 +262,9 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
           const cell = grid[r][c];
 
           if (cell.type !== "space") {
-            // Letter glyphs: tight, focused contact illumination
-            if (isCoreRow && colDiff <= 4.5) {
-              const addedIntensity = Math.max(0, 1.0 - (colDiff / 4.5) * 0.45);
+            // Letter glyphs: contact illumination
+            if (isCoreRow && colDiff <= letterRadius) {
+              const addedIntensity = Math.max(0, 1.0 - (colDiff / letterRadius) * 0.45);
               cell.intensity = Math.max(cell.intensity, addedIntensity);
 
               if (cell.type !== "border" && Math.random() < 0.3) {
@@ -410,7 +432,7 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
 
           if (cell.type === "space") {
             if (cell.scanIntensity > 0) {
-              cell.scanIntensity = Math.max(0, cell.scanIntensity - delta * 0.55);
+              cell.scanIntensity = Math.max(0, cell.scanIntensity - delta * HOVER_EFFECT_CONFIG.decaySpeed);
               if (cell.scanIntensity > 0.02) {
                 ctx.fillStyle = `rgba(234, 88, 12, ${Math.min(0.65, cell.scanIntensity)})`;
                 ctx.fillText(cell.scanChar, x, y);
@@ -421,7 +443,7 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
 
           // Smooth exponential decay for letter trail
           if (cell.intensity > 0) {
-            cell.intensity = Math.max(0, cell.intensity - delta * 0.65);
+            cell.intensity = Math.max(0, cell.intensity - delta * HOVER_EFFECT_CONFIG.decaySpeed);
             if (cell.intensity === 0 && cell.type !== "border") {
               cell.char = cell.initialChar;
             }
