@@ -6,31 +6,51 @@ interface LivingAsciiEdsProps {
   compact?: boolean;
 }
 
-const DENSE_GLYPHS = ["%", "@", "#", "0", "O", "8", "&"];
-const MEDIUM_GLYPHS = ["+", "*", "=", "x", "~"];
-const LIGHT_GLYPHS = [".", ":", "-", "'"];
-const BORDER_GLYPHS = ["/", "\\", "|", "_", "[", "]"];
+const DENSE_GLYPHS = ["@", "#", "%", "0", "O", "8", "&"];
+const MEDIUM_GLYPHS = ["+", "*", "=", "x", "#", "~"];
+const LIGHT_GLYPHS = [":", "-", "=", "+", "·"];
+const DUST_GLYPHS = [".", "·", ":", "'", "`"];
+const BORDER_GLYPHS = ["/", "\\", "|", "_", "-", "=", "[", "]"];
 
-// 18 rows x 76 cols template for Hero view
-const LARGE_TEMPLATE = [
-  "|%0%0%00 0%%===%%% 0%%|   |%000 0=%00 0%#%00 0%0\\         /%0% 0%0 %##00%      ",
-  "|00 0%0 0%%00%00 00 0%|   |0%#0 00%0% 00%00#00%00\\\\    / %0###00%00 0%000%00 \\",
-  "|0%0% |%00 00%0000 00 |   |0%00 00#00 %000 00%00 0\\\\   //00#%0#000 0%00 000%00\\\\",
-  "|0 00%00 %000 0%00 000|   |000% 00|     \\00% 00% 00|   /%#00#00%0=---=0%00%00#0\\",
-  "|0%%0% 00|====0000 00 |   |%00 000|      |000 00#00|   |00# 0000/      \\00 000|",
-  "|%00 000%|                |%00 000|      |00# 00000|   \\000 0000\\              ",
-  "|%00 000%|                |0%0 000|      |000 000%0|    \\00% 0000000000%0\\     ",
-  "|%00 0%00%000000000000|   |000 000|      |000 00#00|     \\000%0000000000000\\   ",
-  "|%%00%000000 000000000|   |%00 000|      |000 00000|       \\000%000000000000\\  ",
-  "|00%00 000%00 00000000|   |0%0 000|      |000 000%0|          \\0000000000%000\\ ",
-  "|%00 000%|                |%00 000|      |00# 00000|                \\0000 0000|",
-  "|%00 000%|                |%00 000|      |000 00#00|   |000 000\\      /000 000|",
-  "|0%%0% 00|====0000 00 |   |000% 00|     /00% 00% 00|   \\00#00#00%0---=0%00%00#/ ",
-  "|0 00%00 %000 0%00 000|   |0%00 00#00 %000 00%00 0//   \\\\00#%0#000 0%00 000%0// ",
-  "|0%0% |%00 00%0000 00 |   |0%#0 00%0% 00%00#00%00//     \\ %0###00%00 0%000%0/  ",
-  "|00 0%0 0%%00%00 00 0%|   |%000 0=%00 0%#%00 0%0/          \\%0% 0%0 %##00%/    ",
-  "|%0%0%00 0%%===%%% 0%%|   +==+====+==+===+=====+             +===+===+===+      ",
-  "+==+====+==+===+=====+                                                          ",
+// 37 rows x 94 columns template with rich vertical degradation matching reference
+const CINEMATIC_LARGE_TEMPLATE = [
+  ".__________________________.    .________________________.                 _.-===-._            ",
+  "|@@ @# %%%@%@% @@#%#%# @@%0|    |@@ @# %%%@%@% @@#%#%# @@%0\\           ..%#%#00#%@%#%@%0%_..    ",
+  "|@@# @@# @@%@%%%#@@#%#@%00#|    |@@# @@# @@%@%%%#@@#%#@%00#\\\\       /__%#@#%#%@#0#%#%#@#%@#%@__ ",
+  "|%@%@% @%% @@# @%@%%%#%#%00|    |%@%@% @%% @@# @%@%%%#%#%000\\\\     /%#%#%#000%#%#00#%#0%#%0%#00%\\\\",
+  "|%%%%%%@@ #%## #%@#% @@#000|    |%%%%%%@@ #%## #%@#% @@#00000\\\\    /#0%#%#0#0#0#0%#%0%#%0#%#0%#0%0\\\\",
+  "|0%%0% 00|=================|    |0%%0% 00|====0000 00 \\00% 00|   |#%#%@%0%0%0#%0%0%0#%00%00%000#0%|",
+  "|%00 000%|                      |%00 000%|             \\00 00|   |%%00%0%@%0%0#0%000%   \\%%%%000@#%|",
+  "|%00 000%|                      |%00 000%|              |000 |   |%00#0%00%00#0#000%     \\##@%#@#00|",
+  "|0%0 000%|                      |0%0 000%|              |000 |   |00%00#0#0000#0#00*      |@%0%#00@|",
+  "|000 000%|                      |000 000%|              |000 |   |%00#0%00%00#0#00%*       `---\\00%|",
+  "|%00 000%|                      |%00 000%|              |000 |   \\%@%#%#0#0#0#0%#%#*+-: · . ·  \\00#/",
+  "|%00 0%00%00000000000000000|    |%00 000%|              |000 |    \\%#0%#%%%#%#*+=__     . .    /00%|",
+  "|%%00%000000 00000000000000|    |%%00%000|              |000 |     \\##%%#0#%#%#%%%#*__\\       /0#00|",
+  "|00%00 000%00 0000000000000|    |00%00 00|              |000 |      \\%%%%%%%%%%%#%%%#%*\\\\   //%0%#0/",
+  "|0%0%0 000000 0000000000000|    |0%0%0 00|              |000 |      -=*#%#%#+*%+#%%%%%%%#%#*\\\\    / ",
+  "|%00 000%|=================|    |%00 000%|              |000 |         \\%%#*%#*#*%#%*#%##*   /--=   ",
+  "|%00 000%|                      |%00 000%|              |000 |          \\   `%##%#00#*+--==*#%*+    ",
+  "|%00 000%|                      |%00 000%|              |000 |                \\%%%#0%#*+-:==#%*+    ",
+  "|0%0 000%|                      |0%0 000%|              |000 |                --===+*#%#*+=+#%*+--  ",
+  "|000 000%|                      |000 000%|              |000 |           -+--===*#%#*+=+*#%#*+=---  ",
+  "|%00 000%|                      |%00 000%|              |000 |        ==+==+*#%#*+=+*#%#*+=---      ",
+  "|0%%0% 00|_________________|    |0%%0% 00|              /000 |       =+-+*#%#*+=+*#%#*+=---        ",
+  "|0 00%00 %000 0%00 00000000|    |0 00%00 %000 0%00 000 /00 00|      =+-*#%#*+=+*#%#*+=--- \\000#00|  ",
+  "|0%0% |%00 00%0000 00000000|    |0%0% |%00 00%0000 00 /00% 00|     /--*#%#*+=+*#%#*+=---   \\00#00%| ",
+  "|00 0%0 0%%00%00 00 0000000|    |00 0%0 0%%00%00 00 0//00000//    |00#--*#%#*+=+*#%#*+=--   |00000| ",
+  "|%0%0%00 0%%===%%% 00000000|    |%0%0%00 0%%===%%% 0//00000//     |0#0%--*#%#*+=+*#%#*+=--  |000#0| ",
+  "|=+%#=#==#*#%*+%#=##=+#*#%#|    |=+%#=#==#*#%*+%#=##=+#*#%#/      \\000%#--*#%#*+=+*#%#*+=--/000#00| ",
+  "|#%=+##%--%#%=+%#-#+#%==+#*|    |#%=+##%--%#%=+%#-#+#%==+#*        \\00#00--*#%#*+=+*#%#*+=--#000#0/ ",
+  "|=+%-+-#%#+#+#-=#%=#+#==#%#|    |=+%-+-#%#+#+#-=#%=#+#==#%#       |-+=#+--*#%#*:%#%#++:-*:- -##*+=* ",
+  "|:= -#-#%#*- -%#+#*- +++%=#|    |:= -#-#%#*- -%#+#*- +++%=#       \\+#+#%%-%=##*:#::-*%+-=##:%:--%*  ",
+  "|: * + - # = : - ** : *%**%|    |: * + - # = : - ** : *%**%       --:+%+%+=:::#*:%:#:=%+-=+-++#=*:: ",
+  "|· ** + - ++ : - :++ · · = |    |· ** + - ++ : - :++ · · =          =% -+++-: %**+-*+==:*%=#-**+=:  ",
+  "|· * = + + : ; - * - *# = +|    |· * = + + : ; - * - *# = +         == . == *= .=+*+--#* -- -#%#*:. ",
+  "|- + , · + = - : · - * · : |    |- + , · + = - : · - * · :            :: . -+=*+ :==  . :* + . . .  ",
+  "|= = : , : · · = - · : · : |    |= = : , : · · = - · : · :               . : - -  . .   .   .       ",
+  "|· · · · · · · · · · · · · |    |· · · · · · · · · · · · ·                 . . .    .               ",
+  "`                          '    `                             '              .                      ",
 ];
 
 // 7 rows x 29 cols template for Sidebar view
@@ -44,8 +64,7 @@ const COMPACT_TEMPLATE = [
   "+==+===+  +==+==%0/    \\ %0%==/ ",
 ];
 
-
-type DensityType = "space" | "border" | "dense" | "medium" | "light";
+type DensityType = "space" | "border" | "dense" | "medium" | "light" | "dust";
 
 interface CellState {
   initialChar: string;
@@ -64,9 +83,12 @@ interface Particle {
   opacity: number;
 }
 
-function getDensityType(ch: string): DensityType {
+function getDensityType(ch: string, rowIndex: number): DensityType {
   if (ch === " ") return "space";
   if (BORDER_GLYPHS.includes(ch)) return "border";
+  if (rowIndex >= 31) return "dust";
+  if (rowIndex >= 26) return "light";
+  if (rowIndex >= 16 && (MEDIUM_GLYPHS.includes(ch) || LIGHT_GLYPHS.includes(ch))) return "medium";
   if (DENSE_GLYPHS.includes(ch)) return "dense";
   if (MEDIUM_GLYPHS.includes(ch)) return "medium";
   return "light";
@@ -76,21 +98,18 @@ function getRandomGlyph(type: DensityType): string {
   if (type === "dense") return DENSE_GLYPHS[Math.floor(Math.random() * DENSE_GLYPHS.length)];
   if (type === "medium") return MEDIUM_GLYPHS[Math.floor(Math.random() * MEDIUM_GLYPHS.length)];
   if (type === "light") return LIGHT_GLYPHS[Math.floor(Math.random() * LIGHT_GLYPHS.length)];
+  if (type === "dust") return DUST_GLYPHS[Math.floor(Math.random() * DUST_GLYPHS.length)];
   return "·";
 }
 
-function getBaseColor(type: DensityType): string {
-  switch (type) {
-    case "dense":
-      return "#FFFFFF";
-    case "medium":
-      return "#D4D4D8";
-    case "border":
-      return "#A1A1AA";
-    case "light":
-    default:
-      return "#71717A";
-  }
+function getBaseColor(type: DensityType, rowIndex: number): string {
+  if (rowIndex >= 32) return "#52525B";
+  if (rowIndex >= 27) return "#71717A";
+  if (rowIndex >= 20) return "#A1A1AA";
+  if (type === "dense") return "#FFFFFF";
+  if (type === "medium") return "#E4E4E7";
+  if (type === "border") return "#D4D4D8";
+  return "#8E8E93";
 }
 
 export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
@@ -105,7 +124,7 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const lines = compact ? COMPACT_TEMPLATE : LARGE_TEMPLATE;
+    const lines = compact ? COMPACT_TEMPLATE : CINEMATIC_LARGE_TEMPLATE;
     const rows = lines.length;
     const cols = Math.max(...lines.map((l) => l.length));
 
@@ -116,13 +135,13 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       const line = lines[r].padEnd(cols, " ");
       for (let c = 0; c < cols; c++) {
         const ch = line[c];
-        const type = getDensityType(ch);
+        const type = getDensityType(ch, r);
         grid[r][c] = {
           initialChar: ch,
           char: ch,
           type,
           intensity: 0,
-          baseColor: getBaseColor(type),
+          baseColor: getBaseColor(type, r),
         };
       }
     }
@@ -133,22 +152,31 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
     let lastShimmerTime = performance.now();
     let lastInteractionTime = performance.now();
 
+    // Reticle & cursor position state
+    let targetX = -999;
+    let targetY = -999;
+    let isPointerInside = false;
+
     // Autonomous sweep state
     let isSweeping = false;
     let sweepProgress = 0;
     let sweepStartTime = 0;
 
     const computeMetrics = () => {
-      const containerWidth = container.clientWidth || (compact ? 240 : 640);
-      // Determine font size based on container width
-      let fontSize = compact ? 8 : 13;
+      const containerWidth = container.clientWidth || (compact ? 240 : 800);
+      let fontSize = compact ? 8 : 11;
+
       if (!compact) {
         if (containerWidth < 480) {
-          fontSize = 6.2;
+          fontSize = 4.8;
         } else if (containerWidth < 640) {
+          fontSize = 6.4;
+        } else if (containerWidth < 840) {
           fontSize = 8.5;
-        } else if (containerWidth < 800) {
-          fontSize = 11;
+        } else if (containerWidth < 1024) {
+          fontSize = 10.5;
+        } else {
+          fontSize = 11.5;
         }
       }
 
@@ -177,44 +205,49 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
     });
     resizeObserver.observe(container);
 
-    // Mouse / Touch Interaction Handler (only if not compact)
+    // Mouse / Touch Interaction Handler (Hero only)
     const handlePointer = (clientX: number, clientY: number) => {
       if (compact) return;
       const rect = canvas.getBoundingClientRect();
       const x = clientX - rect.left;
       const y = clientY - rect.top;
 
-      if (x < 0 || x > metrics.totalWidth || y < 0 || y > metrics.totalHeight) {
+      if (x < -20 || x > metrics.totalWidth + 20 || y < -20 || y > metrics.totalHeight + 20) {
+        isPointerInside = false;
         return;
       }
 
-      const touchedCol = x / metrics.charWidth;
-      const touchedRow = y / metrics.charHeight;
-      const radius = 2.4; // cells radius
+      isPointerInside = true;
+      targetX = Math.max(0, Math.min(x, metrics.totalWidth));
+      targetY = Math.max(0, Math.min(y, metrics.totalHeight));
+
+      const touchedCol = targetX / metrics.charWidth;
+      const touchedRow = targetY / metrics.charHeight;
+      const radius = 3.2;
 
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           const cell = grid[r][c];
           if (cell.type === "space") continue;
 
-          const dist = Math.hypot(c - touchedCol, r - touchedRow);
+          const dist = Math.hypot(c - touchedCol, (r - touchedRow) * 1.2);
           if (dist <= radius) {
-            const addedIntensity = 1.0 - (dist / radius) * 0.45;
+            const addedIntensity = 1.0 - (dist / radius) * 0.4;
             cell.intensity = Math.max(cell.intensity, addedIntensity);
 
-            // Dynamic glyph mutation on contact
-            if (Math.random() < 0.4) {
+            // Contact mutation
+            if (Math.random() < 0.35) {
               cell.char = getRandomGlyph(cell.type);
             }
 
-            // Spawn particle whisper
-            if (Math.random() < 0.08 && particles.length < 30) {
+            // Spawn particle whispers along path
+            if (Math.random() < 0.08 && particles.length < 40) {
               particles.push({
-                x: c * metrics.charWidth + (Math.random() - 0.5) * 6,
-                y: r * metrics.charHeight + (Math.random() - 0.5) * 6,
-                vx: (Math.random() - 0.5) * 12,
-                vy: -Math.random() * 15 - 5,
-                char: [".", ":", "-", "·", "+"][Math.floor(Math.random() * 5)],
+                x: c * metrics.charWidth + (Math.random() - 0.5) * 8,
+                y: r * metrics.charHeight + (Math.random() - 0.5) * 8,
+                vx: (Math.random() - 0.5) * 16,
+                vy: -Math.random() * 18 - 6,
+                char: [".", ":", "-", "·", "+", "="][Math.floor(Math.random() * 6)],
                 opacity: 1.0,
               });
             }
@@ -235,9 +268,14 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       }
     };
 
+    const onPointerLeave = () => {
+      isPointerInside = false;
+    };
+
     if (!compact) {
       window.addEventListener("mousemove", onMouseMove, { passive: true });
       window.addEventListener("touchmove", onTouchMove, { passive: true });
+      canvas.addEventListener("mouseleave", onPointerLeave);
     }
 
     // Main render loop
@@ -245,16 +283,16 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       const delta = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
 
-      // 1. Shimmer engine: micro-mutate a few cells periodically
-      if (now - lastShimmerTime > 90) {
+      // 1. Shimmer engine: micro-mutate random cells periodically
+      if (now - lastShimmerTime > 80) {
         lastShimmerTime = now;
-        const shimmerCount = compact ? 1 : 3;
+        const shimmerCount = compact ? 2 : 5;
         for (let i = 0; i < shimmerCount; i++) {
           const randR = Math.floor(Math.random() * rows);
           const randC = Math.floor(Math.random() * cols);
           const cell = grid[randR][randC];
           if (cell.type !== "space") {
-            if (Math.random() < 0.3) {
+            if (Math.random() < 0.4) {
               cell.char = getRandomGlyph(cell.type);
             } else {
               cell.char = cell.initialChar;
@@ -264,46 +302,54 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       }
 
       // 2. Autonomous Idle Sweep (Hero only)
+      let activeScanY = -999;
+      let activeScanX = -999;
+      let drawScanReticle = false;
+
       if (!compact) {
         const idleDuration = now - lastInteractionTime;
-        if (!isSweeping && idleDuration > 4000) {
+        if (!isPointerInside && !isSweeping && idleDuration > 3800) {
           isSweeping = true;
           sweepProgress = 0;
           sweepStartTime = now;
         }
 
         if (isSweeping) {
-          const sweepDuration = 2200; // ms
+          const sweepDuration = 2800; // ms
           const elapsed = now - sweepStartTime;
           sweepProgress = elapsed / sweepDuration;
 
           if (sweepProgress >= 1.0) {
             isSweeping = false;
-            lastInteractionTime = now; // wait another interval
+            lastInteractionTime = now;
           } else {
-            // Sweeping wave coordinate
-            const sweepCol = sweepProgress * (cols + 16) - 8;
-            const waveCenterRow = rows / 2 + Math.sin(sweepProgress * Math.PI * 2) * 2;
+            // Sweep coordinates across the matrix
+            const sweepCol = sweepProgress * (cols + 20) - 10;
+            const sweepRow = 14 + Math.sin(sweepProgress * Math.PI * 2.2) * 8;
+
+            activeScanX = sweepCol * metrics.charWidth;
+            activeScanY = sweepRow * metrics.charHeight;
+            drawScanReticle = true;
 
             for (let r = 0; r < rows; r++) {
               for (let c = 0; c < cols; c++) {
                 const cell = grid[r][c];
                 if (cell.type === "space") continue;
 
-                const dist = Math.hypot(c - sweepCol, (r - waveCenterRow) * 1.5);
-                if (dist <= 2.2) {
-                  const added = 1.0 - (dist / 2.2) * 0.4;
+                const dist = Math.hypot(c - sweepCol, (r - sweepRow) * 1.3);
+                if (dist <= 3.2) {
+                  const added = 1.0 - (dist / 3.2) * 0.4;
                   cell.intensity = Math.max(cell.intensity, added);
-                  if (Math.random() < 0.25) {
+                  if (Math.random() < 0.3) {
                     cell.char = getRandomGlyph(cell.type);
                   }
-                  if (Math.random() < 0.05 && particles.length < 25) {
+                  if (Math.random() < 0.06 && particles.length < 35) {
                     particles.push({
                       x: c * metrics.charWidth,
                       y: r * metrics.charHeight,
-                      vx: (Math.random() - 0.5) * 8,
-                      vy: -Math.random() * 12,
-                      char: [".", ":", "-"][Math.floor(Math.random() * 3)],
+                      vx: (Math.random() - 0.5) * 10,
+                      vy: -Math.random() * 14,
+                      char: [".", "-", ":", "+"][Math.floor(Math.random() * 4)],
                       opacity: 0.9,
                     });
                   }
@@ -311,41 +357,68 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
               }
             }
           }
+        } else if (isPointerInside) {
+          activeScanX = targetX;
+          activeScanY = targetY;
+          drawScanReticle = true;
         }
       }
 
       // 3. Clear Canvas
       ctx.clearRect(0, 0, metrics.totalWidth, metrics.totalHeight);
 
-      // 4. Render Grid Cells
       const { charWidth, charHeight, fontSize } = metrics;
       ctx.font = `${fontSize}px var(--font-ioskeley-mono), monospace`;
 
+      // 4. Draw Horizontal Scanline Guideline Band (Ref: dashed lines across voids)
+      if (!compact && drawScanReticle && activeScanY >= 0) {
+        const scanRowIndex = Math.floor(activeScanY / charHeight);
+        const bandRows = [scanRowIndex - 1, scanRowIndex, scanRowIndex + 1];
+
+        for (const br of bandRows) {
+          if (br < 0 || br >= rows) continue;
+          const yPos = br * charHeight;
+
+          for (let c = 0; c < cols; c++) {
+            const cell = grid[br][c];
+            if (cell.type === "space") {
+              // Draw dashed / dotted guideline characters in empty space near scanline
+              const distFromX = Math.abs(c * charWidth - activeScanX) / (charWidth * 16);
+              if (distFromX < 2.5) {
+                const alpha = Math.max(0, 0.45 - distFromX * 0.16);
+                ctx.fillStyle = `rgba(234, 88, 12, ${alpha})`;
+                const dashChar = br === scanRowIndex ? "-" : (c % 2 === 0 ? "=" : "+");
+                ctx.fillText(dashChar, c * charWidth, yPos);
+              }
+            }
+          }
+        }
+      }
+
+      // 5. Render Grid Cells
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           const cell = grid[r][c];
           if (cell.type === "space") continue;
 
-          // Decay intensity smoothly
+          // Smooth exponential decay
           if (cell.intensity > 0) {
-            cell.intensity = Math.max(0, cell.intensity - delta * 1.8);
+            cell.intensity = Math.max(0, cell.intensity - delta * 1.5);
           }
 
           const x = c * charWidth;
           const y = r * charHeight;
 
-          // Color blending: warm glowing orange to monochrome base
           if (cell.intensity > 0.02) {
-            // High intensity: warm bright orange (#FF6B00), fading into amber (#F97316), then base
-            const orangeAlpha = Math.min(cell.intensity, 1.0);
-            ctx.fillStyle = `rgba(255, 107, 0, ${orangeAlpha})`;
+            // Rich orange / ember glowing illumination (#FF4500 to #EA580C)
+            const glowAlpha = Math.min(cell.intensity, 1.0);
+            ctx.fillStyle = `rgba(255, 69, 0, ${glowAlpha})`;
             ctx.fillText(cell.char, x, y);
 
-            // Ambient glow halo for brightest cells
-            if (cell.intensity > 0.6 && !compact) {
-              ctx.shadowColor = "rgba(255, 107, 0, 0.5)";
-              ctx.shadowBlur = 4;
-              ctx.fillStyle = "#FF8A3D";
+            if (cell.intensity > 0.5 && !compact) {
+              ctx.shadowColor = "rgba(255, 69, 0, 0.6)";
+              ctx.shadowBlur = 5;
+              ctx.fillStyle = "#FF7A1A";
               ctx.fillText(cell.char, x, y);
               ctx.shadowBlur = 0;
             }
@@ -356,19 +429,55 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
         }
       }
 
-      // 5. Update & Render Trail Particles
+      // 6. Draw Sci-Fi Crosshair Reticle & Status Tag (Ref: circle with ✕ prongs & label)
+      if (!compact && drawScanReticle && activeScanX >= 0 && activeScanY >= 0) {
+        ctx.save();
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
+        ctx.lineWidth = 1.2;
+
+        // Outer ring
+        const reticleR = fontSize * 1.1;
+        ctx.beginPath();
+        ctx.arc(activeScanX, activeScanY, reticleR, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Diagonal cross prongs
+        const prongLen = reticleR * 1.5;
+        ctx.beginPath();
+        ctx.moveTo(activeScanX - prongLen, activeScanY - prongLen);
+        ctx.lineTo(activeScanX + prongLen, activeScanY + prongLen);
+        ctx.moveTo(activeScanX - prongLen, activeScanY + prongLen);
+        ctx.lineTo(activeScanX + prongLen, activeScanY - prongLen);
+        ctx.strokeStyle = "rgba(234, 88, 12, 0.9)";
+        ctx.stroke();
+
+        // Center dot
+        ctx.fillStyle = "#FFFFFF";
+        ctx.beginPath();
+        ctx.arc(activeScanX, activeScanY, 1.8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Label beside reticle (Ref: "BREATHE" / "EDS / ACTIVE")
+        ctx.font = `bold ${Math.max(8, fontSize * 0.85)}px var(--font-ioskeley-mono), monospace`;
+        ctx.fillStyle = "#E4E4E7";
+        ctx.fillText("BREATHE", activeScanX + reticleR + 6, activeScanY - 4);
+
+        ctx.restore();
+      }
+
+      // 7. Update & Render Trail Particles
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.x += p.vx * delta;
         p.y += p.vy * delta;
-        p.opacity -= delta * 1.4;
+        p.opacity -= delta * 1.2;
 
         if (p.opacity <= 0) {
           particles.splice(i, 1);
           continue;
         }
 
-        ctx.fillStyle = `rgba(249, 115, 22, ${p.opacity * 0.75})`;
+        ctx.fillStyle = `rgba(234, 88, 12, ${p.opacity * 0.85})`;
         ctx.fillText(p.char, p.x, p.y);
       }
 
@@ -383,6 +492,7 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       if (!compact) {
         window.removeEventListener("mousemove", onMouseMove);
         window.removeEventListener("touchmove", onTouchMove);
+        canvas.removeEventListener("mouseleave", onPointerLeave);
       }
     };
   }, [compact]);
@@ -391,7 +501,7 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
     <div
       ref={containerRef}
       className={`relative flex items-center justify-center select-none overflow-hidden ${
-        compact ? "w-full py-1 pointer-events-none" : "w-full max-w-full py-2 cursor-crosshair"
+        compact ? "w-full py-1 pointer-events-none" : "w-full max-w-full py-1 cursor-crosshair"
       }`}
       aria-label="EDS ASCII Typographical Emblem"
     >

@@ -432,13 +432,13 @@ export function TerminalInterface() {
           <div className="relative flex-1 min-h-0 w-full overflow-hidden">
             <AsciiBackground themeId={currentTheme} />
             <div className="relative z-10 h-full overflow-y-auto overflow-x-hidden flex flex-col justify-center items-center px-4 py-8">
-              <div className="max-w-2xl w-full text-center space-y-4">
+              <div className="max-w-5xl w-full text-center space-y-3">
                 {/* Large Centered 2D Living Typographical ASCII EDS */}
-                <div className="py-2">
+                <div className="py-1 w-full overflow-hidden">
                   <LivingAsciiEds compact={false} />
                 </div>
 
-                <div className="space-y-2">
+                <div className="max-w-2xl mx-auto space-y-2">
                   <h1 className="text-base sm:text-lg text-[#FFFFFF] font-semibold tracking-wide">
                     DIMAS EDRA AR RAFI (EDS)
                   </h1>
