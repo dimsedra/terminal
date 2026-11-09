@@ -237,9 +237,13 @@ export function TerminalInterface() {
         isDone: false,
       });
 
+      const initialGreetingPrompt = currentLang === "id"
+        ? "Halo! Saya baru saja membuka sesi interaktif ini. Tolong perkenalkan dirimu dengan ramah dalam Bahasa Indonesia dan jelaskan bagaimana kita bisa menjelajahi profil dan karya Eds bersama."
+        : "Hi! I just activated this interactive session. Please introduce yourself warmly and let me know how we can explore Eds's work and background.";
+
       setActiveAiOutputId(outId);
       sendMessage({
-        text: "Hi! I just activated this interactive session. Please introduce yourself warmly and let me know how we can explore Eds's work and background.",
+        text: initialGreetingPrompt,
       });
       setInputVal("");
       return;
@@ -250,13 +254,21 @@ export function TerminalInterface() {
       let promptToSend = trimmed;
 
       if (cmdLower === "/projects" || cmdLower === "/project") {
-        promptToSend = "Can you casually introduce Eds's featured projects and share what he's been building recently?";
+        promptToSend = currentLang === "id"
+          ? "Bisakah kamu menceritakan proyek-proyek unggulan yang telah dibangun oleh Eds baru-baru ini?"
+          : "Can you casually introduce Eds's featured projects and share what he's been building recently?";
       } else if (cmdLower === "/skills") {
-        promptToSend = "What are Eds's core engineering strengths and the tech stack he enjoys working with the most?";
+        promptToSend = currentLang === "id"
+          ? "Apa saja keahlian teknis utama Eds dan teknologi yang paling dia sukai?"
+          : "What are Eds's core engineering strengths and the tech stack he enjoys working with the most?";
       } else if (cmdLower === "/about") {
-        promptToSend = "Can you tell me a bit about Eds, his mindset as a systems thinker, and what drives his engineering work?";
+        promptToSend = currentLang === "id"
+          ? "Bisakah kamu menceritakan sedikit tentang Eds, pola pikirnya sebagai systems thinker, dan apa yang mendorong karya rekayasanya?"
+          : "Can you tell me a bit about Eds, his mindset as a systems thinker, and what drives his engineering work?";
       } else if (cmdLower === "/contact") {
-        promptToSend = "What's the best way to get in touch, reach out, or collaborate with Eds?";
+        promptToSend = currentLang === "id"
+          ? "Bagaimana cara terbaik untuk menghubungi, menjangkau, atau berkolaborasi dengan Eds?"
+          : "What's the best way to get in touch, reach out, or collaborate with Eds?";
       } else if (cmdLower === "/themes" || cmdLower.startsWith("/themes ")) {
         const themeArg = trimmed.slice(7).trim();
         if (!themeArg) {
