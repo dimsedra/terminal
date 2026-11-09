@@ -38,6 +38,31 @@ const THEME_OPTIONS: ThemeSuggestionOption[] = THEME_LIST.map((t) => {
   };
 });
 
+interface LanguageSuggestionOption {
+  key: string;
+  fullText: string;
+  label: string;
+  description: string;
+  aliases: string[];
+}
+
+const LANGUAGE_OPTIONS: LanguageSuggestionOption[] = [
+  {
+    key: "en",
+    fullText: "/lang en",
+    label: "en",
+    description: "English (Default)",
+    aliases: ["en", "english"],
+  },
+  {
+    key: "id",
+    fullText: "/lang id",
+    label: "id",
+    description: "Bahasa Indonesia",
+    aliases: ["id", "indonesia", "indonesian"],
+  },
+];
+
 function getEmptyResult(query: string): CommandSuggestionResult {
   return {
     isOpen: false,
@@ -85,6 +110,48 @@ export function getCommandSuggestions(rawInput: string): CommandSuggestionResult
     const ghostSuffix = bestMatchFullText.slice(rawInput.length);
 
     const suggestions: CommandSuggestion[] = matchingThemes.map((opt) => ({
+      name: opt.label,
+      fullText: opt.fullText,
+      description: opt.description,
+    }));
+
+    return {
+      isOpen: true,
+      query: rawInput,
+      ghostSuffix,
+      bestMatchFullText,
+      suggestions,
+    };
+  }
+
+  // Multi-token command: /lang with arguments
+  if (lower.startsWith("/lang ")) {
+    const argQuery = lower.slice("/lang ".length).trimStart();
+
+    const matchingLangs = LANGUAGE_OPTIONS.filter((opt) => {
+      if (argQuery.length === 0) return true;
+      return opt.aliases.some((alias) => alias.toLowerCase().startsWith(argQuery));
+    }).sort((a, b) => {
+      const aExactKey = a.key.toLowerCase().startsWith(argQuery);
+      const bExactKey = b.key.toLowerCase().startsWith(argQuery);
+      if (aExactKey && !bExactKey) return -1;
+      if (!aExactKey && bExactKey) return 1;
+      return 0;
+    });
+
+    if (matchingLangs.length === 0) {
+      return getEmptyResult(rawInput);
+    }
+
+    const bestOption = matchingLangs[0];
+    const matchingAlias = bestOption.key.toLowerCase().startsWith(argQuery)
+      ? bestOption.key
+      : (bestOption.aliases.find((alias) => alias.toLowerCase().startsWith(argQuery)) || bestOption.key);
+
+    const bestMatchFullText = `/lang ${matchingAlias}`;
+    const ghostSuffix = bestMatchFullText.slice(rawInput.length);
+
+    const suggestions: CommandSuggestion[] = matchingLangs.map((opt) => ({
       name: opt.label,
       fullText: opt.fullText,
       description: opt.description,

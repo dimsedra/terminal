@@ -67,7 +67,8 @@ test("Command Suggestions (Language Command & Arguments) - resolves '/l' to /lan
 
   const aliasResult = getCommandSuggestions("/lang indo");
   assert.equal(aliasResult.isOpen, true);
-  assert.equal(aliasResult.bestMatchFullText, "/lang id");
+  assert.equal(aliasResult.bestMatchFullText, "/lang indonesia");
+  assert.equal(aliasResult.ghostSuffix, "nesia");
   assert.equal(aliasResult.suggestions[0].name, "id");
 
   const invalidArg = getCommandSuggestions("/lang xyz");

@@ -6,6 +6,7 @@ export const commands: CommandItem[] = [
   { name: "/skills", desc: "Inspect technical skills, stack, and AI tooling" },
   { name: "/about", desc: "Learn about Eds, role, and engineering philosophy" },
   { name: "/contact", desc: "Get touchpoints (GitHub, LinkedIn, Email)" },
+  { name: "/lang", desc: "Switch language / ganti bahasa (en/id)" },
   { name: "/themes", desc: "Switch ambient ASCII background theme" },
   { name: "/help", desc: "List all available terminal commands" },
   { name: "/exit", desc: "Exit session and return to home" },
