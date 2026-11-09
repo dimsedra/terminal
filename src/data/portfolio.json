@@ -101,6 +101,7 @@
         "tagline": "Local-first AI companion desktop app with 3-tier privacy memory pipeline",
         "period": "Jun 2026 - Present",
         "role": "Full-Stack Developer",
+        "github": "https://github.com/dimsedra/dialogue-ai",
         "description": "Architected a local-first AI companion desktop app using Next.js 16, Electron, and embedded PocketBase, decoupling real-time chat interfaces from asynchronous background observer agents to eliminate UI latency. Engineered a 3-tier privacy-focused memory pipeline using Markdown storage and on-device vector embeddings (xenova/multilingual-e5-small) for auditable semantic recall. Orchestrated autonomous AI agent workflows leveraging Mastra framework and Playwright for deep web research and document parsing under human-in-the-loop gates.",
         "stack": [
           "Next.js 16",
@@ -122,6 +123,7 @@
         "tagline": "Full-stack Neo-Brutalist editorial web store with real-time reactive sync",
         "period": "May 2026",
         "role": "Full-Stack Developer",
+        "github": "https://github.com/dimsedra/ATMOS",
         "description": "Architected a modern full-stack web platform using React 19, Vite 8, and Tailwind CSS v4, implementing a responsive Neo-Brutalist design system with dynamic routing via React Router v7. Integrated Convex backend and Stripe API to handle real-time database queries, reactive state synchronization, and secure e-commerce payment workflows with webhook handlers. Built a Headless CMS and i18n ecosystem using Sanity Studio and i18next for seamless content management across artist rosters and multi-language user sessions.",
         "stack": [
           "React 19",
@@ -144,6 +146,7 @@
         "tagline": "Computer vision pipeline for 87 gemstone categories with FastAPI backend",
         "period": "Jun 2026 - Jul 2026",
         "role": "AI and Software Engineer, Self Initiated",
+        "github": "https://github.com/dimsedra/Gemstone",
         "description": "Developed and fine-tuned a PyTorch (ResNet50) deep learning pipeline using transfer learning on 6,700+ images across 87 gemstone categories, achieving 92.8% training accuracy and perfect F1-scores (100%) on 14 fine-grained classes. Engineered a high-performance FastAPI backend featuring thread-safe lazy model loading and asynchronous request handling to deliver real-time image inferences with Top-5 class confidence scores. Built an interactive web dashboard with drag-and-drop upload and established an automated Pytest test suite covering 8 critical API scenarios.",
         "stack": [
           "PyTorch",
@@ -164,6 +167,8 @@
         "tagline": "Client-side metadata analysis and forensic detection tool with zero cloud dependency",
         "period": "Apr 2026 - Present",
         "role": "Software Engineer, Self Initiated",
+        "github": "https://github.com/dimsedra/ExifSense",
+        "link": "https://exif-sense.vercel.app/",
         "description": "Architected a zero-server, client-side metadata analysis tool using Vanilla JavaScript and Exifr to parse raw EXIF, GPS, and optical camera parameters from multi-format images with 100% local data privacy. Engineered metadata sanitization and forensic detection features to automatically flag software edit signatures and timestamp discrepancies, enabling one-click client-side removal of sensitive tags. Integrated geospatial route visualization and multi-format exports (PDF, CSV, Markdown, JSON) using Leaflet.js, OSRM, and jsPDF.",
         "stack": [
           "Vanilla JavaScript (ES6+)",
@@ -284,6 +289,7 @@
         "tagline": "Aplikasi desktop AI companion berbasis lokal dengan alur memori 3-tier berorientasi privasi",
         "period": "Jun 2026 - Sekarang",
         "role": "Full-Stack Developer",
+        "github": "https://github.com/dimsedra/dialogue-ai",
         "description": "Merancang arsitektur aplikasi pendamping AI desktop lokal menggunakan Next.js 16, Electron, dan PocketBase tersemat untuk memisahkan UI chat dari background observer agent demi menghilangkan latensi antarmuka. Membangun memori 3-tier berorientasi privasi menggunakan penyimpanan Markdown dan embedding vektor lokal (xenova/multilingual-e5-small) tanpa dependensi cloud. Mengorkestrasi workflow agent otonom dengan Mastra dan Playwright melalui persetujuan human-in-the-loop.",
         "stack": [
           "Next.js 16",
@@ -305,6 +311,7 @@
         "tagline": "Platform web editorial dan e-commerce Neo-Brutalist dengan sinkronisasi reaktif real-time",
         "period": "Mei 2026",
         "role": "Full-Stack Developer",
+        "github": "https://github.com/dimsedra/ATMOS",
         "description": "Membangun platform web full-stack modern menggunakan React 19, Vite 8, dan Tailwind CSS v4 dengan desain Neo-Brutalist serta routing dinamis via React Router v7. Mengintegrasikan backend Convex dan Stripe API untuk kueri real-time, sinkronisasi state reaktif, serta alur pembayaran aman dengan webhook handler. Mengembangkan ekosistem Headless CMS dan i18n menggunakan Sanity Studio dan i18next untuk manajemen konten multi-bahasa.",
         "stack": [
           "React 19",
@@ -327,6 +334,7 @@
         "tagline": "Pipeline computer vision untuk klasifikasi 87 kategori batu permata dengan backend asinkron FastAPI",
         "period": "Jun 2026 - Jul 2026",
         "role": "AI and Software Engineer, Self Initiated",
+        "github": "https://github.com/dimsedra/Gemstone",
         "description": "Mengembangkan dan melakukan fine-tuning pipeline deep learning PyTorch (ResNet50) dengan transfer learning pada 6.700+ gambar di 87 kategori batu permata, meraih akurasi training 92,8% dan F1-score sempurna (100%) pada 14 kelas detail. Membangun backend performa tinggi FastAPI dengan thread-safe lazy model loading dan penanganan request asinkron untuk inferensi real-time. Menyediakan dashboard web interaktif dengan drag-and-drop dan test suite Pytest otomatis untuk 8 skenario API kritis.",
         "stack": [
           "PyTorch",
@@ -347,6 +355,8 @@
         "tagline": "Alat analisis metadata dan forensik gambar client-side dengan privasi lokal penuh tanpa server",
         "period": "Apr 2026 - Sekarang",
         "role": "Software Engineer, Self Initiated",
+        "github": "https://github.com/dimsedra/ExifSense",
+        "link": "https://exif-sense.vercel.app/",
         "description": "Merancang alat analisis metadata gambar client-side (zero-server) berbasis Vanilla JavaScript dan Exifr untuk membedah data mentah EXIF, GPS, dan parameter optik kamera secara lokal dengan privasi data 100%. Mengembangkan fitur sanitasi metadata dan deteksi forensik untuk menandai jejak manipulasi software serta penghapusan tag lokasi sensitif dalam satu klik. Mengintegrasikan visualisasi rute spasial dengan Leaflet.js, OSRM, dan ekspor multi-format (PDF, CSV, Markdown, JSON) via jsPDF.",
         "stack": [
           "Vanilla JavaScript (ES6+)",

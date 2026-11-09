@@ -134,8 +134,15 @@ export function getProjectsMarkdown(lang?: SupportedLanguage): string {
     .map((p) => {
       const stackBadges = p.stack.map((s) => `\`${s}\``).join(" ");
       const rolePeriod = p.role && p.period ? `\n  _${p.role} · ${p.period}_` : "";
-      const repoLink = p.github ? `\n  [view repository ↗](${p.github})` : "";
-      return `- **${p.name}**${rolePeriod}\n  ${p.description}\n  ${stackBadges}${repoLink}`;
+      const links: string[] = [];
+      if (p.github) {
+        links.push(`[${isId ? "lihat repositori ↗" : "view repository ↗"}](${p.github})`);
+      }
+      if (p.link) {
+        links.push(`[${isId ? "demo langsung ↗" : "live demo ↗"}](${p.link})`);
+      }
+      const linksLine = links.length > 0 ? `\n  ${links.join(" · ")}` : "";
+      return `- **${p.name}**${rolePeriod}\n  ${p.description}\n  ${stackBadges}${linksLine}`;
     })
     .join("\n\n");
 

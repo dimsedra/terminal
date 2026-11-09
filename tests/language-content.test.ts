@@ -68,6 +68,10 @@ test("Localized Markdown Generators - renders English content by default and for
   const enProjects = getProjectsMarkdown("en");
   assert.match(enProjects, /Dialogue AI/i);
   assert.match(enProjects, /Local-first AI companion/i);
+  assert.match(enProjects, /view repository ↗/i);
+  assert.match(enProjects, /https:\/\/github\.com\/dimsedra\/dialogue-ai/);
+  assert.match(enProjects, /live demo ↗/i);
+  assert.match(enProjects, /https:\/\/exif-sense\.vercel\.app\//);
 
   const enSkills = getSkillsMarkdown("en");
   assert.match(enSkills, /Hard Skills & Core Engineering/i);
@@ -87,6 +91,10 @@ test("Localized Markdown Generators - renders Indonesian content when 'id' is su
   assert.match(idProjects, /Dialogue AI/i);
   assert.match(idProjects, /aplikasi pendamping AI desktop lokal/i);
   assert.match(idProjects, /Proyek Unggulan/i);
+  assert.match(idProjects, /lihat repositori ↗/i);
+  assert.match(idProjects, /https:\/\/github\.com\/dimsedra\/dialogue-ai/);
+  assert.match(idProjects, /demo langsung ↗/i);
+  assert.match(idProjects, /https:\/\/exif-sense\.vercel\.app\//);
 
   const idSkills = getSkillsMarkdown("id");
   assert.match(idSkills, /Keahlian Teknis & Rekayasa Inti/i);
