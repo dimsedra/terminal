@@ -85,7 +85,7 @@ test("Localized Markdown Generators - renders Indonesian content when 'id' is su
 
   const idProjects = getProjectsMarkdown("id");
   assert.match(idProjects, /Dialogue AI/i);
-  assert.match(idProjects, /Aplikasi desktop AI companion/i);
+  assert.match(idProjects, /aplikasi pendamping AI desktop lokal/i);
   assert.match(idProjects, /Proyek Unggulan/i);
 
   const idSkills = getSkillsMarkdown("id");
