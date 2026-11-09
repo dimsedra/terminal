@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from "react";
 
 interface LivingAsciiEdsProps {
   compact?: boolean;
+  anchorRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 const DENSE_GLYPHS = ["@", "#", "%"];
@@ -133,23 +134,16 @@ export const HOVER_EFFECT_CONFIG = {
 
   // Jumlah sel yang berkedip per siklus saat idle agar huruf terasa hidup dan berdenyut
   idleShimmerCount: 26,
+
+  // Jangkauan fringe titik-titik samar di baris atas dan bawah laser
+  fringeColReach: 14,
 };
 
 const PAD_TOP_ROWS = 6;
 const PAD_BOTTOM_ROWS = 6;
-const PAD_LEFT_COLS = 18;
-const PAD_RIGHT_COLS = 18;
 const LETTER_BLOCK_WIDTH = 122;
 
-const PADDED_LARGE_TEMPLATE = [
-  ...Array.from({ length: PAD_TOP_ROWS }, () => " ".repeat(LETTER_BLOCK_WIDTH + PAD_LEFT_COLS + PAD_RIGHT_COLS)),
-  ...CINEMATIC_LARGE_TEMPLATE.map(
-    (line) => " ".repeat(PAD_LEFT_COLS) + line.trimEnd().padEnd(LETTER_BLOCK_WIDTH, " ") + " ".repeat(PAD_RIGHT_COLS)
-  ),
-  ...Array.from({ length: PAD_BOTTOM_ROWS }, () => " ".repeat(LETTER_BLOCK_WIDTH + PAD_LEFT_COLS + PAD_RIGHT_COLS)),
-];
-
-export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
+export function LivingAsciiEds({ compact = false, anchorRef }: LivingAsciiEdsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -160,10 +154,6 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
-    const lines = compact ? COMPACT_TEMPLATE : PADDED_LARGE_TEMPLATE;
-    const rows = lines.length;
-    const cols = Math.max(...lines.map((l) => l.length));
 
     const getResolvedFontFamily = () => {
       const cssVar = window.getComputedStyle(document.body).getPropertyValue("--font-ioskeley-mono").trim();
@@ -177,25 +167,141 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       return "monospace";
     };
 
-    // Initialize grid cells
-    const grid: CellState[][] = [];
-    for (let r = 0; r < rows; r++) {
-      grid[r] = [];
-      const line = lines[r].padEnd(cols, " ");
-      for (let c = 0; c < cols; c++) {
-        const ch = line[c];
-        const type = getDensityType(ch, r, rows);
-        grid[r][c] = {
-          initialChar: ch,
-          char: ch,
-          type,
-          intensity: 0,
-          scanIntensity: 0,
-          scanChar: r % 2 === 0 ? "-" : c % 3 === 0 ? "=" : ".",
-          baseColor: getBaseColor(),
+    const computeMetrics = () => {
+      const fontFamily = getResolvedFontFamily();
+
+      if (compact) {
+        const containerWidth = container.clientWidth || 230;
+        const targetCharWidth = 5.2;
+        const charWidth = Math.min(targetCharWidth, Math.max(2.2, (containerWidth - 8) / 44));
+        const fontSize = charWidth * 1.42;
+        const charHeight = charWidth * 1.78;
+        const totalWidth = Math.ceil(44 * charWidth);
+        const totalHeight = Math.ceil(12 * charHeight);
+
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = totalWidth * dpr;
+        canvas.height = totalHeight * dpr;
+        canvas.style.width = `${totalWidth}px`;
+        canvas.style.height = `${totalHeight}px`;
+
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.font = `${fontSize}px ${fontFamily}`;
+        ctx.textBaseline = "top";
+
+        return {
+          fontSize,
+          fontFamily,
+          charWidth,
+          charHeight,
+          totalWidth,
+          totalHeight,
+          cols: 44,
+          rows: 12,
+          edsStartRow: 0,
+          edsStartCol: 0,
         };
       }
-    }
+
+      // Hero Full Screen mode (spans full workspace, behind text, above background)
+      const containerWidth = container.clientWidth || window.innerWidth;
+      const containerHeight = container.clientHeight || (window.innerHeight - 97);
+
+      const maxColsNeeded = LETTER_BLOCK_WIDTH + 8; // 130
+      const charWidth = Math.min(7.25, Math.max(2.2, (containerWidth - 16) / maxColsNeeded));
+      const fontSize = charWidth * 1.42;
+      const charHeight = charWidth * 1.78;
+      const totalWidth = containerWidth;
+      const totalHeight = containerHeight;
+
+      const cols = Math.ceil(containerWidth / charWidth);
+      const rows = Math.ceil(containerHeight / charHeight);
+
+      // Reserve exact vertical space in the foreground flex flow
+      const totalEdsRows = 29 + PAD_TOP_ROWS + PAD_BOTTOM_ROWS;
+      const placeholderHeight = Math.ceil(totalEdsRows * charHeight);
+      if (anchorRef?.current) {
+        anchorRef.current.style.height = `${placeholderHeight}px`;
+      }
+
+      // Determine where the EDS letter block sits on the full-screen grid
+      let edsStartRow = Math.max(0, Math.round((rows - 29) / 2));
+      let edsStartCol = Math.max(0, Math.round((cols - LETTER_BLOCK_WIDTH) / 2));
+
+      if (anchorRef?.current) {
+        const anchorRect = anchorRef.current.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        const anchorRelTop = anchorRect.top - containerRect.top;
+        edsStartRow = Math.max(0, Math.round((anchorRelTop + PAD_TOP_ROWS * charHeight) / charHeight));
+        const anchorCenterX = (anchorRect.left + anchorRect.right) / 2 - containerRect.left;
+        edsStartCol = Math.max(0, Math.round((anchorCenterX - (LETTER_BLOCK_WIDTH * charWidth) / 2) / charWidth));
+      }
+
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.ceil(containerWidth * dpr);
+      canvas.height = Math.ceil(containerHeight * dpr);
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
+
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.font = `${fontSize}px ${fontFamily}`;
+      ctx.textBaseline = "top";
+
+      return {
+        fontSize,
+        fontFamily,
+        charWidth,
+        charHeight,
+        totalWidth,
+        totalHeight,
+        cols,
+        rows,
+        edsStartRow,
+        edsStartCol,
+      };
+    };
+
+    let metrics = computeMetrics();
+
+    const buildGrid = (m: ReturnType<typeof computeMetrics>) => {
+      const { cols, rows, edsStartRow, edsStartCol } = m;
+      const g: CellState[][] = [];
+
+      for (let r = 0; r < rows; r++) {
+        g[r] = [];
+        const templateRow = r - edsStartRow;
+        const isWithinEds =
+          templateRow >= 0 &&
+          templateRow < (compact ? COMPACT_TEMPLATE.length : CINEMATIC_LARGE_TEMPLATE.length);
+        const templateLine = isWithinEds
+          ? compact
+            ? COMPACT_TEMPLATE[templateRow]
+            : CINEMATIC_LARGE_TEMPLATE[templateRow]
+          : null;
+
+        for (let c = 0; c < cols; c++) {
+          const templateCol = c - edsStartCol;
+          let ch = " ";
+          if (templateLine && templateCol >= 0 && templateCol < templateLine.length) {
+            ch = templateLine[templateCol];
+          }
+
+          const type = getDensityType(ch, templateRow >= 0 ? templateRow : 0, compact ? 12 : 29);
+          g[r][c] = {
+            initialChar: ch,
+            char: ch,
+            type,
+            intensity: 0,
+            scanIntensity: 0,
+            scanChar: r % 2 === 0 ? "-" : c % 3 === 0 ? "=" : ".",
+            baseColor: getBaseColor(),
+          };
+        }
+      }
+      return g;
+    };
+
+    let grid = buildGrid(metrics);
 
     const particles: Particle[] = [];
     let animationFrameId: number;
@@ -226,18 +332,17 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
     let activeTrajectory: SweepTrajectory | null = null;
 
     const createRandomTrajectory = (): SweepTrajectory => {
-      const padTop = compact ? 0 : PAD_TOP_ROWS;
-      const letterRows = 29;
-      const minRow = padTop + 2;
-      const maxRow = padTop + letterRows - 1;
+      const { rows, cols, edsStartRow } = metrics;
+      const minRow = Math.max(2, edsStartRow - 3);
+      const maxRow = Math.min(rows - 3, edsStartRow + 29 + 4);
 
       const startRow = minRow + Math.random() * (maxRow - minRow);
       const endRow = minRow + Math.random() * (maxRow - minRow);
       const direction: 1 | -1 = Math.random() > 0.5 ? 1 : -1;
       // Gentle subtle curvature (-3.0 to +3.0 rows)
       const bowHeight = (Math.random() - 0.5) * 6.0;
-      // Swift shooting star streak: 1400ms to 2000ms
-      const duration = 1400 + Math.random() * 600;
+      // Swift shooting star streak: 1500ms to 2200ms
+      const duration = 1500 + Math.random() * 700;
       // Random cadence: 3800ms to 7000ms
       const delay = 3800 + Math.random() * 3200;
 
@@ -248,54 +353,34 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
         bowHeight,
         duration,
         nextIdleDelay: delay,
-        lastCol: direction === 1 ? -14 : cols + 14,
+        lastCol: direction === 1 ? -16 : cols + 16,
         lastRow: startRow,
       };
     };
 
-    const computeMetrics = () => {
-      const fontFamily = getResolvedFontFamily();
-      const containerWidth = container.clientWidth || (compact ? 230 : 1150);
-
-      const targetCharWidth = compact ? 5.2 : 7.25;
-      const charWidth = Math.min(targetCharWidth, Math.max(2.2, (containerWidth - 8) / cols));
-      // Use 1.42x charWidth for fontSize so each glyph has crisp horizontal breathing space
-      const fontSize = charWidth * 1.42;
-      const charHeight = charWidth * 1.78;
-      const totalWidth = Math.ceil(cols * charWidth);
-      const totalHeight = Math.ceil(rows * charHeight);
-
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = totalWidth * dpr;
-      canvas.height = totalHeight * dpr;
-      canvas.style.width = `${totalWidth}px`;
-      canvas.style.height = `${totalHeight}px`;
-
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.font = `${fontSize}px ${fontFamily}`;
-      ctx.textBaseline = "top";
-
-      return { fontSize, fontFamily, charWidth, charHeight, totalWidth, totalHeight };
-    };
-
-    let metrics = computeMetrics();
-
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(() => {
         metrics = computeMetrics();
+        grid = buildGrid(metrics);
       });
     }
 
     const resizeObserver = new ResizeObserver(() => {
       metrics = computeMetrics();
+      grid = buildGrid(metrics);
     });
     resizeObserver.observe(container);
+    if (anchorRef?.current) {
+      resizeObserver.observe(anchorRef.current);
+    }
 
     const applyWakeAt = (colCenter: number, rowCenter: number) => {
       const activeRadiusCols = HOVER_EFFECT_CONFIG.scanlineReachCols;
       const laserHeight = HOVER_EFFECT_CONFIG.laserHeightRows;
       const coreThreshold = HOVER_EFFECT_CONFIG.coreRowThreshold;
       const letterRadius = HOVER_EFFECT_CONFIG.letterGlowRadiusCols;
+
+      const { rows, cols } = metrics;
 
       for (let r = 0; r < rows; r++) {
         const rowDiff = Math.abs(r - rowCenter);
@@ -307,7 +392,8 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
           const colDiff = Math.abs(c - colCenter);
           if (colDiff > activeRadiusCols) continue;
 
-          const cell = grid[r][c];
+          const cell = grid[r]?.[c];
+          if (!cell) continue;
 
           if (cell.type !== "space") {
             // Letter glyphs: contact illumination
@@ -319,12 +405,12 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
                 cell.char = getRandomGlyph(cell.type, cell.initialChar);
               }
 
-              if (Math.random() < 0.03 && particles.length < 25) {
+              if (Math.random() < 0.03 && particles.length < 35) {
                 particles.push({
-                  x: c * metrics.charWidth + (Math.random() - 0.5) * 6,
-                  y: r * metrics.charHeight,
-                  vx: (Math.random() - 0.5) * 12,
-                  vy: -Math.random() * 14 - 4,
+                  x: c + (Math.random() - 0.5) * 1.5,
+                  y: r,
+                  vx: (Math.random() - 0.5) * 2.5,
+                  vy: -Math.random() * 2.2 - 0.5,
                   char: [".", ":", "·", "-"][Math.floor(Math.random() * 4)],
                   opacity: 0.85,
                 });
@@ -348,9 +434,9 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
               } else {
                 cell.scanChar = ["-", "·", "."][Math.floor(Math.random() * 3)];
               }
-            } else if (colDiff <= 14) {
+            } else if (colDiff <= HOVER_EFFECT_CONFIG.fringeColReach) {
               // Faint dotted fringe 1 row above/below
-              const fringeScan = Math.max(0, 0.32 - (colDiff / 14) * 0.25);
+              const fringeScan = Math.max(0, 0.32 - (colDiff / HOVER_EFFECT_CONFIG.fringeColReach) * 0.25);
               cell.scanIntensity = Math.max(cell.scanIntensity, fringeScan);
               cell.scanChar = ["·", "."][Math.floor(Math.random() * 2)];
             }
@@ -414,7 +500,7 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
     if (!compact) {
       window.addEventListener("mousemove", onMouseMove, { passive: true });
       window.addEventListener("touchmove", onTouchMove, { passive: true });
-      canvas.addEventListener("mouseleave", onPointerLeave);
+      document.addEventListener("mouseleave", onPointerLeave);
     }
 
     // Main render loop
@@ -432,10 +518,10 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
         }
 
         // Active trail cells constantly cycle glyphs in real-time
-        for (let r = 0; r < rows; r++) {
-          for (let c = 0; c < cols; c++) {
-            const cell = grid[r][c];
-            if (cell.type === "space" || cell.type === "border") continue;
+        for (let r = 0; r < metrics.rows; r++) {
+          for (let c = 0; c < metrics.cols; c++) {
+            const cell = grid[r]?.[c];
+            if (!cell || cell.type === "space" || cell.type === "border") continue;
 
             if (cell.intensity > 0.06) {
               cell.char = getRandomGlyph(cell.type, cell.initialChar);
@@ -443,13 +529,17 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
           }
         }
 
-        // Ambient shimmer: micro-mutate random cells so typography stays living
+        // Ambient shimmer: micro-mutate random cells on EDS letters so typography stays living
         const shimmerCount = compact ? 4 : HOVER_EFFECT_CONFIG.idleShimmerCount;
         for (let i = 0; i < shimmerCount; i++) {
-          const randR = Math.floor(Math.random() * rows);
-          const randC = Math.floor(Math.random() * cols);
-          const cell = grid[randR][randC];
-          if (cell.type !== "space" && cell.type !== "border" && cell.intensity <= 0.06) {
+          const randR = compact
+            ? Math.floor(Math.random() * metrics.rows)
+            : metrics.edsStartRow + Math.floor(Math.random() * 29);
+          const randC = compact
+            ? Math.floor(Math.random() * metrics.cols)
+            : metrics.edsStartCol + Math.floor(Math.random() * LETTER_BLOCK_WIDTH);
+          const cell = grid[randR]?.[randC];
+          if (cell && cell.type !== "space" && cell.type !== "border" && cell.intensity <= 0.06) {
             if (Math.random() < 0.45) {
               cell.char = getRandomGlyph(cell.type, cell.initialChar);
             } else {
@@ -480,21 +570,21 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
           } else {
             const { direction, startRow, endRow, bowHeight } = activeTrajectory;
 
-            // Parametric continuous column progress
+            // Parametric continuous column progress from off-screen edge to off-screen edge
             const col = direction === 1
-              ? t * (cols + 28) - 14
-              : (1 - t) * (cols + 28) - 14;
+              ? t * (metrics.cols + 32) - 16
+              : (1 - t) * (metrics.cols + 32) - 16;
 
             // Straightforward shooting star streak with a single gentle bow curvature
             const baseRow = startRow + (endRow - startRow) * t;
             const bow = bowHeight * Math.sin(t * Math.PI);
-            const row = Math.max(2, Math.min(rows - 3, baseRow + bow));
+            const row = Math.max(2, Math.min(metrics.rows - 3, baseRow + bow));
 
             // Smooth interpolation between frames to guarantee an unbroken trail
             const dCol = col - activeTrajectory.lastCol;
             const dRow = row - activeTrajectory.lastRow;
             const dist = Math.hypot(dCol, dRow);
-            const steps = Math.min(10, Math.max(1, Math.ceil(dist / 2.5)));
+            const steps = Math.min(12, Math.max(1, Math.ceil(dist / 2.5)));
 
             for (let s = 1; s <= steps; s++) {
               const ic = activeTrajectory.lastCol + (dCol * s) / steps;
@@ -515,10 +605,11 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       ctx.font = `${fontSize}px ${fontFamily}`;
 
       // 4. Render Grid Cells (both letter glyphs and horizontal scanline trails)
-      for (let r = 0; r < rows; r++) {
+      for (let r = 0; r < metrics.rows; r++) {
         const y = r * charHeight;
-        for (let c = 0; c < cols; c++) {
-          const cell = grid[r][c];
+        for (let c = 0; c < metrics.cols; c++) {
+          const cell = grid[r]?.[c];
+          if (!cell) continue;
           const x = c * charWidth;
 
           if (cell.type === "space") {
@@ -566,13 +657,13 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
         p.y += p.vy * delta;
         p.opacity -= delta * 1.1;
 
-        if (p.opacity <= 0) {
+        if (p.opacity <= 0 || p.x < 0 || p.x > metrics.cols || p.y < 0 || p.y > metrics.rows) {
           particles.splice(i, 1);
           continue;
         }
 
         ctx.fillStyle = `rgba(234, 88, 12, ${p.opacity * 0.85})`;
-        ctx.fillText(p.char, p.x, p.y);
+        ctx.fillText(p.char, p.x * metrics.charWidth, p.y * metrics.charHeight);
       }
 
       animationFrameId = requestAnimationFrame(render);
@@ -586,26 +677,41 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
       if (!compact) {
         window.removeEventListener("mousemove", onMouseMove);
         window.removeEventListener("touchmove", onTouchMove);
-        canvas.removeEventListener("mouseleave", onPointerLeave);
+        document.removeEventListener("mouseleave", onPointerLeave);
       }
     };
-  }, [compact]);
+  }, [compact, anchorRef]);
+
+  if (compact) {
+    return (
+      <div
+        ref={containerRef}
+        className="relative flex items-center justify-center select-none overflow-hidden font-mono w-full py-1 pointer-events-none"
+        aria-label="EDS ASCII Typographical Emblem"
+      >
+        <canvas
+          ref={canvasRef}
+          role="img"
+          aria-label="EDS 2D Typographical ASCII Emblem"
+          className="block mx-auto"
+        />
+        <span className="sr-only">EDS</span>
+      </div>
+    );
+  }
 
   return (
     <div
       ref={containerRef}
-      className={`relative flex items-center justify-center select-none overflow-hidden font-mono ${
-        compact ? "w-full py-1 pointer-events-none" : "w-full max-w-full py-1 cursor-default"
-      }`}
-      aria-label="EDS ASCII Typographical Emblem"
+      className="absolute inset-0 w-full h-full pointer-events-none select-none overflow-hidden font-mono z-[5]"
+      aria-hidden="true"
     >
       <canvas
         ref={canvasRef}
         role="img"
         aria-label="EDS 2D Typographical ASCII Emblem"
-        className="block mx-auto"
+        className="block w-full h-full"
       />
-      <span className="sr-only">EDS</span>
     </div>
   );
 }
