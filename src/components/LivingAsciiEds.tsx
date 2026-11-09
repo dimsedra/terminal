@@ -137,14 +137,16 @@ export const HOVER_EFFECT_CONFIG = {
 
 const PAD_TOP_ROWS = 6;
 const PAD_BOTTOM_ROWS = 6;
-const PAD_SIDE_COLS = 16;
+const PAD_LEFT_COLS = 18;
+const PAD_RIGHT_COLS = 18;
+const LETTER_BLOCK_WIDTH = 122;
 
 const PADDED_LARGE_TEMPLATE = [
-  ...Array.from({ length: PAD_TOP_ROWS }, () => " ".repeat(126 + PAD_SIDE_COLS * 2)),
+  ...Array.from({ length: PAD_TOP_ROWS }, () => " ".repeat(LETTER_BLOCK_WIDTH + PAD_LEFT_COLS + PAD_RIGHT_COLS)),
   ...CINEMATIC_LARGE_TEMPLATE.map(
-    (line) => " ".repeat(PAD_SIDE_COLS) + line.padEnd(126, " ") + " ".repeat(PAD_SIDE_COLS)
+    (line) => " ".repeat(PAD_LEFT_COLS) + line.trimEnd().padEnd(LETTER_BLOCK_WIDTH, " ") + " ".repeat(PAD_RIGHT_COLS)
   ),
-  ...Array.from({ length: PAD_BOTTOM_ROWS }, () => " ".repeat(126 + PAD_SIDE_COLS * 2)),
+  ...Array.from({ length: PAD_BOTTOM_ROWS }, () => " ".repeat(LETTER_BLOCK_WIDTH + PAD_LEFT_COLS + PAD_RIGHT_COLS)),
 ];
 
 export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
