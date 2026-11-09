@@ -1,5 +1,6 @@
 import { commands } from "../content/commands.ts";
-import { THEME_LIST, type ThemeDefinition } from "../content/themes.ts";
+import { THEME_LIST, parseThemeArgument, type ThemeDefinition } from "../content/themes.ts";
+import { parseLanguageArgument } from "../data/portfolioData.ts";
 
 export interface CommandSuggestion {
   name: string;
@@ -201,4 +202,60 @@ export function getCommandSuggestions(
     bestMatchFullText,
     suggestions,
   };
+}
+
+/**
+ * Evaluates whether a raw user input represents a fully formed and recognized command
+ * (either a standalone slash command or a command with valid sub-arguments).
+ * Used for dynamic syntax highlighting across the input bar and history logs.
+ */
+export function isRecognizedCommand(rawInput: string): boolean {
+  if (!rawInput) return false;
+  const trimmedStart = rawInput.trimStart();
+  if (!trimmedStart.startsWith("/")) return false;
+
+  const spaceIdx = trimmedStart.indexOf(" ");
+
+  // Case A: Single token command (no space)
+  if (spaceIdx === -1) {
+    const cmd = trimmedStart.toLowerCase();
+    const standaloneCommands = [
+      "/help",
+      "/about",
+      "/projects",
+      "/project",
+      "/skills",
+      "/contact",
+      "/exit",
+      "/clear",
+      "/cls",
+      "/chat",
+      "/themes",
+      "/lang",
+    ];
+    return standaloneCommands.includes(cmd);
+  }
+
+  // Case B: Multi-token command (has space)
+  const cmd = trimmedStart.slice(0, spaceIdx).toLowerCase();
+  const rawArg = trimmedStart.slice(spaceIdx + 1).trim();
+
+  // If there is a space, but the argument is completely empty, it is incomplete
+  if (!rawArg) {
+    return false;
+  }
+
+  if (cmd === "/chat") {
+    return rawArg.length > 0;
+  }
+
+  if (cmd === "/themes") {
+    return parseThemeArgument(rawArg).success;
+  }
+
+  if (cmd === "/lang") {
+    return parseLanguageArgument(rawArg).success;
+  }
+
+  return false;
 }

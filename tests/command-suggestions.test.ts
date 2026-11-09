@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getCommandSuggestions } from "../src/lib/commandSuggestions.ts";
+import { getCommandSuggestions, isRecognizedCommand } from "../src/lib/commandSuggestions.ts";
 
 test("Command Suggestions (Normal Path) - resolves slash command prefix to matching suggestions and ghost suffix", () => {
   const result = getCommandSuggestions("/th");
@@ -147,4 +147,41 @@ test("Command Suggestions (Invariants) - is case-insensitive and resilient to re
   assert.equal(regexInput.isOpen, false);
   assert.equal(regexInput.ghostSuffix, "");
   assert.deepEqual(regexInput.suggestions, []);
+});
+
+test("isRecognizedCommand (Normal Path) - recognizes standalone slash commands", () => {
+  assert.equal(isRecognizedCommand("/projects"), true);
+  assert.equal(isRecognizedCommand("/project"), true);
+  assert.equal(isRecognizedCommand("/about"), true);
+  assert.equal(isRecognizedCommand("/skills"), true);
+  assert.equal(isRecognizedCommand("/contact"), true);
+  assert.equal(isRecognizedCommand("/help"), true);
+  assert.equal(isRecognizedCommand("/exit"), true);
+  assert.equal(isRecognizedCommand("/clear"), true);
+  assert.equal(isRecognizedCommand("/cls"), true);
+  assert.equal(isRecognizedCommand("/chat"), true);
+  assert.equal(isRecognizedCommand("/themes"), true);
+  assert.equal(isRecognizedCommand("/lang"), true);
+});
+
+test("isRecognizedCommand (Normal Path) - recognizes commands with valid sub-arguments", () => {
+  assert.equal(isRecognizedCommand("/themes default"), true);
+  assert.equal(isRecognizedCommand("/themes autumn"), true);
+  assert.equal(isRecognizedCommand("/themes neon"), true);
+  assert.equal(isRecognizedCommand("/themes 1"), true);
+  assert.equal(isRecognizedCommand("/lang en"), true);
+  assert.equal(isRecognizedCommand("/lang id"), true);
+  assert.equal(isRecognizedCommand("/chat what projects have you built?"), true);
+});
+
+test("isRecognizedCommand (Boundaries & Errors) - rejects incomplete, invalid, or non-slash inputs", () => {
+  assert.equal(isRecognizedCommand("/"), false);
+  assert.equal(isRecognizedCommand("/p"), false);
+  assert.equal(isRecognizedCommand("/proj"), false);
+  assert.equal(isRecognizedCommand("/the"), false);
+  assert.equal(isRecognizedCommand("/themes nonexistent123"), false);
+  assert.equal(isRecognizedCommand("/lang japanese"), false);
+  assert.equal(isRecognizedCommand("/chat "), false);
+  assert.equal(isRecognizedCommand("hello world"), false);
+  assert.equal(isRecognizedCommand(""), false);
 });

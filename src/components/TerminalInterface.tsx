@@ -9,7 +9,7 @@ import { PORTFOLIO_DATA, parseLanguageArgument, type SupportedLanguage } from "@
 import { StreamingTerminalOutput, OutputPayload } from "./StreamingTerminalOutput";
 import { AiNoticeToast } from "./AiNoticeToast";
 import { useTerminalSession } from "@/hooks/useTerminalSession";
-import { getCommandSuggestions } from "@/lib/commandSuggestions";
+import { getCommandSuggestions, isRecognizedCommand } from "@/lib/commandSuggestions";
 
 export function TerminalInterface() {
   const [inputVal, setInputVal] = useState("");
@@ -28,6 +28,8 @@ export function TerminalInterface() {
     }
     return getCommandSuggestions(inputVal, currentLang);
   }, [inputVal, isDismissed, currentLang]);
+
+  const isInputValidCommand = useMemo(() => isRecognizedCommand(inputVal), [inputVal]);
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeAiOutputId, setActiveAiOutputId] = useState<string | null>(null);
@@ -672,7 +674,7 @@ export function TerminalInterface() {
                   autoFocus
                   spellCheck={false}
                   autoComplete="off"
-                  className="relative z-10 w-full bg-transparent border-none outline-none text-[#F4F4F5] text-xs sm:text-sm font-mono leading-normal placeholder:text-[#52525B] p-0 m-0"
+                  className={`relative z-10 w-full bg-transparent border-none outline-none ${isInputValidCommand ? "text-[#5B9BF8]" : "text-[#F4F4F5]"} text-xs sm:text-sm font-mono leading-normal placeholder:text-[#52525B] p-0 m-0`}
                 />
               </div>
               <div className="text-xs text-[#44444A] select-none hidden sm:block shrink-0">
@@ -803,7 +805,7 @@ export function TerminalInterface() {
                         {msg.type === "user" ? (
                           <div className="flex items-center space-x-2 sm:space-x-2.5 text-xs sm:text-sm">
                             <span className="text-[#5B9BF8] font-bold">❯</span>
-                            <span className="text-[#FFFFFF] font-medium">{msg.command}</span>
+                            <span className={`${isRecognizedCommand(msg.command || "") ? "text-[#5B9BF8]" : "text-[#FFFFFF]"} font-medium`}>{msg.command}</span>
                           </div>
                         ) : (
                           <div className="pl-2.5 sm:pl-5 border-l-2 border-[#27272A]">
@@ -884,7 +886,7 @@ export function TerminalInterface() {
                     autoFocus
                     spellCheck={false}
                     autoComplete="off"
-                    className="relative z-10 w-full bg-transparent border-none outline-none text-[#F4F4F5] text-xs sm:text-sm font-mono leading-normal placeholder:text-[#52525B] p-0 m-0"
+                    className={`relative z-10 w-full bg-transparent border-none outline-none ${isInputValidCommand ? "text-[#5B9BF8]" : "text-[#F4F4F5]"} text-xs sm:text-sm font-mono leading-normal placeholder:text-[#52525B] p-0 m-0`}
                   />
                 </div>
                 <div className="text-xs text-[#44444A] select-none hidden sm:block shrink-0">
