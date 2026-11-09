@@ -38,7 +38,6 @@ export function TerminalInterface() {
   const isAwaitingNewAssistantRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const contentWrapperRef = useRef<HTMLDivElement>(null);
-  const edsAnchorRef = useRef<HTMLDivElement>(null);
 
 
   useEffect(() => {
@@ -481,17 +480,12 @@ export function TerminalInterface() {
         <div className="relative flex-1 min-h-0 flex flex-col justify-between overflow-hidden z-10">
           <div className="relative flex-1 min-h-0 w-full overflow-hidden">
             <AsciiBackground themeId={currentTheme} />
-            {/* Living 2D ASCII Canvas Layer (fullscreen, under text, above background) */}
-            <LivingAsciiEds compact={false} anchorRef={edsAnchorRef} />
             <div className="relative z-10 h-full overflow-y-auto overflow-x-hidden flex flex-col justify-center items-center px-4 py-4 sm:py-6">
-              <div className="max-w-6xl w-full text-center space-y-2">
-                {/* Large Centered 2D Living Typographical ASCII EDS Anchor */}
-                <div
-                  ref={edsAnchorRef}
-                  className="w-full flex items-center justify-center select-none pointer-events-none"
-                  style={{ minHeight: "clamp(260px, 45vh, 528px)" }}
-                  aria-hidden="true"
-                />
+              <div className="max-w-4xl w-full text-center space-y-3">
+                {/* Large Centered 2D Living Typographical ASCII EDS */}
+                <div className="w-full flex items-center justify-center select-none pb-2">
+                  <LivingAsciiEds compact={false} />
+                </div>
 
                 <div className="max-w-2xl mx-auto space-y-2">
                   <h1 className="text-base sm:text-lg text-[#FFFFFF] font-semibold tracking-wide">
