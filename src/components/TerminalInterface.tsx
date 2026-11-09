@@ -206,8 +206,9 @@ export function TerminalInterface() {
       return;
     }
 
-    // 2. Entering AI Session via bare /chat
-    if (cmdLower === "/chat") {
+    // 2. Entering AI Session via bare /chat or /chat <prompt>
+    if (cmdLower === "/chat" || cmdLower.startsWith("/chat ")) {
+      const explicitPrompt = cmdLower.startsWith("/chat ") ? trimmed.slice(6).trim() : "";
       // Clear previous CLI shell output so the AI session starts with a clean slate
       clearSession();
       setMessages([]);
@@ -231,22 +232,23 @@ export function TerminalInterface() {
         }
       }
 
-      // Append initial /chat entry and immediately stream AI's greeting
-      const outId = appendInteraction("/chat", {
+      // Append initial /chat entry and immediately stream AI's greeting or answer
+      const outId = appendInteraction(trimmed, {
         type: "markdown",
         content: "",
         isLiveStream: true,
         isDone: false,
       });
 
-      const initialGreetingPrompt = currentLang === "id"
+      const promptToSend = explicitPrompt || (currentLang === "id"
         ? "Halo! Saya baru saja membuka sesi interaktif ini. Tolong perkenalkan dirimu dengan ramah dalam Bahasa Indonesia dan jelaskan bagaimana kita bisa menjelajahi profil dan karya Eds bersama."
-        : "Hi! I just activated this interactive session. Please introduce yourself warmly and let me know how we can explore Eds's work and background.";
+        : "Hi! I just activated this interactive session. Please introduce yourself warmly and let me know how we can explore Eds's work and background.");
 
       setActiveAiOutputId(outId);
-      sendMessage({
-        text: initialGreetingPrompt,
-      });
+      sendMessage(
+        { text: promptToSend },
+        { body: { lang: currentLang } }
+      );
       setInputVal("");
       return;
     }
@@ -367,7 +369,10 @@ export function TerminalInterface() {
 
       isAwaitingNewAssistantRef.current = true;
       setActiveAiOutputId(outId);
-      sendMessage({ text: promptToSend });
+      sendMessage(
+        { text: promptToSend },
+        { body: { lang: currentLang } }
+      );
       setInputVal("");
       return;
     }
