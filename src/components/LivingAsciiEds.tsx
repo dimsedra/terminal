@@ -207,9 +207,52 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
     let isPointerInside = false;
 
     // Autonomous sweep state
+    interface SweepTrajectory {
+      direction: 1 | -1;
+      startRow: number;
+      endRow: number;
+      frequency: number;
+      amplitude: number;
+      phase: number;
+      duration: number;
+      nextIdleDelay: number;
+      lastCol: number;
+      lastRow: number;
+    }
+
     let isSweeping = false;
-    let sweepProgress = 0;
     let sweepStartTime = 0;
+    let nextIdleDelay = 3500;
+    let activeTrajectory: SweepTrajectory | null = null;
+
+    const createRandomTrajectory = (): SweepTrajectory => {
+      const padTop = compact ? 0 : PAD_TOP_ROWS;
+      const letterRows = 29;
+      const minRow = padTop + 3;
+      const maxRow = padTop + letterRows - 2;
+
+      const startRow = minRow + Math.random() * (maxRow - minRow);
+      const endRow = minRow + Math.random() * (maxRow - minRow);
+      const direction: 1 | -1 = Math.random() > 0.5 ? 1 : -1;
+      const frequency = 1.2 + Math.random() * 1.6;
+      const amplitude = 2.5 + Math.random() * 4.5;
+      const phase = Math.random() * Math.PI * 2;
+      const duration = 2500 + Math.random() * 1100;
+      const delay = 4000 + Math.random() * 3500;
+
+      return {
+        direction,
+        startRow,
+        endRow,
+        frequency,
+        amplitude,
+        phase,
+        duration,
+        nextIdleDelay: delay,
+        lastCol: direction === 1 ? -12 : cols + 12,
+        lastRow: startRow,
+      };
+    };
 
     const computeMetrics = () => {
       const fontFamily = getResolvedFontFamily();
@@ -417,27 +460,51 @@ export function LivingAsciiEds({ compact = false }: LivingAsciiEdsProps) {
         }
       }
 
-      // 2. Autonomous Idle Sweep (Hero only)
+      // 2. Autonomous Idle Sweep (Hero only - mathematically randomized continuous trail)
       if (!compact) {
         const idleDuration = now - lastInteractionTime;
-        if (!isPointerInside && !isSweeping && idleDuration > 3500) {
+        if (!isPointerInside && !isSweeping && idleDuration > nextIdleDelay) {
           isSweeping = true;
-          sweepProgress = 0;
           sweepStartTime = now;
+          activeTrajectory = createRandomTrajectory();
         }
 
-        if (isSweeping) {
-          const sweepDuration = 3200; // ms
+        if (isSweeping && activeTrajectory) {
           const elapsed = now - sweepStartTime;
-          sweepProgress = elapsed / sweepDuration;
+          const t = elapsed / activeTrajectory.duration;
 
-          if (sweepProgress >= 1.0) {
+          if (t >= 1.0) {
             isSweeping = false;
+            nextIdleDelay = activeTrajectory.nextIdleDelay;
+            activeTrajectory = null;
             lastInteractionTime = now;
           } else {
-            const sweepCol = sweepProgress * (cols + 16) - 8;
-            const sweepRow = rows * 0.48 + Math.sin(sweepProgress * Math.PI * 2.1) * (rows * 0.24);
-            applyWakeAt(sweepCol, sweepRow);
+            const { direction, startRow, endRow, amplitude, frequency, phase } = activeTrajectory;
+
+            // Parametric continuous column progress
+            const col = direction === 1
+              ? t * (cols + 24) - 12
+              : (1 - t) * (cols + 24) - 12;
+
+            // Parametric continuous row with harmonic wave
+            const baseRow = startRow + (endRow - startRow) * t;
+            const wave = amplitude * Math.sin(t * Math.PI * 2 * frequency + phase);
+            const row = Math.max(2, Math.min(rows - 3, baseRow + wave));
+
+            // Smooth interpolation between frames to guarantee an unbroken trail
+            const dCol = col - activeTrajectory.lastCol;
+            const dRow = row - activeTrajectory.lastRow;
+            const dist = Math.hypot(dCol, dRow);
+            const steps = Math.min(10, Math.max(1, Math.ceil(dist / 2.5)));
+
+            for (let s = 1; s <= steps; s++) {
+              const ic = activeTrajectory.lastCol + (dCol * s) / steps;
+              const ir = activeTrajectory.lastRow + (dRow * s) / steps;
+              applyWakeAt(ic, ir);
+            }
+
+            activeTrajectory.lastCol = col;
+            activeTrajectory.lastRow = row;
           }
         }
       }
