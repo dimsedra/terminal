@@ -32,7 +32,9 @@ The portfolio is built as an authentic developer terminal and agentic CLI interf
   - Background base: `#161616` (Carbon Black).
   - Surface panels: `#1C1C1C` with subtle transparency (`bg-[#1C1C1C]/80` to `/85`) allowing the ambient ASCII layer to shine through as quiet texture.
   - Foreground text: `#FFFFFF` (headings and primary text), `#D4D4D8` (body and output text), `#8E8E93` / `#52525B` (subdued labels and borders).
-  - Accent color: Neutral gray / slate scale (`#A1A1AA` to `#E4E4E7`) for interactive prompt cursors, active command chips, and key links (strictly no green accents).
+  - Accent colors:
+    - Neutral slate scale (`#A1A1AA` to `#E4E4E7`) for interactive command chips and subdued terminal borders (strictly no green accents).
+    - Purposeful light terminal blue (`#5B9BF8`, hover: `#88B7FD`) for prompt chevrons (`❯`) and clickable Markdown links to provide crisp visual hierarchy and visual anchors against the dark carbon background.
 - **Typography & Scale**:
   - Monospace font stack powered by Ioskeley Mono (`Ioskeley Mono`, `ui-monospace`, `monospace`).
   - Strict text scaling (`text-xs` to `text-sm` for commands and output, `text-base` for section headings).

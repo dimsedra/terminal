@@ -625,7 +625,7 @@ export function TerminalInterface() {
           {/* Bottom Input Prompt for Fase 1 */}
           <footer className={`relative shrink-0 w-full bg-[#161616] border-t border-[#27272A] px-3 sm:px-8 flex items-center h-11 sm:h-[52px] ${suggestions.isOpen ? "z-40" : "z-20"}`}>
             <div className="max-w-5xl mx-auto flex items-center space-x-2 sm:space-x-3 w-full">
-              <span className="text-[#E4E4E7] font-bold text-xs sm:text-lg select-none shrink-0">❯</span>
+              <span className="text-[#5B9BF8] font-bold text-xs sm:text-lg select-none shrink-0">❯</span>
               <div className="relative flex-1 min-w-0 flex items-center">
                 {/* Floating Recommendation Chips Popover */}
                 {suggestions.isOpen && suggestions.suggestions.length > 0 && (
@@ -802,7 +802,7 @@ export function TerminalInterface() {
                       <div key={msg.id} className="space-y-1 sm:space-y-1.5 font-mono">
                         {msg.type === "user" ? (
                           <div className="flex items-center space-x-2 sm:space-x-2.5 text-xs sm:text-sm">
-                            <span className="text-[#E4E4E7] font-bold">❯</span>
+                            <span className="text-[#5B9BF8] font-bold">❯</span>
                             <span className="text-[#FFFFFF] font-medium">{msg.command}</span>
                           </div>
                         ) : (
@@ -832,7 +832,7 @@ export function TerminalInterface() {
             {/* Input Prompt Bar for Fase 2 */}
             <footer className={`relative shrink-0 w-full bg-[#161616] border-t border-[#27272A] px-3 sm:px-8 flex items-center h-11 sm:h-[52px] ${suggestions.isOpen ? "z-40" : "z-20"}`}>
               <div className="w-full flex items-center space-x-2 sm:space-x-3">
-                <span className="text-[#E4E4E7] font-bold text-xs sm:text-base select-none shrink-0">❯</span>
+                <span className="text-[#5B9BF8] font-bold text-xs sm:text-base select-none shrink-0">❯</span>
                 <div className="relative flex-1 min-w-0 flex items-center">
                   {/* Floating Recommendation Chips Popover */}
                   {suggestions.isOpen && suggestions.suggestions.length > 0 && (

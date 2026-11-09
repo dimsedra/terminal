@@ -329,7 +329,7 @@ export function StreamingTerminalOutput({
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[#E4E4E7] hover:underline cursor-pointer transition-colors"
+          className="text-[#5B9BF8] hover:text-[#88B7FD] hover:underline cursor-pointer transition-colors"
           {...props}
         >
           {children}
