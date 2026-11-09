@@ -13,6 +13,10 @@ export function getMonoFont(): string {
   return getResolvedFont('--font-ioskeley-mono', '"Ioskeley Mono", ui-monospace, SFMono-Regular, Menlo, monospace');
 }
 
+export function getAsciiFont(): string {
+  return getResolvedFont('--font-geist-mono', '"Geist Mono", "GeistMono", ui-monospace, SFMono-Regular, Menlo, monospace');
+}
+
 export const C = {
   ink: '#161616',     // Carbon Black base
   paper: '#FFFFFF',   // Crisp solid white glyphs

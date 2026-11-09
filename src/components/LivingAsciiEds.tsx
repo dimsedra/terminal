@@ -8,6 +8,7 @@ import {
   dprOf,
   fitCanvas,
   fontsReady,
+  getAsciiFont,
   getMonoFont,
   makeAtlas,
   reducedMotion,
@@ -202,11 +203,11 @@ export function LivingAsciiEds({ compact = false, anchorRef }: LivingAsciiEdsPro
 
     const build = async () => {
       const id = ++buildId;
-      const monoFont = getMonoFont();
-      const family = monoFont;
+      const asciiFont = getAsciiFont();
+      const family = asciiFont;
       const weight = 700;
 
-      await fontsReady(`700 100px ${family}`, `400 12px ${monoFont}`);
+      await fontsReady(`700 100px ${family}`, `400 12px ${asciiFont}`);
       if (disposed || id !== buildId) return;
 
       const W = wrap.clientWidth;
@@ -224,7 +225,7 @@ export function LivingAsciiEds({ compact = false, anchorRef }: LivingAsciiEdsPro
         fs,
         1.12,
         dpr,
-        monoFont
+        asciiFont
       );
 
       cols = Math.max(4, Math.floor(W / atlas.cellW));

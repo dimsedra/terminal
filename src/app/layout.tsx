@@ -24,6 +24,18 @@ const ioskeleyMono = localFont({
   display: "swap",
 });
 
+const geistMono = localFont({
+  src: [
+    {
+      path: "../fonts/GeistMono-Bold.otf",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-geist-mono",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Eds | AI-Assisted Software Engineer",
   description: "Interactive modern terminal portfolio of Dimas Edra Ar Rafi (Eds)",
@@ -42,7 +54,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={ioskeleyMono.variable} suppressHydrationWarning>
+    <html lang="en" className={`${ioskeleyMono.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <body
         suppressHydrationWarning
         className="antialiased min-h-[100dvh] bg-[#161616] text-[#D4D4D8] font-mono selection:bg-[#27272A] selection:text-[#FFFFFF]"
