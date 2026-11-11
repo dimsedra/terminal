@@ -10,6 +10,10 @@ Shared memory and architectural index for `eds-terminal-portfolio`.
 - [GitHub Contributions Visualization in /about](file:///home/eds/Code/terminal/docs/intent/20261105_github_contributions.md) (2026-11-05): Green ASCII contribution grid in `/about` with responsive mobile windowing and cached Vercel endpoint.
 - [Animated ASCII Background Themes](file:///home/eds/Code/terminal/docs/intent/20261105_ascii_background_themes.md) (2026-11-05): Ambient animated ASCII backgrounds with live `/themes` switching.
 
+## Decisions
+
+- [ADR-001: Defer Generative UI and Tool-Based Context Fetching in the /chat Agent](file:///home/eds/Code/terminal/docs/decisions/adr_001_defer_chat_generative_ui_and_context_tools.md) (2026-11-12): Keep full-context system prompt injection with `streamText` on flash-lite; defer Generative UI and project-context tool fetching as unproven scope extension, with trigger conditions and the bundled-imports deployment rule for any future revisit.
+
 ## Blueprints
 
 - [Bilingual Portfolio Support (EN & ID)](file:///home/eds/Code/terminal/docs/blueprint/20261110_bilingual_portfolio_support.md) (2026-11-10): Technical contracts for bilingual JSON data structure, localized markdown generators, `/lang <en|id>` command execution, multi-level autocomplete suggestions, and active language injection into `/chat` initialization.
