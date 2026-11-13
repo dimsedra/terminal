@@ -37,7 +37,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Eds | AI-Assisted Software Engineer",
+  title: "Eds | Software Engineer & Building with AI",
   description: "Interactive modern terminal portfolio of Dimas Edra Ar Rafi (Eds)",
 };
 

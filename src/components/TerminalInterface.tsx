@@ -618,7 +618,7 @@ export function TerminalInterface() {
                     DIMAS EDRA AR RAFI (EDS)
                   </h1>
                   <p className="text-xs sm:text-sm text-[#8E8E93]">
-                    AI-Assisted Software Engineer & Systems Thinker
+                    Software Engineer & Building with AI
                   </p>
                   <p className="text-xs sm:text-sm text-[#52525B] pt-1 sm:pt-2">
                     Type a command or click a shortcut to explore:
@@ -738,7 +738,7 @@ export function TerminalInterface() {
                   <p className="text-xs font-semibold text-[#FFFFFF] pt-1">
                     DIMAS EDRA AR RAFI
                   </p>
-                  <p className="text-[11px] text-[#8E8E93]">AI-Assisted Engineer</p>
+                  <p className="text-[11px] text-[#8E8E93]">Software Engineer & Building with AI</p>
                 </div>
 
                 {/* Quick Navigation Commands */}
